@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Grass-Roots</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">Grass-Roots</a>
+            <div class="nav-links">
+                <a href="register.html">Register</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Login to Grass-Roots</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="userType">User Type</label>
+                <select id="userType" required>
+                    <option value="">Select User Type</option>
+                    <option value="farmer">Farmer</option>
+                    <option value="customer">Customer</option>
+                    <option value="retailer">Retailer/Shopkeeper</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Login</button>
+        </form>
+        <p style="text-align: center; margin-top: 1rem;">
+            Don't have an account? <a href="register.html" style="color: var(--primary-color);">Register here</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userType = document.getElementById('userType').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Add your login logic here
+            console.log('Login attempt:', { userType, email, password });
+            
+            // Redirect to dashboard based on user type
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>

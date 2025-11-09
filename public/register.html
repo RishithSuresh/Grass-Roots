@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Grass-Roots</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">Grass-Roots</a>
+            <div class="nav-links">
+                <a href="login.html">Login</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Register with Grass-Roots</h2>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="userType">User Type</label>
+                <select id="userType" required onchange="toggleFields()">
+                    <option value="">Select User Type</option>
+                    <option value="farmer">Farmer</option>
+                    <option value="customer">Customer</option>
+                    <option value="retailer">Retailer/Shopkeeper</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <!-- Farmer-specific fields -->
+            <div id="farmerFields" style="display: none;">
+                <div class="form-group">
+                    <label for="landSize">Land Size (in acres)</label>
+                    <input type="number" id="landSize">
+                </div>
+                <div class="form-group">
+                    <label for="cropTypes">Primary Crops</label>
+                    <input type="text" id="cropTypes" placeholder="e.g., Rice, Wheat, Vegetables">
+                </div>
+                <div class="form-group">
+                    <label for="location">Farm Location</label>
+                    <input type="text" id="location">
+                </div>
+            </div>
+
+            <!-- Retailer-specific fields -->
+            <div id="retailerFields" style="display: none;">
+                <div class="form-group">
+                    <label for="shopName">Shop/Business Name</label>
+                    <input type="text" id="shopName">
+                </div>
+                <div class="form-group">
+                    <label for="businessAddress">Business Address</label>
+                    <textarea id="businessAddress"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="license">Business License Number</label>
+                    <input type="text" id="license">
+                </div>
+            </div>
+
+            <!-- Customer-specific fields -->
+            <div id="customerFields" style="display: none;">
+                <div class="form-group">
+                    <label for="deliveryAddress">Delivery Address</label>
+                    <textarea id="deliveryAddress"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Register</button>
+        </form>
+        <p style="text-align: center; margin-top: 1rem;">
+            Already have an account? <a href="login.html" style="color: var(--primary-color);">Login here</a>
+        </p>
+    </div>
+
+    <script>
+        function toggleFields() {
+            const userType = document.getElementById('userType').value;
+            document.getElementById('farmerFields').style.display = 'none';
+            document.getElementById('retailerFields').style.display = 'none';
+            document.getElementById('customerFields').style.display = 'none';
+
+            if (userType === 'farmer') {
+                document.getElementById('farmerFields').style.display = 'block';
+            } else if (userType === 'retailer') {
+                document.getElementById('retailerFields').style.display = 'block';
+            } else if (userType === 'customer') {
+                document.getElementById('customerFields').style.display = 'block';
+            }
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add your registration logic here
+            console.log('Registration submitted');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

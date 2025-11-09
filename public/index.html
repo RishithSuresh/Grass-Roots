@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grass-Roots - Agricultural Blockchain Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/farm-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .features {
+            padding: 50px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .feature-card img {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+        }
+
+        .cta-buttons {
+            margin-top: 2rem;
+        }
+
+        .cta-buttons .btn {
+            margin: 0 10px;
+            padding: 1rem 2rem;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid var(--white);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--white);
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">Grass-Roots</a>
+            <div class="nav-links">
+                <a href="login.html">Login</a>
+                <a href="register.html">Register</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container">
+            <h1>Welcome to Grass-Roots</h1>
+            <p style="font-size: 1.2rem; margin: 1rem 0;">
+                Empowering farmers through blockchain technology for transparent and fair agricultural trade
+            </p>
+            <div class="cta-buttons">
+                <a href="register.html" class="btn">Get Started</a>
+                <a href="#features" class="btn btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="features" id="features">
+            <div class="feature-card">
+                <img src="images/blockchain-icon.png" alt="Blockchain">
+                <h3>Blockchain Technology</h3>
+                <p>Secure and transparent tracking of agricultural products from farm to table</p>
+            </div>
+
+            <div class="feature-card">
+                <img src="images/phone-icon.png" alt="Call Bot">
+                <h3>Smart Call Bot</h3>
+                <p>Easy crop information submission through voice calls in local languages</p>
+            </div>
+
+            <div class="feature-card">
+                <img src="images/qr-icon.png" alt="QR Code">
+                <h3>QR Traceability</h3>
+                <p>Track product journey and verify quality through QR codes</p>
+            </div>
+
+            <div class="feature-card">
+                <img src="images/market-icon.png" alt="Market">
+                <h3>Fair Pricing</h3>
+                <p>Get the best market prices by connecting directly with buyers</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call Bot Icon -->
+    <div class="call-bot" onclick="openCallBot()">
+        <img src="images/phone-icon.png" alt="Call Bot">
+    </div>
+
+    <script>
+        function openCallBot() {
+            alert('Connecting to call bot...');
+            // Add your call bot integration code here
+        }
+    </script>
+</body>
+</html>

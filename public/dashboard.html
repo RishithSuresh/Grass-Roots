@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Grass-Roots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="dashboard.html" class="logo">Grass-Roots</a>
+            <div class="nav-links">
+                <a href="qr-generator.html">Generate QR</a>
+                <a href="contact.html">Contact</a>
+                <a href="login.html" id="logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="dashboard-card">
+                <h3>Crop Information</h3>
+                <div id="cropInfo">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Market Prices</h3>
+                <div id="marketPrices">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Recent Transactions</h3>
+                <div id="transactions">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call Bot Icon -->
+    <div class="call-bot" onclick="openCallBot()">
+        <img src="images/phone-icon.png" alt="Call Bot">
+    </div>
+
+    <script>
+        // Simulate loading data
+        window.onload = function() {
+            // Example data - replace with actual data from your backend
+            const cropInfo = {
+                crops: [
+                    { name: 'Rice', quantity: '500 kg', quality: 'Grade A' },
+                    { name: 'Wheat', quantity: '300 kg', quality: 'Grade B' }
+                ]
+            };
+
+            const marketPrices = {
+                prices: [
+                    { crop: 'Rice', price: '₹35/kg', location: 'Local Market' },
+                    { crop: 'Wheat', price: '₹28/kg', location: 'State Market' }
+                ]
+            };
+
+            const transactions = {
+                recent: [
+                    { date: '2023-11-08', crop: 'Rice', quantity: '100 kg', amount: '₹3500' },
+                    { date: '2023-11-07', crop: 'Wheat', quantity: '50 kg', amount: '₹1400' }
+                ]
+            };
+
+            // Populate the dashboard
+            document.getElementById('cropInfo').innerHTML = cropInfo.crops.map(crop => `
+                <div class="info-item">
+                    <h4>${crop.name}</h4>
+                    <p>Quantity: ${crop.quantity}</p>
+                    <p>Quality: ${crop.quality}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('marketPrices').innerHTML = marketPrices.prices.map(price => `
+                <div class="price-item">
+                    <h4>${price.crop}</h4>
+                    <p>Price: ${price.price}</p>
+                    <p>Location: ${price.location}</p>
+                </div>
+            `).join('');
+
+            document.getElementById('transactions').innerHTML = transactions.recent.map(tx => `
+                <div class="transaction-item">
+                    <p>Date: ${tx.date}</p>
+                    <p>Crop: ${tx.crop}</p>
+                    <p>Quantity: ${tx.quantity}</p>
+                    <p>Amount: ${tx.amount}</p>
+                </div>
+            `).join('');
+        };
+
+        function openCallBot() {
+            // Implement call bot functionality
+            alert('Connecting to call bot...');
+            // Add your call bot integration code here
+        }
+    </script>
+</body>
+</html>

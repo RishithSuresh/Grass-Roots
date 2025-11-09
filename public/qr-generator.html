@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Generator - Grass-Roots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="dashboard.html" class="logo">Grass-Roots</a>
+            <div class="nav-links">
+                <a href="dashboard.html">Dashboard</a>
+                <a href="contact.html">Contact</a>
+                <a href="login.html">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-container" style="max-width: 800px;">
+            <h2 style="text-align: center; margin-bottom: 2rem;">Generate QR Code for Crop Batch</h2>
+            
+            <form id="qrForm">
+                <div class="form-group">
+                    <label for="cropType">Crop Type</label>
+                    <input type="text" id="cropType" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="variety">Variety</label>
+                    <input type="text" id="variety" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity">Quantity (in kg)</label>
+                    <input type="number" id="quantity" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="harvestDate">Harvest Date</label>
+                    <input type="date" id="harvestDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fertilizers">Fertilizers Used</label>
+                    <textarea id="fertilizers" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pesticides">Pesticides Used</label>
+                    <textarea id="pesticides" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quality">Quality Grade</label>
+                    <select id="quality" required>
+                        <option value="">Select Quality Grade</option>
+                        <option value="A">Grade A</option>
+                        <option value="B">Grade B</option>
+                        <option value="C">Grade C</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn" style="width: 100%;">Generate QR Code</button>
+            </form>
+
+            <div class="qr-container">
+                <div id="qrcode"></div>
+                <button id="downloadBtn" class="btn" style="display: none; margin-top: 1rem;">Download QR Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('qrForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const cropData = {
+                cropType: document.getElementById('cropType').value,
+                variety: document.getElementById('variety').value,
+                quantity: document.getElementById('quantity').value,
+                harvestDate: document.getElementById('harvestDate').value,
+                fertilizers: document.getElementById('fertilizers').value,
+                pesticides: document.getElementById('pesticides').value,
+                quality: document.getElementById('quality').value,
+                timestamp: new Date().toISOString(),
+                batchId: generateBatchId()
+            };
+
+            // Clear previous QR code
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generate QR code
+            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(cropData), function (error, canvas) {
+                if (error) console.error(error);
+                document.getElementById('qrcode').appendChild(canvas);
+                document.getElementById('downloadBtn').style.display = 'inline-block';
+            });
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const canvas = document.querySelector('#qrcode canvas');
+            const url = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.download = 'crop-qr-code.png';
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        function generateBatchId() {
+            return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+    </script>
+</body>
+</html>
