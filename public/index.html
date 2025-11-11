@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('images/farm-bg.jpg');
+            /* Background image placed behind the welcome text. Save your attached photo as public/images/hero.jpg */
+            background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.25)), url('images/hero.jpg');
             background-size: cover;
             background-position: center;
             color: white;
@@ -64,7 +65,6 @@
             <a href="index.html" class="logo">GrassRoots</a>
             <div class="nav-links">
                 <a href="login.html">Login</a>
-                <a href="register.html">Register</a>
                 <a href="contact.html">Contact</a>
             </div>
         </div>
@@ -85,11 +85,7 @@
 
     <div class="container">
         <div class="features" id="features">
-            <div class="feature-card">
-                <img src="images/blockchain-icon.png" alt="Blockchain">
-                <h3>Blockchain Technology</h3>
-                <p>Secure and transparent tracking of agricultural products from farm to table</p>
-            </div>
+            <!-- Blockchain feature removed as requested -->
 
             <div class="feature-card">
                 <img src="images/phone-icon.png" alt="Call Bot">
@@ -109,6 +105,60 @@
                 <p>Get the best market prices by connecting directly with buyers</p>
             </div>
         </div>
+
+            <!-- Contact section (styled like provided design) -->
+            <section class="contact-section">
+                <div class="container">
+                    <div class="contact-wrapper">
+                        <div class="contact-info">
+                            <h2 class="contact-title">Contact Us</h2>
+                            <p class="contact-sub">We'd love to hear from you! Reach out with any questions, feedback, or partnership inquiries.</p>
+
+                            <div class="contact-list">
+                                <div class="contact-item">
+                                    <img src="images/phone-icon.png" alt="phone" class="contact-icon">
+                                    <div>
+                                        <h4>Email</h4>
+                                        <p><a href="mailto:support@grassroots.com">support@grassroots.com</a></p>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item">
+                                    <img src="images/phone-icon.png" alt="phone" class="contact-icon">
+                                    <div>
+                                        <h4>Phone</h4>
+                                        <p>+91 1234567890</p>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item">
+                                    <img src="images/market-icon.png" alt="location" class="contact-icon">
+                                    <div>
+                                        <h4>Office</h4>
+                                        <p>123 Agri Tower, Tech Park Road, Bangalore - 560001</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-form">
+                            <h3>Send Us a Message</h3>
+                            <form id="contactForm">
+                                <div class="form-group">
+                                    <input type="text" id="cname" placeholder="Your Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" id="cemail" placeholder="Your Email" required>
+                                </div>
+                                <div class="form-group">
+                                    <textarea id="cmessage" rows="6" placeholder="Your Message" required></textarea>
+                                </div>
+                                <button type="submit" class="btn contact-btn">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
     </div>
 
     <!-- Call Bot Icon -->
@@ -121,6 +171,17 @@
             alert('Connecting to call bot...');
             // Add your call bot integration code here
         }
+        // contact form handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const cf = document.getElementById('contactForm');
+            if (cf) {
+                cf.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thanks — your message has been received. (Demo)');
+                    cf.reset();
+                });
+            }
+        });
     </script>
 </body>
 </html>
