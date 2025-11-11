@@ -7,14 +7,52 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .hero {
-            /* Background image placed behind the welcome text. Save your attached photo as public/images/hero.jpg */
-            background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.25)), url('images/hero.jpg');
+            /* Background image placed behind the welcome text. Save your welcome photo as public/images/welcome.jpg */
+            /* Stronger dark overlay for legibility; falls back to the gradient if the image is missing */
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.45)), url('images/welcome.jpg');
             background-size: cover;
             background-position: center;
-            color: white;
-            padding: 100px 0;
+            color: #fff;
+            padding: 120px 0 100px;
             text-align: center;
             margin-top: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Improve hero text contrast and responsiveness */
+        .hero h1 {
+            color: #ffffff;
+            font-size: 48px;
+            line-height: 1.1;
+            font-weight: 800;
+            margin: 0 0 10px;
+            text-shadow: 0 6px 18px rgba(0,0,0,0.65);
+            letter-spacing: 0.5px;
+        }
+
+        .hero p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.15rem;
+            margin: 0 auto;
+            max-width: 900px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.55);
+        }
+
+        @media (max-width: 900px) {
+            .hero {
+                padding: 100px 0 60px;
+            }
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero { padding: 80px 0 40px; }
+            .hero h1 { font-size: 26px; }
+            .hero p { font-size: 0.95rem; }
+            .cta-buttons .btn { padding: 0.7rem 1.2rem; }
         }
 
         .features {
