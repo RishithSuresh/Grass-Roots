@@ -75,6 +75,21 @@ body {
     margin: 80px auto 20px;
 }
 
+/* When showing login + register on the same page */
+.forms-wrapper {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 80px;
+    margin-bottom: 20px;
+}
+
+.forms-wrapper .form-container {
+    flex: 1 1 0;
+    max-width: none;
+    margin: 0;
+}
+
 .form-group {
     margin-bottom: 1.5rem;
 }
