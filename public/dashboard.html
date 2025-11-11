@@ -14,7 +14,8 @@
             <div class="nav-links">
                 <a href="qr-generator.html">Generate QR</a>
                 <a href="contact.html">Contact</a>
-                <a href="login.html" id="logout">Logout</a>
+                <a href="profile.html" id="profileLink">Profile</a>
+                <a href="#" id="logout">Logout</a>
             </div>
         </div>
     </nav>
@@ -106,6 +107,16 @@
             alert('Connecting to call bot...');
             // Add your call bot integration code here
         }
+
+        // Logout handler - clears client-side session and redirects to login
+        document.getElementById('logout').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('fullName');
+            localStorage.removeItem('userType');
+            window.location.href = 'login.html';
+        });
     </script>
 </body>
 </html>

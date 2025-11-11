@@ -55,9 +55,14 @@
             const password = document.getElementById('password').value;
 
             // TODO: Replace with real login logic (AJAX / form POST)
-            console.log('Login attempt:', { userType, email, password });
+            console.log('Login attempt:', { userType, email });
 
-            // For now, redirect to dashboard (placeholder)
+            // Simulate successful login: store a simple client-side session
+            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userType', userType);
+
+            // Redirect to dashboard (or profile) after login
             window.location.href = 'dashboard.html';
         });
 

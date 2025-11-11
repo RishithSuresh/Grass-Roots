@@ -111,9 +111,22 @@
 
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // Add your registration logic here
-            console.log('Registration submitted');
-            window.location.href = 'login.html';
+            // Simulate registration and create a simple client-side session
+            const name = document.getElementById('name').value.trim();
+            const userType = document.getElementById('userType').value;
+            const email = document.getElementById('email').value.trim();
+            // You may want to add proper validation here
+
+            // Save user info locally (for demo purposes only)
+            localStorage.setItem('loggedIn', 'true');
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('fullName', name);
+            localStorage.setItem('userType', userType);
+
+            console.log('Registration submitted', { name, userType, email });
+
+            // Redirect to profile after registration
+            window.location.href = 'profile.html';
         });
     </script>
 </body>
