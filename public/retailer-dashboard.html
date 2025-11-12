@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Retailer Dashboard - GrassRoots</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
   <style>
     /* Keep styling consistent with farmer dashboard */
     .dashboard-header { background: linear-gradient(135deg, var(--primary-color), #4a8b5a); color: white; padding: 1.75rem 0; margin-bottom: 1.5rem; }
@@ -153,16 +155,10 @@
   </div>
 
   <script>
-    // Auth guard
-    (function() {
-      const loggedIn = localStorage.getItem('loggedIn');
-      const userType = localStorage.getItem('userType');
-      if (loggedIn !== 'true' || userType !== 'retailer') {
-        alert('Access denied: retailers only');
-        window.location.href = 'login.html';
-        return;
-      }
-    })();
+    // Auth guard - use centralized system
+    if (!GrassRootsAuth.requireAuth('retailer')) {
+      // Will redirect automatically if not authorized
+    }
 
     // LocalStorage keys
     const KEY_PRODUCTS = 'retailer_products';
@@ -468,11 +464,7 @@
     }
 
     function logout() {
-      localStorage.removeItem('loggedIn');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userType');
-      localStorage.removeItem('fullName');
-      window.location.href = 'login.html';
+      GrassRootsAuth.logout();
     }
 
     // Init

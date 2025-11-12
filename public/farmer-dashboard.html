@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farmer Dashboard - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/auth.js" defer></script>
+    <script src="js/utils.js" defer></script>
     <style>
         .dashboard-header {
             background: linear-gradient(135deg, var(--primary-color), #5a9b6f);
@@ -238,12 +239,8 @@
         function addFarmNotification(msg){ const list = loadKey(KEY_FARM_NOTIFS) || []; list.unshift({ id:'n_'+Date.now(), msg, at:new Date().toISOString() }); saveKey(KEY_FARM_NOTIFS,list); renderFarmNotifCount(); }
 
         window.addEventListener('DOMContentLoaded', function() {
-            const loggedIn = localStorage.getItem('loggedIn');
-            const userType = localStorage.getItem('userType');
-
-            if (loggedIn !== 'true' || userType !== 'farmer') {
-                alert('Access denied: This page is for farmers only.');
-                window.location.href = 'login.html';
+            // Use centralized auth system
+            if (!GrassRootsAuth.requireAuth('farmer')) {
                 return;
             }
 
@@ -255,11 +252,7 @@
         document.addEventListener('click', function(e){ const dd=document.getElementById('farmNotifDropdown'); const btn=document.getElementById('farmNotifBtn'); if(!dd||!btn) return; if(!dd.contains(e.target) && !btn.contains(e.target)){ dd.style.display='none' } });
 
         function logout() {
-            localStorage.removeItem('loggedIn');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userType');
-            localStorage.removeItem('fullName');
-            window.location.href = 'login.html';
+            GrassRootsAuth.logout();
         }
     </script>
 </body>

@@ -6,6 +6,8 @@
     <title>QR Generator - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/utils.js" defer></script>
     <style>
         .qr-section { margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 0.5rem; border: 1px solid #e0e0e0; }
         .qr-section h3 { margin-top: 0; color: var(--primary-color); font-size: 1rem; }
@@ -134,15 +136,10 @@
     </main>
 
     <script>
-        // Auth guard
-        (function() {
-            const loggedIn = localStorage.getItem('loggedIn');
-            const userType = localStorage.getItem('userType');
-            if (loggedIn !== 'true' || userType !== 'farmer') {
-                alert('Access denied: This page is for farmers only.');
-                window.location.href = 'login.html';
-            }
-        })();
+        // Auth guard - use centralized system
+        if (!GrassRootsAuth.requireAuth('farmer')) {
+            // Will redirect automatically if not authorized
+        }
 
         // Load crops into dropdown
         function loadCropSelector() {

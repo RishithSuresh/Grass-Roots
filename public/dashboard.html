@@ -6,6 +6,8 @@
     <title>Dashboard - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.min.js"></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/utils.js" defer></script>
 </head>
 <body>
     <nav class="navbar">
@@ -108,14 +110,10 @@
             // Add your call bot integration code here
         }
 
-        // Logout handler - clears client-side session and redirects to login
+        // Logout handler - use centralized auth
         document.getElementById('logout').addEventListener('click', function(e) {
             e.preventDefault();
-            localStorage.removeItem('loggedIn');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('fullName');
-            localStorage.removeItem('userType');
-            window.location.href = 'login.html';
+            GrassRootsAuth.logout();
         });
     </script>
 </body>
