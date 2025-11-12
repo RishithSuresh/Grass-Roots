@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - GrassRoots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .about-hero {
+            padding: 80px 0;
+            text-align: center;
+            background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.05));
+        }
+        .about-content { padding: 60px 0; }
+        .team-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:1.5rem; }
+        .team-card { background:#fff; padding:1.25rem; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">GrassRoots</a>
+            <div class="nav-links">
+                <a href="login.html">Login</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="about-hero">
+        <div class="container">
+            <h1>About GrassRoots</h1>
+            <p style="max-width:900px;margin:1rem auto;color:var(--muted);">We help farmers access markets, record provenance, and get fair prices by combining low-barrier technology with local partnerships.</p>
+        </div>
+    </header>
+
+    <main class="about-content">
+        <div class="container">
+            <section>
+                <h2>Our Mission</h2>
+                <p style="color:var(--muted);">To increase smallholder farmer incomes and market visibility through practical tools that respect local languages and workflows.</p>
+            </section>
+
+            <section style="margin-top:2rem;">
+                <h2>How We Work</h2>
+                <div style="display:flex;gap:2rem;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:220px;">
+                        <h4>Voice-first tools</h4>
+                        <p style="color:var(--muted);">Farmers can submit crop details via simple call-in systems in their local language.</p>
+                    </div>
+                    <div style="flex:1;min-width:220px;">
+                        <h4>Traceability</h4>
+                        <p style="color:var(--muted);">QR-based tracking helps buyers and consumers verify product origin and quality.</p>
+                    </div>
+                    <div style="flex:1;min-width:220px;">
+                        <h4>Market Linkages</h4>
+                        <p style="color:var(--muted);">We connect farmer groups directly with buyers to improve margins.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top:2.5rem;">
+                <h2>Our Team</h2>
+                <div class="team-grid" style="margin-top:1rem;">
+                    <div class="team-card">
+                        <h4>Rishith Suresh</h4>
+                        <p style="color:var(--muted);">Founder — product & partnerships</p>
+                    </div>
+                    <div class="team-card">
+                        <h4>Neha</h4>
+                        <p style="color:var(--muted);">Community & field operations</p>
+                    </div>
+                    <div class="team-card">
+                        <h4>Field Partner</h4>
+                        <p style="color:var(--muted);">Local field coordinators and trainers</p>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top:2.5rem;text-align:center;">
+                <a href="contact.html" class="btn">Get in touch</a>
+            </section>
+        </div>
+    </main>
+
+</body>
+</html>
