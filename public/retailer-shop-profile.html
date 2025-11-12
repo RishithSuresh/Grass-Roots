@@ -237,6 +237,34 @@
             <!-- Actions Section -->
             <div class="section" style="margin-top:24px;padding-top:16px;border-top:1px solid #eee">
                 <a href="retailer-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+
+                <!-- Blockchain / QR demo -->
+                <div style="margin-top:18px;border:1px dashed #e6efe7;padding:14px;border-radius:8px;background:#fbfff9">
+                    <h3 style="margin:0 0 8px 0;color:#2f6b50">🔒 Demo: Simulate Purchase & Generate QR</h3>
+                    <p style="margin:0 0 12px 0;color:#556b58;font-size:0.95rem">Click the button to create a transaction on the local demo blockchain. A QR containing the transaction id and block hash will be shown to both buyer and seller.</p>
+
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+                        <button id="simulatePurchaseBtn" class="btn">Simulate Purchase (Demo)</button>
+                        <div id="miningMsg" style="color:#2f6b50;font-weight:600;margin-left:8px"></div>
+                    </div>
+
+                    <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap">
+                        <div style="flex:1;min-width:220px;text-align:center">
+                            <h4 style="margin:0 0 8px 0;color:#2f6b50;font-size:0.95rem">Buyer QR</h4>
+                            <img id="qrBuyerImg" alt="Buyer QR" src="" style="width:200px;height:200px;border:1px solid #e6efe7;border-radius:8px;background:white" />
+                        </div>
+
+                        <div style="flex:1;min-width:220px;text-align:center">
+                            <h4 style="margin:0 0 8px 0;color:#2f6b50;font-size:0.95rem">Seller QR</h4>
+                            <img id="qrSellerImg" alt="Seller QR" src="" style="width:200px;height:200px;border:1px solid #e6efe7;border-radius:8px;background:white" />
+                        </div>
+                    </div>
+
+                    <div style="margin-top:12px;font-size:0.9rem;color:#445444">
+                        <strong>Payload (for verification):</strong>
+                        <pre id="qrPayload" style="white-space:pre-wrap;background:#fff;padding:8px;border-radius:6px;border:1px solid #eee;margin-top:8px">No transaction yet.</pre>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -494,6 +522,68 @@
             localStorage.removeItem('fullName');
             window.location.href = 'login.html';
         }
+    </script>
+    <script src="js/blockchain.js" defer></script>
+    <script>
+        // Demo: simulate a purchase and show QR codes to both seller and buyer
+        function createTransactionPayload(productId, productName, amount, buyerId, sellerId) {
+            return {
+                txId: 'tx-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                productId,
+                productName,
+                amount,
+                buyerId,
+                sellerId,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        async function simulatePurchase() {
+            const productId = 'demo-prod-001';
+            const productName = 'Demo Product';
+            const amount = 1250; // demo amount
+            const buyerId = localStorage.getItem('userEmail') || 'buyer@example.com';
+            const sellerId = localStorage.getItem('userEmail') || 'seller@example.com';
+
+            const tx = createTransactionPayload(productId, productName, amount, buyerId, sellerId);
+
+            // Add to blockchain (mining simulated PoW)
+            const miningMsg = document.getElementById('miningMsg');
+            miningMsg.textContent = 'Mining transaction on local chain — this may take a few seconds...';
+
+            try {
+                const block = await window.GrassRootsChainAddTransaction(tx);
+                miningMsg.textContent = 'Transaction mined! Block index: ' + block.index;
+
+                // Save transaction record
+                const txs = JSON.parse(localStorage.getItem('gr_transactions') || '[]');
+                txs.push({ tx, block });
+                localStorage.setItem('gr_transactions', JSON.stringify(txs));
+
+                // Prepare payload to encode in QR code (shortened)
+                const payload = JSON.stringify({ txId: tx.txId, productId: tx.productId, blockHash: block.hash, index: block.index });
+
+                // Use Google Chart API to render QR images quickly (requires network).
+                const base = 'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=';
+                const url = base + encodeURIComponent(payload);
+
+                document.getElementById('qrBuyerImg').src = url;
+                document.getElementById('qrSellerImg').src = url;
+
+                // show payload text for accessibility
+                document.getElementById('qrPayload').textContent = payload;
+
+            } catch (err) {
+                console.error(err);
+                miningMsg.textContent = 'Failed to mine transaction: ' + (err.message || err);
+            }
+        }
+
+        // Wire simulate button after DOM ready
+        window.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('simulatePurchaseBtn');
+            if (btn) btn.addEventListener('click', simulatePurchase);
+        });
     </script>
 </body>
 </html>
