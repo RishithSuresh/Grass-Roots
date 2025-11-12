@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Customer Dashboard - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Local tweaks for customer dashboard */
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--primary-color), #5a9b6f);
+      color: white;
+      padding: 1.75rem 0;
+      margin-bottom: 1.5rem;
+    }
+    .dashboard-header h1 { margin: 0; font-size: 1.6rem; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.6rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+    .feature-box { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    .feature-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
+    .feature-box h3 { margin: 0 0 0.6rem; color: var(--primary-color); }
+    .feature-box p { color: #586a5a; margin: 0 0 1rem; }
+
+    /* Nav tweaks */
+    .navbar { background-color: var(--primary-color); }
+    .nav-links { display:flex; gap:1.2rem; align-items:center; }
+    .nav-links a { color: white; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="contact.html">Contact</a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-header">
+    <div class="container">
+      <h1>Customer Dashboard</h1>
+      <p style="margin:0.35rem 0 0;color:rgba(255,255,255,0.9);font-size:0.95rem;">Explore products, track provenance, and set price alerts.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="dashboard-grid">
+      <div class="feature-box">
+        <div class="feature-icon">🛒</div>
+        <h3>Product Marketplace</h3>
+        <p>Browse available farm products with prices, quantities and quick filters.</p>
+        <a href="marketplace.html" class="btn">Open Marketplace</a>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon">🔎</div>
+        <h3>Product Details & Traceability</h3>
+        <p>Inspect batch provenance, QR verification, and batch history for products.</p>
+        <a href="product-detail.html" class="btn">View Product</a>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon">⭐</div>
+        <h3>Ratings & Reviews</h3>
+        <p>Read and leave reviews for products and farmers to build trust.</p>
+        <a href="ratings.html" class="btn">See Reviews</a>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon">⚙️</div>
+        <h3>Search & Filters</h3>
+        <p>Find products by crop, price range, quality or location using powerful filters.</p>
+        <a href="search.html" class="btn">Search Products</a>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon">🔔</div>
+        <h3>Price Alerts</h3>
+        <p>Set alerts to be notified when a product price falls below a threshold.</p>
+        <a href="price-alerts.html" class="btn">Manage Alerts</a>
+      </div>
+
+      <div class="feature-box">
+        <div class="feature-icon">👩‍🌾</div>
+        <h3>Farmer Profile & Store</h3>
+        <p>Visit a farmer's store page to view other products, ratings and contact info.</p>
+        <a href="farmer-store.html" class="btn">Open Farmer Store</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Auth guard: allow only logged-in customers to access this page
+    (function() {
+      const loggedIn = localStorage.getItem('loggedIn');
+      const userType = localStorage.getItem('userType');
+      if (loggedIn !== 'true' || userType !== 'customer') {
+        alert('Access denied: This page is for customers only.');
+        window.location.href = 'login.html';
+      }
+    })();
+
+    function logout() {
+      localStorage.removeItem('loggedIn');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('fullName');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
