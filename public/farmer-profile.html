@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Profile - GrassRoots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+        .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
+        .card { width:100%; max-width:900px; background: #fff; border-radius:10px; padding:28px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
+        .card h1 { margin-top:0; color: #2f6b50; margin-bottom:24px; border-bottom:2px solid #ecf5ee; padding-bottom:12px }
+        .card h2 { color: #2f6b50; margin-top:24px; margin-bottom:14px; font-size:1.15rem }
+        .section { margin-bottom:24px }
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px }
+        @media (max-width:640px) { .info-grid { grid-template-columns:1fr } }
+        .info-item { padding:12px; background:#f5f5f5; border-radius:8px; border-left:4px solid #2f6b50 }
+        .info-label { font-weight:600; color:#2f6b50; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px }
+        .info-value { color:#333; margin-top:4px; font-size:1rem }
+        .activity-list { list-style:none; padding:0; margin:0 }
+        .activity-list li { padding:12px 14px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; font-size:0.95rem }
+        .activity-list li:last-child { border-bottom:none }
+        .activity-time { color:#999; font-size:0.85rem; white-space:nowrap }
+        .activity-badge { display:inline-block; padding:4px 8px; background:#e8f5e9; color:#2f6b50; border-radius:4px; font-size:0.8rem; font-weight:600 }
+        .stat-card { background:linear-gradient(135deg, #2f6b50, #4a8f6f); color:white; padding:16px; border-radius:8px; text-align:center; margin-bottom:12px }
+        .stat-number { font-size:2rem; font-weight:700; margin:0 }
+        .stat-label { font-size:0.9rem; opacity:0.9; margin:4px 0 0 0 }
+        .btn { background:#2f6b50; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; font-size:0.95rem; transition:background 0.3s }
+        .btn:hover { background:#1f4a34 }
+        .btn-secondary { background:#999; }
+        .btn-secondary:hover { background:#777 }
+        .back-link { display:inline-block; margin-bottom:16px; color:#2f6b50; text-decoration:none; font-weight:500 }
+        .back-link:hover { text-decoration:underline }
+        .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid #eee; flex-wrap:wrap }
+        .tab-btn { background:none; border:none; padding:12px 16px; cursor:pointer; font-weight:600; color:#999; border-bottom:3px solid transparent; transition:all 0.3s }
+        .tab-btn.active { color:#2f6b50; border-bottom-color:#2f6b50 }
+        .tab-content { display:none }
+        .tab-content.active { display:block }
+        .empty-state { text-align:center; padding:32px 16px; color:#999 }
+        .empty-state p { margin:12px 0 0 0 }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">GrassRoots</a>
+            <div class="nav-links">
+                <a href="farmer-dashboard.html">← Back to Dashboard</a>
+                <a href="contact.html">Contact</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="card">
+            <h1>👤 Farmer Profile</h1>
+
+            <!-- Personal Details Section -->
+            <div class="section">
+                <h2>Personal Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" id="profileName">—</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value" id="profileEmail">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agriculture Activity Section -->
+            <div class="section">
+                <h2>🌾 Agriculture Activity</h2>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+                    <div class="stat-card">
+                        <p class="stat-number" id="cropCount">0</p>
+                        <p class="stat-label">Crops Registered</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-number" id="qrCount">0</p>
+                        <p class="stat-label">QR Codes Generated</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-number" id="priceCheckCount">0</p>
+                        <p class="stat-label">Price Checks</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="color:#2f6b50;margin:16px 0 12px;font-size:1rem">Recent Crop Activity</h3>
+                    <ul class="activity-list" id="cropActivityList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No crop activity yet. Start by adding a crop.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Website Activity Section -->
+            <div class="section">
+                <h2>📊 Website Activity</h2>
+                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+                    <button class="tab-btn active" onclick="switchTab('all-activity')">All Activity</button>
+                    <button class="tab-btn" onclick="switchTab('notifications')">Notifications</button>
+                    <button class="tab-btn" onclick="switchTab('market-checks')">Market Price Checks</button>
+                </div>
+
+                <!-- All Activity Tab -->
+                <div id="all-activity" class="tab-content active">
+                    <ul class="activity-list" id="allActivityList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No website activity yet.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="notifications" class="tab-content">
+                    <ul class="activity-list" id="notificationsList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No notifications yet.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Market Checks Tab -->
+                <div id="market-checks" class="tab-content">
+                    <ul class="activity-list" id="marketChecksList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No market price checks yet.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="section" style="margin-top:24px;padding-top:16px;border-top:1px solid #eee">
+                <a href="farmer-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const KEY_CROPS = 'farmer_crops';
+        const KEY_QR_CODES = 'farmer_qr_codes';
+        const KEY_PRICE_CHECKS = 'farmer_price_checks';
+        const KEY_FARM_NOTIFS = 'farmer_notifications';
+        const KEY_ACTIVITY = 'farmer_activity';
+
+        function loadKey(k){ try { return JSON.parse(localStorage.getItem(k) || 'null') } catch(e){ return null } }
+        function saveKey(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+
+        // Auth check
+        window.addEventListener('DOMContentLoaded', function() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            const userType = localStorage.getItem('userType');
+            if (loggedIn !== 'true' || userType !== 'farmer') {
+                alert('Access denied: This page is for farmers only.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load profile details
+            const fullName = localStorage.getItem('fullName') || '—';
+            const userEmail = localStorage.getItem('userEmail') || '—';
+            document.getElementById('profileName').textContent = fullName;
+            document.getElementById('profileEmail').textContent = userEmail;
+
+            // Load stats
+            const crops = loadKey(KEY_CROPS) || [];
+            const qrCodes = loadKey(KEY_QR_CODES) || [];
+            const priceChecks = loadKey(KEY_PRICE_CHECKS) || [];
+            const notifications = loadKey(KEY_FARM_NOTIFS) || [];
+
+            document.getElementById('cropCount').textContent = crops.length;
+            document.getElementById('qrCount').textContent = qrCodes.length;
+            document.getElementById('priceCheckCount').textContent = priceChecks.length;
+
+            // Render crop activity
+            renderCropActivity(crops);
+
+            // Render notifications
+            renderNotifications(notifications);
+
+            // Render market checks
+            renderMarketChecks(priceChecks);
+
+            // Render all activity (combined)
+            renderAllActivity();
+        });
+
+        function renderCropActivity(crops) {
+            const list = document.getElementById('cropActivityList');
+            if (!crops.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No crop activity yet.</p></li>';
+                return;
+            }
+            list.innerHTML = '';
+            crops.slice(0, 10).forEach(crop => {
+                const li = document.createElement('li');
+                const date = crop.plantDate ? new Date(crop.plantDate).toLocaleDateString() : '—';
+                li.innerHTML = `
+                    <div>
+                        <strong>${crop.name || 'Unknown'}</strong> · ${crop.type || 'Unknown'}
+                        <div style="font-size:0.85rem;color:#999">Expected yield: ${crop.expectedYield || '—'} units</div>
+                    </div>
+                    <span class="activity-time">${date}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderNotifications(notifications) {
+            const list = document.getElementById('notificationsList');
+            if (!notifications.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No notifications yet.</p></li>';
+                return;
+            }
+            list.innerHTML = '';
+            notifications.slice(0, 15).forEach(notif => {
+                const li = document.createElement('li');
+                const time = new Date(notif.at).toLocaleString();
+                li.innerHTML = `
+                    <div>${notif.msg}</div>
+                    <span class="activity-time">${time}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderMarketChecks(priceChecks) {
+            const list = document.getElementById('marketChecksList');
+            if (!priceChecks.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No market price checks yet.</p></li>';
+                return;
+            }
+            list.innerHTML = '';
+            priceChecks.slice(0, 15).forEach(check => {
+                const li = document.createElement('li');
+                const time = new Date(check.checkedAt).toLocaleString();
+                li.innerHTML = `
+                    <div>
+                        <strong>${check.cropName || 'Unknown'}</strong>
+                        <div style="font-size:0.85rem;color:#999">Price: ₹${Number(check.price).toFixed(2)}</div>
+                    </div>
+                    <span class="activity-time">${time}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderAllActivity() {
+            const list = document.getElementById('allActivityList');
+            const crops = loadKey(KEY_CROPS) || [];
+            const qrCodes = loadKey(KEY_QR_CODES) || [];
+            const priceChecks = loadKey(KEY_PRICE_CHECKS) || [];
+            const notifications = loadKey(KEY_FARM_NOTIFS) || [];
+
+            // Combine all activities with timestamps
+            const activities = [];
+            
+            crops.forEach(c => {
+                activities.push({
+                    time: c.plantDate || new Date().toISOString(),
+                    msg: `Added crop: ${c.name}`,
+                    type: 'crop'
+                });
+            });
+
+            qrCodes.forEach(q => {
+                activities.push({
+                    time: q.generatedAt || new Date().toISOString(),
+                    msg: `Generated QR code for: ${q.cropName}`,
+                    type: 'qr'
+                });
+            });
+
+            priceChecks.forEach(p => {
+                activities.push({
+                    time: p.checkedAt || new Date().toISOString(),
+                    msg: `Checked price for: ${p.cropName} (₹${Number(p.price).toFixed(2)})`,
+                    type: 'price'
+                });
+            });
+
+            notifications.forEach(n => {
+                activities.push({
+                    time: n.at,
+                    msg: n.msg,
+                    type: 'notification'
+                });
+            });
+
+            if (!activities.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No website activity yet.</p></li>';
+                return;
+            }
+
+            // Sort by time (newest first)
+            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+            list.innerHTML = '';
+            activities.slice(0, 20).forEach(activity => {
+                const li = document.createElement('li');
+                const time = new Date(activity.time).toLocaleString();
+                const typeEmoji = {
+                    'crop': '🌾',
+                    'qr': '📱',
+                    'price': '📊',
+                    'notification': '🔔'
+                }[activity.type] || '•';
+
+                li.innerHTML = `
+                    <div>
+                        <span style="margin-right:8px">${typeEmoji}</span>${activity.msg}
+                    </div>
+                    <span class="activity-time">${time}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const tabEl = document.getElementById(tabName);
+            if (tabEl) {
+                tabEl.classList.add('active');
+                event.target.classList.add('active');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('fullName');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

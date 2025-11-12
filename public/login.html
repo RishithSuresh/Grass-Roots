@@ -28,9 +28,12 @@
                         <select id="userType" required>
                             <option value="">Select User Type</option>
                             <option value="farmer">Farmer</option>
-                            <option value="customer">Customer</option>
                             <option value="retailer">Retailer/Shopkeeper</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" required>
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
@@ -53,23 +56,26 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const userType = document.getElementById('userType').value;
+            const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
             // TODO: Replace with real login logic (AJAX / form POST)
-            console.log('Login attempt:', { userType, email });
+            console.log('Login attempt:', { userType, name, email });
 
             // Simulate successful login: store a simple client-side session
             localStorage.setItem('loggedIn', 'true');
             localStorage.setItem('userEmail', email);
+            localStorage.setItem('fullName', name);
             localStorage.setItem('userType', userType);
 
             // Redirect based on user type
             if (userType === 'farmer') {
                 window.location.href = 'farmer-dashboard.html';
-            } else if (userType === 'customer') {
-                window.location.href = 'customer-dashboard.html';
+            } else if (userType === 'retailer') {
+                window.location.href = 'retailer-dashboard.html';
             } else {
+                // Other roles go to the main dashboard
                 window.location.href = 'dashboard.html';
             }
         });

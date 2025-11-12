@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Retailer Products - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .container{max-width:1100px;margin:24px auto;padding:0 16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid #eee}
+    .btn{background:var(--primary-color);color:#fff;padding:8px 12px;border-radius:8px;border:none}
+    /* Page wrapper & card to match main site's visual style */
+    body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+    .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
+    .card { width:100%; max-width:960px; background: #fff; border-radius:10px; padding:24px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
+    .card h1 { margin-top:0; color: #2f6b50 }
+    .muted { color:#6b7b6b; margin-top:6px }
+  </style>
+</head>
+<body>
+  <nav class="navbar"><div class="nav-container container"><a href="index.html" class="logo">GrassRoots</a><div class="nav-links"><a href="retailer-dashboard.html">Dashboard</a><a href="retailer-orders.html">Orders</a><a href="retailer-payments.html">Payments</a><a href="retailer-profile.html">Profile</a></div></div></nav>
+
+  <div class="page-wrapper">
+    <div class="card">
+      <h1>Products</h1>
+      <p class="muted">Add and manage your shop products.</p>
+      <div style="margin:12px 0"><button class="btn" onclick="openAdd()">Add Product</button></div>
+      <table id="productsTable"><thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);align-items:center;justify-content:center">
+    <div style="background:#fff;padding:18px;border-radius:8px;max-width:520px;margin:auto">
+      <h3 id="mTitle">Add Product</h3>
+      <div class="form-group"><label>Name</label><input id="mName" /></div>
+      <div class="form-group"><label>Price</label><input id="mPrice" type="number" step="0.01" /></div>
+      <div class="form-group"><label>Stock</label><input id="mStock" type="number" /></div>
+      <div style="margin-top:8px"><button class="btn" onclick="save()">Save</button> <button onclick="closeModal()" class="btn" style="background:#ccc;color:#111">Cancel</button></div>
+    </div>
+  </div>
+
+  <script>
+    const KEY_PRODUCTS='retailer_products';
+    function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+    function saveKey(k,v){localStorage.setItem(k,JSON.stringify(v))}
+    function loadProducts(){return load(KEY_PRODUCTS)||[]}
+    function render(){const rows=document.querySelector('#productsTable tbody');rows.innerHTML='';loadProducts().forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${p.name}</td><td>₹ ${Number(p.price).toFixed(2)}</td><td>${p.stock}</td><td><button class='btn' onclick="edit('${p.id}')">Edit</button> <button class='btn' style='background:#e04' onclick="del('${p.id}')">Delete</button></td>`;rows.appendChild(tr)})}
+    function openAdd(){window.editId=null;document.getElementById('mTitle').textContent='Add Product';document.getElementById('mName').value='';document.getElementById('mPrice').value='';document.getElementById('mStock').value='0';document.getElementById('modal').style.display='flex'}
+    function closeModal(){document.getElementById('modal').style.display='none'}
+    function save(){const name=document.getElementById('mName').value.trim();const price=Number(document.getElementById('mPrice').value)||0;const stock=parseInt(document.getElementById('mStock').value)||0;if(!name){alert('Name required');return}let prods=loadProducts();if(window.editId){const i=prods.findIndex(x=>x.id===window.editId);if(i>-1){prods[i].name=name;prods[i].price=price;prods[i].stock=stock}}else{prods.push({id:'p_'+Date.now(),name,price,stock})}saveKey(KEY_PRODUCTS,prods);closeModal();render();alert('Saved')}
+    function edit(id){const p=loadProducts().find(x=>x.id===id);if(!p)return;window.editId=id;document.getElementById('mTitle').textContent='Edit Product';document.getElementById('mName').value=p.name;document.getElementById('mPrice').value=p.price;document.getElementById('mStock').value=p.stock;document.getElementById('modal').style.display='flex'}
+    function del(id){if(!confirm('Delete?'))return;let prods=loadProducts().filter(x=>x.id!==id);saveKey(KEY_PRODUCTS,prods);render();alert('Deleted')}
+    document.addEventListener('DOMContentLoaded',render);
+  </script>
+</body>
+</html>

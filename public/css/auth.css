@@ -135,10 +135,9 @@ body {
     text-decoration: underline;
 }
 
-/* Conditional fields (farmer, retailer, customer specific) */
+/* Conditional fields (farmer and retailer specific). Customer role removed. */
 .auth-wrapper #farmerFields,
-.auth-wrapper #retailerFields,
-.auth-wrapper #customerFields {
+.auth-wrapper #retailerFields {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid rgba(201, 184, 163, 0.3);

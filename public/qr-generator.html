@@ -6,47 +6,135 @@
     <title>QR Generator - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <style>
+        .qr-section { margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 0.5rem; border: 1px solid #e0e0e0; }
+        .qr-section h3 { margin-top: 0; color: var(--primary-color); font-size: 1rem; }
+        .qr-history { max-height: 400px; overflow-y: auto; margin-top: 1rem; }
+        .qr-item { display: flex; align-items: center; padding: 0.75rem; background: white; margin: 0.5rem 0; border-radius: 0.35rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .qr-item-preview { width: 60px; height: 60px; margin-right: 1rem; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 0.25rem; }
+        .qr-item-preview canvas { max-width: 100%; max-height: 100%; }
+        .qr-item-info { flex: 1; }
+        .qr-item-name { font-weight: 600; color: var(--text-color); font-size: 0.95rem; }
+        .qr-item-detail { font-size: 0.85rem; color: var(--muted); margin: 0.25rem 0; }
+        .qr-item-actions { display: flex; gap: 0.5rem; }
+        .qr-item-actions button { padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #2f6b50; color: white; border: none; border-radius: 0.25rem; cursor: pointer; }
+        .qr-item-actions button:hover { background: #1f4d35; }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container container">
-            <a href="dashboard.html" class="logo">GrassRoots</a>
+            <a href="farmer-dashboard.html" class="logo">GrassRoots</a>
             <div class="nav-links">
-                <a href="dashboard.html">Dashboard</a>
+                <a href="farmer-dashboard.html">Dashboard</a>
+                <a href="crop-info.html">Crop Info</a>
                 <a href="contact.html">Contact</a>
                 <a href="login.html">Logout</a>
             </div>
         </div>
     </nav>
 
-    <main class="container" style="padding:2.5rem 0;">
-        <div class="form-container" style="max-width: 980px; margin:96px auto 40px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-                <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">📱 Generate QR Code for Product</h2>
-                <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">Create codes buyers can scan</div>
+    <main class="container" style="padding: 2.5rem 0; min-height: 100vh;">
+        <div class="form-container" style="max-width: 980px; margin: 96px auto 40px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                <h2 style="color: var(--primary-color); font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 0.6rem;">📱 QR Code Generator</h2>
+                <div style="color: var(--muted); font-size: 0.95rem; opacity: 0.9;">Generate QR codes from your crop data</div>
             </div>
 
-            <form id="qrForm">
+            <!-- Crop Selection -->
+            <div class="qr-section">
+                <h3>Step 1: Select Your Crop</h3>
                 <div class="form-group">
-                    <label for="productName">Product Name</label>
-                    <input type="text" id="productName" placeholder="e.g., Organic Rice Batch 001" required>
+                    <label for="cropSelect">Choose a Saved Crop (or manually enter below)</label>
+                    <select id="cropSelect">
+                        <option value="">-- Select a crop --</option>
+                    </select>
                 </div>
+            </div>
+
+            <!-- QR Generation Form -->
+            <form id="qrForm" class="qr-section">
+                <h3>Step 2: Enter Product & Agricultural Details</h3>
+
                 <div class="form-group">
-                    <label for="productInfo">Product Information</label>
-                    <textarea id="productInfo" rows="3" placeholder="Details: variety, harvest date, location, certifications, etc." required></textarea>
+                    <label for="productName">Product Name *</label>
+                    <input type="text" id="productName" placeholder="e.g., Basmati Rice - Premium Grade" required>
                 </div>
-                <button type="submit" class="btn" style="width:100%;">Generate QR Code</button>
+
+                <div class="form-group">
+                    <label for="cropType">Crop Type *</label>
+                    <input type="text" id="cropType" placeholder="e.g., Rice, Wheat, Vegetables" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quality">Quality Grade *</label>
+                    <select id="quality" required>
+                        <option value="">-- Select Quality --</option>
+                        <option value="Premium (Grade A)">Premium (Grade A) - Best quality</option>
+                        <option value="Good (Grade B)">Good (Grade B) - Standard quality</option>
+                        <option value="Standard (Grade C)">Standard (Grade C) - Regular quality</option>
+                        <option value="Economy">Economy - Budget option</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="harvestDate">Harvest Date *</label>
+                    <input type="date" id="harvestDate" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmLocation">Farm Location *</label>
+                    <input type="text" id="farmLocation" placeholder="e.g., Punjab, District Name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fertilizerUsed">Fertilizer Used *</label>
+                    <textarea id="fertilizerUsed" rows="2" placeholder="e.g., Organic compost, NPK 20:20:20, Urea dosage..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="pesticidesUsed">Pesticides Used *</label>
+                    <textarea id="pesticidesUsed" rows="2" placeholder="e.g., Neem oil spray, Organic BioInsecticide, or 'None - Organic'" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="batchNumber">Batch Number (Optional)</label>
+                    <input type="text" id="batchNumber" placeholder="e.g., BATCH-2024-001">
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Price (Optional)</label>
+                    <input type="text" id="price" placeholder="e.g., ₹80/kg">
+                </div>
+
+                <div class="form-group">
+                    <label for="additionalNotes">Additional Notes</label>
+                    <textarea id="additionalNotes" rows="2" placeholder="Any special certifications, handling instructions, etc."></textarea>
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; background: var(--primary-color); color: white; padding: 0.75rem; font-weight: 600;">Generate QR Code</button>
             </form>
 
-            <div class="qr-container" style="text-align:center;margin-top:1.25rem;">
-                <div id="qrcode"></div>
-                <button id="downloadBtn" class="btn" style="display: none; margin-top: 1rem;">Download QR Code</button>
+            <!-- QR Display -->
+            <div class="qr-section" id="qrDisplaySection" style="display: none; text-align: center;">
+                <h3>Your Generated QR Code</h3>
+                <div id="qrcode" style="display: inline-block; margin: 1rem 0;"></div>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                    <button id="downloadBtn" class="btn" style="background: #2f6b50; color: white; padding: 0.6rem 1.2rem;">📥 Download QR</button>
+                    <button id="printBtn" class="btn" style="background: #666; color: white; padding: 0.6rem 1.2rem;">🖨️ Print QR</button>
+                </div>
+            </div>
+
+            <!-- QR History -->
+            <div class="qr-section" id="qrHistorySection" style="display: none;">
+                <h3>QR Code History</h3>
+                <div class="qr-history" id="qrHistory"></div>
             </div>
         </div>
     </main>
 
     <script>
-        // Auth guard: allow only logged-in farmers to access this page
+        // Auth guard
         (function() {
             const loggedIn = localStorage.getItem('loggedIn');
             const userType = localStorage.getItem('userType');
@@ -56,43 +144,234 @@
             }
         })();
 
+        // Load crops into dropdown
+        function loadCropSelector() {
+            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+            const select = document.getElementById('cropSelect');
+            select.innerHTML = '<option value="">-- Select a crop --</option>';
+            crops.forEach(crop => {
+                const opt = document.createElement('option');
+                opt.value = crop.id;
+                opt.textContent = `${crop.type} (${crop.area} acres, planted ${crop.plantingDate})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // Load crop details when selected
+        document.getElementById('cropSelect').addEventListener('change', function() {
+            if (!this.value) return;
+            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+            const selected = crops.find(c => c.id == this.value);
+            if (selected) {
+                document.getElementById('cropType').value = selected.type || '';
+                document.getElementById('farmLocation').value = selected.notes || '';
+            }
+        });
+
+        // Format QR data
+        function formatQRData() {
+            const data = {
+                productName: document.getElementById('productName').value,
+                cropType: document.getElementById('cropType').value,
+                quality: document.getElementById('quality').value,
+                harvestDate: document.getElementById('harvestDate').value,
+                farmLocation: document.getElementById('farmLocation').value,
+                fertilizerUsed: document.getElementById('fertilizerUsed').value,
+                pesticidesUsed: document.getElementById('pesticidesUsed').value,
+                batchNumber: document.getElementById('batchNumber').value,
+                price: document.getElementById('price').value,
+                farmerEmail: localStorage.getItem('userEmail'),
+                farmerName: localStorage.getItem('fullName'),
+                generatedAt: new Date().toISOString()
+            };
+
+            // Format as human-readable text block
+            let qrText = `GrassRoots QR\n`;
+            qrText += `Product: ${data.productName}\n`;
+            qrText += `Type: ${data.cropType}\n`;
+            qrText += `Quality: ${data.quality}\n`;
+            qrText += `Harvest: ${data.harvestDate}\n`;
+            qrText += `Location: ${data.farmLocation}\n`;
+            qrText += `Fertilizer: ${data.fertilizerUsed}\n`;
+            qrText += `Pesticides: ${data.pesticidesUsed}\n`;
+            if (data.batchNumber) qrText += `Batch: ${data.batchNumber}\n`;
+            if (data.price) qrText += `Price: ${data.price}\n`;
+            qrText += `Farmer: ${data.farmerName}\n`;
+            qrText += `Contact: ${data.farmerEmail}\n`;
+            qrText += `Generated: ${new Date().toLocaleString()}`;
+
+            return { qrText, data };
+        }
+
+        // Generate QR Code
         document.getElementById('qrForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const productName = document.getElementById('productName').value;
-            const productInfo = document.getElementById('productInfo').value;
-            const qrData = `GrassRoots|${productName}|${productInfo}|Farmer:${localStorage.getItem('userEmail')}`;
+            const { qrText, data } = formatQRData();
 
             document.getElementById('qrcode').innerHTML = '';
-            const qrContainer = document.getElementById('qrcode');
-            qrContainer.innerHTML = '<p>Generating QR Code...</p>';
+            document.getElementById('qrDisplaySection').style.display = 'block';
+            document.getElementById('qrHistorySection').style.display = 'block';
 
-            setTimeout(() => {
-                qrContainer.innerHTML = '';
-                // Using qrcode library included in this page
-                QRCode.toCanvas(document.createElement('canvas'), qrData, function (error, canvas) {
-                    if (error) { console.error(error); qrContainer.innerHTML = '<p style="color:#c00">Error generating QR</p>'; return; }
-                    qrContainer.appendChild(canvas);
-                    document.getElementById('downloadBtn').style.display = 'inline-block';
-                });
-            }, 250);
+            // Generate using qrcode.js
+            QRCode.toCanvas(document.createElement('canvas'), qrText, { width: 300, margin: 2 }, function (error, canvas) {
+                if (error) {
+                    console.error(error);
+                    document.getElementById('qrcode').innerHTML = '<p style="color: #c00;">Error generating QR code</p>';
+                    return;
+                }
+                document.getElementById('qrcode').innerHTML = '';
+                document.getElementById('qrcode').appendChild(canvas);
+
+                // Save to history
+                const qrId = 'qr_' + Date.now();
+                const qrRecord = {
+                    id: qrId,
+                    ...data,
+                    qrText: qrText,
+                    canvasData: canvas.toDataURL('image/png')
+                };
+
+                let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                qrHistory.unshift(qrRecord);
+                qrHistory = qrHistory.slice(0, 10); // Keep last 10
+                localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+
+                renderQRHistory();
+            });
         });
 
+        // Download QR
         document.getElementById('downloadBtn').addEventListener('click', function() {
             const canvas = document.querySelector('#qrcode canvas');
             if (!canvas) return;
             const url = canvas.toDataURL('image/png');
             const a = document.createElement('a');
-            a.download = 'product-qr-code.png';
+            a.download = `QR-${document.getElementById('productName').value || 'product'}-${Date.now()}.png`;
             a.href = url;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
         });
 
-        function generateBatchId() {
-            return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        // Print QR
+        document.getElementById('printBtn').addEventListener('click', function() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) return;
+            const printWindow = window.open('', '', 'width=800,height=600');
+            const productName = document.getElementById('productName').value;
+            printWindow.document.write(`
+                <html><head><title>Print QR Code</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                    h2 { color: #2f6b50; }
+                    img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
+                    .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
+                </style>
+                </head><body>
+                <h2>${productName}</h2>
+                <img src="${canvas.toDataURL('image/png')}" />
+                <div class="details">
+                    <p><strong>Crop Type:</strong> ${document.getElementById('cropType').value}</p>
+                    <p><strong>Quality:</strong> ${document.getElementById('quality').value}</p>
+                    <p><strong>Harvest Date:</strong> ${document.getElementById('harvestDate').value}</p>
+                    <p><strong>Fertilizer:</strong> ${document.getElementById('fertilizerUsed').value}</p>
+                    <p><strong>Pesticides:</strong> ${document.getElementById('pesticidesUsed').value}</p>
+                </div>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        });
+
+        // Render QR History
+        function renderQRHistory() {
+            const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const historyDiv = document.getElementById('qrHistory');
+
+            if (!qrHistory.length) {
+                historyDiv.innerHTML = '<p style="color: var(--muted);">No QR codes generated yet.</p>';
+                return;
+            }
+
+            let html = '';
+            qrHistory.forEach(qr => {
+                html += `
+                    <div class="qr-item">
+                        <div class="qr-item-preview" id="preview-${qr.id}"></div>
+                        <div class="qr-item-info">
+                            <div class="qr-item-name">${qr.productName}</div>
+                            <div class="qr-item-detail">Crop: ${qr.cropType} | Quality: ${qr.quality}</div>
+                            <div class="qr-item-detail">Harvest: ${qr.harvestDate} | Generated: ${new Date(qr.generatedAt).toLocaleDateString()}</div>
+                        </div>
+                        <div class="qr-item-actions">
+                            <button onclick="downloadQRFromHistory('${qr.id}')">Download</button>
+                            <button onclick="printQRFromHistory('${qr.id}')">Print</button>
+                        </div>
+                    </div>
+                `;
+            });
+            historyDiv.innerHTML = html;
+
+            // Render preview canvases
+            qrHistory.forEach(qr => {
+                const previewDiv = document.getElementById(`preview-${qr.id}`);
+                if (previewDiv && qr.canvasData) {
+                    const img = document.createElement('img');
+                    img.src = qr.canvasData;
+                    img.style.maxWidth = '100%';
+                    previewDiv.appendChild(img);
+                }
+            });
         }
+
+        // Download from history
+        window.downloadQRFromHistory = function(qrId) {
+            const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const qr = qrHistory.find(q => q.id === qrId);
+            if (!qr || !qr.canvasData) return;
+            const a = document.createElement('a');
+            a.href = qr.canvasData;
+            a.download = `QR-${qr.productName}-${qr.id}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        // Print from history
+        window.printQRFromHistory = function(qrId) {
+            const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const qr = qrHistory.find(q => q.id === qrId);
+            if (!qr || !qr.canvasData) return;
+            const printWindow = window.open('', '', 'width=800,height=600');
+            printWindow.document.write(`
+                <html><head><title>Print QR Code</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                    h2 { color: #2f6b50; }
+                    img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
+                    .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
+                </style>
+                </head><body>
+                <h2>${qr.productName}</h2>
+                <img src="${qr.canvasData}" />
+                <div class="details">
+                    <p><strong>Crop Type:</strong> ${qr.cropType}</p>
+                    <p><strong>Quality:</strong> ${qr.quality}</p>
+                    <p><strong>Location:</strong> ${qr.farmLocation}</p>
+                    <p><strong>Fertilizer:</strong> ${qr.fertilizerUsed}</p>
+                    <p><strong>Pesticides:</strong> ${qr.pesticidesUsed}</p>
+                    <p><strong>Farmer:</strong> ${qr.farmerName} (${qr.farmerEmail})</p>
+                </div>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        };
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            loadCropSelector();
+            renderQRHistory();
+        });
     </script>
 </body>
 </html>

@@ -28,7 +28,6 @@
                 <select id="userType" required onchange="toggleFields()">
                     <option value="">Select User Type</option>
                     <option value="farmer">Farmer</option>
-                    <option value="customer">Customer</option>
                     <option value="retailer">Retailer/Shopkeeper</option>
                 </select>
             </div>
@@ -81,13 +80,7 @@
                 </div>
             </div>
 
-            <!-- Customer-specific fields -->
-            <div id="customerFields" style="display: none;">
-                <div class="form-group">
-                    <label for="deliveryAddress">Delivery Address</label>
-                    <textarea id="deliveryAddress"></textarea>
-                </div>
-            </div>
+            <!-- Customer role removed -->
 
                     <button type="submit" class="btn">Register</button>
                 </form>
@@ -103,14 +96,11 @@
             const userType = document.getElementById('userType').value;
             document.getElementById('farmerFields').style.display = 'none';
             document.getElementById('retailerFields').style.display = 'none';
-            document.getElementById('customerFields').style.display = 'none';
 
             if (userType === 'farmer') {
                 document.getElementById('farmerFields').style.display = 'block';
             } else if (userType === 'retailer') {
                 document.getElementById('retailerFields').style.display = 'block';
-            } else if (userType === 'customer') {
-                document.getElementById('customerFields').style.display = 'block';
             }
         }
 
@@ -133,9 +123,10 @@
             // Redirect based on user type
             if (userType === 'farmer') {
                 window.location.href = 'farmer-dashboard.html';
-            } else if (userType === 'customer') {
-                window.location.href = 'customer-dashboard.html';
+            } else if (userType === 'retailer') {
+                window.location.href = 'retailer-dashboard.html';
             } else {
+                // Other roles go to profile
                 window.location.href = 'profile.html';
             }
         });
