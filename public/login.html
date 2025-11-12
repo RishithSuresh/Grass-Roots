@@ -64,8 +64,12 @@
             localStorage.setItem('userEmail', email);
             localStorage.setItem('userType', userType);
 
-            // Redirect to dashboard (or profile) after login
-            window.location.href = 'dashboard.html';
+            // Redirect based on user type
+            if (userType === 'farmer') {
+                window.location.href = 'farmer-dashboard.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
         });
 
         // Registration form removed from this page; users should use register.html

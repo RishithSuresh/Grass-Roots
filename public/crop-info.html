@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Crop Information - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="farmer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding:2.5rem 0;">
+    <div class="form-container" style="max-width:980px;margin:96px auto 40px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">🍃 Manage Your Crop Information</h2>
+        <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">&nbsp;</div>
+      </div>
+
+      <div id="cropEditor"></div>
+
+      <div style="margin-top:1.5rem;">
+        <h3 style="font-size:1rem;margin-bottom:0.6rem;color:var(--text-color);">Your Saved Crops:</h3>
+        <div id="cropListLocal" class="saved-crops-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Auth guard: allow only logged-in farmers to access this page
+    (function() {
+      const loggedIn = localStorage.getItem('loggedIn');
+      const userType = localStorage.getItem('userType');
+      if (loggedIn !== 'true' || userType !== 'farmer') {
+        alert('Access denied: This page is for farmers only.');
+        window.location.href = 'login.html';
+      }
+    })();
+
+    // Inline crop editor and nicer renderer
+    function initCropEditor() {
+      const html = `
+        <form id="cropInfoFormLocal">
+          <div class="form-group">
+            <label for="cropTypeLocal">Crop Type</label>
+            <select id="cropTypeLocal" required>
+              <option value="">Select Crop</option>
+              <option value="Rice">RICE</option>
+              <option value="Wheat">WHEAT</option>
+              <option value="Maize">MAIZE</option>
+              <option value="Vegetables">VEGETABLES</option>
+              <option value="Cotton">COTTON</option>
+              <option value="Sugarcane">SUGARCANE</option>
+              <option value="Other">OTHER</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="plantingDateLocal">Planting Date</label>
+            <input type="date" id="plantingDateLocal" required>
+          </div>
+          <div class="form-group">
+            <label for="areaLocal">Area (in acres)</label>
+            <input type="number" id="areaLocal" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="expectedYieldLocal">Expected Yield (in quintals)</label>
+            <input type="number" id="expectedYieldLocal" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="cropNotesLocal">Additional Notes</label>
+            <textarea id="cropNotesLocal" rows="3" placeholder="Any special details about your crop..."></textarea>
+          </div>
+          <button type="submit" class="btn save-btn">Save Crop Information</button>
+        </form>
+      `;
+      document.getElementById('cropEditor').innerHTML = html;
+
+      document.getElementById('cropInfoFormLocal').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const crop = {
+          id: Date.now(),
+          type: document.getElementById('cropTypeLocal').value,
+          plantingDate: document.getElementById('plantingDateLocal').value,
+          area: document.getElementById('areaLocal').value,
+          expectedYield: document.getElementById('expectedYieldLocal').value,
+          notes: document.getElementById('cropNotesLocal').value
+        };
+        let crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+        crops.push(crop);
+        localStorage.setItem('farmerCrops', JSON.stringify(crops));
+        // small non-blocking toast-ish confirmation
+        const btn = document.querySelector('.save-btn');
+        btn.textContent = 'Saved ✓';
+        setTimeout(()=> btn.textContent = 'Save Crop Information', 1200);
+        this.reset();
+        renderCropList();
+      });
+
+      function renderCropList() {
+        const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+        const out = document.getElementById('cropListLocal');
+        if (!crops.length) {
+          out.innerHTML = '<p style="color:var(--muted);">No crops added yet.</p>';
+          return;
+        }
+        let html = '';
+        crops.forEach(c => {
+          const dateStr = c.plantingDate ? c.plantingDate : '//';
+          html += `
+            <div class="crop-card">
+              <div class="crop-card-inner">
+                <div class="crop-title">${(c.type||'--').toUpperCase()}</div>
+                <div class="crop-meta">Area: ${c.area || '—'} acres | Yield: ${c.expectedYield || '—'} qt</div>
+                <div class="crop-date">Planted: ${dateStr}</div>
+                ${c.notes ? `<div class="crop-notes">${c.notes}</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        out.innerHTML = `<div class="saved-crops-grid">${html}</div>`;
+      }
+
+      renderCropList();
+    }
+
+    initCropEditor();
+  </script>
+</body>
+</html>

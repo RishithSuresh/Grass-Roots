@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Market Prices - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="farmer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding:2.5rem 0;">
+    <div class="form-container" style="max-width:980px;margin:96px auto 40px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">📊 Current Market Prices</h2>
+        <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">Demo data</div>
+      </div>
+
+      <p style="color:var(--muted);margin-bottom:0.8rem;">Demo prices updated weekly (replace with real market API for production).</p>
+
+      <div id="prices" style="margin-top:1.25rem;"></div>
+    </div>
+  </main>
+
+  <script>
+    // Auth guard: allow only logged-in farmers to access this page
+    (function() {
+      const loggedIn = localStorage.getItem('loggedIn');
+      const userType = localStorage.getItem('userType');
+      if (loggedIn !== 'true' || userType !== 'farmer') {
+        alert('Access denied: This page is for farmers only.');
+        window.location.href = 'login.html';
+      }
+    })();
+
+    const prices = [
+      { crop: 'Rice', price: '₹2,500/quintal', trend: '↑ +2%' },
+      { crop: 'Wheat', price: '₹2,200/quintal', trend: '↓ -1%' },
+      { crop: 'Maize', price: '₹1,800/quintal', trend: '→ 0%' },
+      { crop: 'Vegetables', price: '₹3,500/quintal', trend: '↑ +3%' }
+    ];
+
+    function renderPrices() {
+      let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">';
+      prices.forEach(p => {
+        html += `<div class="data-card"><strong>${p.crop}</strong><span>${p.price}</span><small style="display:block;color:#666">${p.trend}</small></div>`;
+      });
+      html += '</div>';
+      document.getElementById('prices').innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', renderPrices);
+  </script>
+</body>
+</html>

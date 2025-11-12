@@ -19,94 +19,71 @@
         </div>
     </nav>
 
-    <div class="container">
-        <div class="form-container" style="max-width: 800px;">
-            <h2 style="text-align: center; margin-bottom: 2rem;">Generate QR Code for Crop Batch</h2>
-            
+    <main class="container" style="padding:2.5rem 0;">
+        <div class="form-container" style="max-width: 980px; margin:96px auto 40px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+                <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">📱 Generate QR Code for Product</h2>
+                <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">Create codes buyers can scan</div>
+            </div>
+
             <form id="qrForm">
                 <div class="form-group">
-                    <label for="cropType">Crop Type</label>
-                    <input type="text" id="cropType" required>
+                    <label for="productName">Product Name</label>
+                    <input type="text" id="productName" placeholder="e.g., Organic Rice Batch 001" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="variety">Variety</label>
-                    <input type="text" id="variety" required>
+                    <label for="productInfo">Product Information</label>
+                    <textarea id="productInfo" rows="3" placeholder="Details: variety, harvest date, location, certifications, etc." required></textarea>
                 </div>
-                
-                <div class="form-group">
-                    <label for="quantity">Quantity (in kg)</label>
-                    <input type="number" id="quantity" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="harvestDate">Harvest Date</label>
-                    <input type="date" id="harvestDate" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fertilizers">Fertilizers Used</label>
-                    <textarea id="fertilizers" rows="3" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="pesticides">Pesticides Used</label>
-                    <textarea id="pesticides" rows="3" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="quality">Quality Grade</label>
-                    <select id="quality" required>
-                        <option value="">Select Quality Grade</option>
-                        <option value="A">Grade A</option>
-                        <option value="B">Grade B</option>
-                        <option value="C">Grade C</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn" style="width: 100%;">Generate QR Code</button>
+                <button type="submit" class="btn" style="width:100%;">Generate QR Code</button>
             </form>
 
-            <div class="qr-container">
+            <div class="qr-container" style="text-align:center;margin-top:1.25rem;">
                 <div id="qrcode"></div>
                 <button id="downloadBtn" class="btn" style="display: none; margin-top: 1rem;">Download QR Code</button>
             </div>
         </div>
-    </div>
+    </main>
 
     <script>
+        // Auth guard: allow only logged-in farmers to access this page
+        (function() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            const userType = localStorage.getItem('userType');
+            if (loggedIn !== 'true' || userType !== 'farmer') {
+                alert('Access denied: This page is for farmers only.');
+                window.location.href = 'login.html';
+            }
+        })();
+
         document.getElementById('qrForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            // Collect form data
-            const cropData = {
-                cropType: document.getElementById('cropType').value,
-                variety: document.getElementById('variety').value,
-                quantity: document.getElementById('quantity').value,
-                harvestDate: document.getElementById('harvestDate').value,
-                fertilizers: document.getElementById('fertilizers').value,
-                pesticides: document.getElementById('pesticides').value,
-                quality: document.getElementById('quality').value,
-                timestamp: new Date().toISOString(),
-                batchId: generateBatchId()
-            };
 
-            // Clear previous QR code
+            const productName = document.getElementById('productName').value;
+            const productInfo = document.getElementById('productInfo').value;
+            const qrData = `GrassRoots|${productName}|${productInfo}|Farmer:${localStorage.getItem('userEmail')}`;
+
             document.getElementById('qrcode').innerHTML = '';
-            
-            // Generate QR code
-            QRCode.toCanvas(document.createElement('canvas'), JSON.stringify(cropData), function (error, canvas) {
-                if (error) console.error(error);
-                document.getElementById('qrcode').appendChild(canvas);
-                document.getElementById('downloadBtn').style.display = 'inline-block';
-            });
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '<p>Generating QR Code...</p>';
+
+            setTimeout(() => {
+                qrContainer.innerHTML = '';
+                // Using qrcode library included in this page
+                QRCode.toCanvas(document.createElement('canvas'), qrData, function (error, canvas) {
+                    if (error) { console.error(error); qrContainer.innerHTML = '<p style="color:#c00">Error generating QR</p>'; return; }
+                    qrContainer.appendChild(canvas);
+                    document.getElementById('downloadBtn').style.display = 'inline-block';
+                });
+            }, 250);
         });
 
         document.getElementById('downloadBtn').addEventListener('click', function() {
             const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) return;
             const url = canvas.toDataURL('image/png');
             const a = document.createElement('a');
-            a.download = 'crop-qr-code.png';
+            a.download = 'product-qr-code.png';
             a.href = url;
             document.body.appendChild(a);
             a.click();

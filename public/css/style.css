@@ -371,6 +371,30 @@ h1, h2, h3, h4 {
     text-align: center;
 }
 
+/* Crop info page specific styles */
+.form-container h2 { font-size: 1.05rem; }
+.saved-crops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 0.6rem;
+}
+.crop-card {
+    background: #f6f7f6; /* very light */
+    border-radius: 8px;
+    padding: 0.6rem;
+    border-left: 5px solid var(--primary-color);
+    box-shadow: 0 2px 6px rgba(25,25,25,0.04);
+}
+.crop-card-inner { background: transparent; padding: 0.8rem 0.8rem; }
+.crop-title { font-weight: 700; color: var(--accent-charcoal); margin-bottom: 0.35rem; }
+.crop-meta { font-size: 0.92rem; color: #445444; margin-bottom: 0.35rem; }
+.crop-date { font-size: 0.85rem; color: #5b6b5f; margin-bottom: 0.45rem; }
+.crop-notes { font-size: 0.88rem; color: #475547; opacity: 0.95; margin-top: 0.35rem; }
+
+/* small adjustment for the save button specifically on crop page */
+.save-btn { padding: 0.7rem 1.25rem; border-radius: 999px; }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-container {

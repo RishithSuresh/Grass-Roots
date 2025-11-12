@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pricing Recommendations - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="farmer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding:2.5rem 0;">
+    <div class="form-container" style="max-width:980px;margin:96px auto 40px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">⭐ Best Pricing Recommendations</h2>
+        <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">Demo recommendations</div>
+      </div>
+
+      <p style="color:var(--muted);margin-bottom:0.8rem;">Get recommendations on when to sell based on demo market signals.</p>
+
+      <section>
+        <form id="pricingFormLocal">
+          <div class="form-group">
+            <label for="cropLocal">Select Crop</label>
+            <select id="cropLocal">
+              <option value="">Select</option>
+              <option value="rice">Rice</option>
+              <option value="wheat">Wheat</option>
+              <option value="maize">Maize</option>
+              <option value="vegetables">Vegetables</option>
+            </select>
+          </div>
+          <button class="btn" type="submit">Get Recommendation</button>
+        </form>
+
+        <div id="recommendationLocal" style="margin-top:1rem;"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Auth guard: allow only logged-in farmers to access this page
+    (function() {
+      const loggedIn = localStorage.getItem('loggedIn');
+      const userType = localStorage.getItem('userType');
+      if (loggedIn !== 'true' || userType !== 'farmer') {
+        alert('Access denied: This page is for farmers only.');
+        window.location.href = 'login.html';
+      }
+    })();
+
+    document.getElementById('pricingFormLocal').addEventListener('submit', function(e){
+      e.preventDefault();
+      const crop = document.getElementById('cropLocal').value;
+      const recommendations = {
+        rice: { rating: '⭐⭐⭐⭐⭐ Excellent', msg: 'Good time to sell. Market demand is high and prices are stable.' },
+        wheat: { rating: '⭐⭐⭐⭐ Good', msg: 'Moderate demand. Consider selling in next 2 weeks for better prices.' },
+        maize: { rating: '⭐⭐⭐ Fair', msg: 'Supply is high. Wait 1 week for prices to improve.' },
+        vegetables: { rating: '⭐⭐⭐⭐⭐ Excellent', msg: 'Premium pricing available. Sell immediately for maximum profit.' }
+      };
+      const rec = recommendations[crop] || { rating: '⭐⭐⭐ Average', msg: 'No strong signal.' };
+      document.getElementById('recommendationLocal').innerHTML = `
+        <div style="background:#e8f5e9;padding:1rem;border-radius:8px;border-left:4px solid var(--primary-color);">
+          <h4 style="color:var(--primary-color);margin-top:0;">${rec.rating}</h4>
+          <p style="margin:0.5rem 0 0 0;">${rec.msg}</p>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
