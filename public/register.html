@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
     <nav class="navbar">
@@ -17,9 +18,11 @@
         </div>
     </nav>
 
-    <div class="form-container">
-    <h2 style="text-align: center; margin-bottom: 2rem;">Register with GrassRoots</h2>
-        <form id="registrationForm">
+    <div class="auth-wrapper">
+        <div class="container">
+            <div class="form-container">
+                <h2>Register with GrassRoots</h2>
+                <form id="registrationForm">
             <div class="form-group">
                 <label for="userType">User Type</label>
                 <select id="userType" required onchange="toggleFields()">
@@ -86,11 +89,13 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn" style="width: 100%;">Register</button>
-        </form>
-        <p style="text-align: center; margin-top: 1rem;">
-            Already have an account? <a href="login.html" style="color: var(--primary-color);">Login here</a>
-        </p>
+                    <button type="submit" class="btn">Register</button>
+                </form>
+                <p>
+                    Already have an account? <a href="login.html">Login here</a>
+                </p>
+            </div>
+        </div>
     </div>
 
     <script>
