@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Call Bot — GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .call-screen {
+      max-width: 520px;
+      margin: 100px auto 40px;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .caller {
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:center;
+      margin-bottom: 12px;
+    }
+    .caller .avatar{ width:78px; height:78px; border-radius:50%; background:#f2f4f2; display:inline-flex; align-items:center; justify-content:center; font-weight:700; color:#567;}
+    .call-status { color: #446; margin-bottom: 6px; }
+    .call-timer { color:#888; font-size:0.95rem; margin-bottom:12px }
+    .dtmf-grid { display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin: 12px 0 18px; }
+    .dtmf-grid button { padding:14px 0; border-radius:8px; font-size:1.15rem; border:1px solid #e5e5e5; background:#fafafa; cursor:pointer }
+    .controls { display:flex; gap:12px; justify-content:center; margin-top:10px }
+    .controls .hang { background:#e04; color:white }
+    .lang-selected { margin-top:8px; color:#2b6b3a; font-weight:600 }
+    .small { font-size:0.9rem; color:#6b6b6b }
+    @media (max-width:600px){ .call-screen{ margin:80px 12px } }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="call-screen">
+      <div class="caller">
+        <div class="avatar">GB</div>
+        <div>
+          <div style="font-size:1.15rem;font-weight:700">GrassRoots Call Bot</div>
+          <div class="small">Automated voice assistant</div>
+        </div>
+      </div>
+
+      <div class="call-status" id="callStatus">Connecting...</div>
+      <div class="call-timer" id="callTimer">00:00</div>
+
+      <div class="small">Choose language by pressing the corresponding number</div>
+      <div class="dtmf-grid" role="group" aria-label="DTMF keypad">
+        <button onclick="pressDTMF(1)">1<br><span style="font-size:0.78rem">English</span></button>
+        <button onclick="pressDTMF(2)">2<br><span style="font-size:0.78rem">Hindi</span></button>
+        <button onclick="pressDTMF(3)">3<br><span style="font-size:0.78rem">Kannada</span></button>
+        <button onclick="pressDTMF(4)">4<br><span style="font-size:0.78rem">Telugu</span></button>
+        <button onclick="pressDTMF(5)">5<br><span style="font-size:0.78rem">Marathi</span></button>
+        <button onclick="pressDTMF(6)">6<br><span style="font-size:0.78rem">Other</span></button>
+        <button onclick="pressDTMF(7)">7</button>
+        <button onclick="pressDTMF(8)">8</button>
+        <button onclick="pressDTMF(9)">9</button>
+      </div>
+
+      <div class="lang-selected" id="langSelected">Selected: —</div>
+
+      <div class="controls">
+        <button class="btn" onclick="muteToggle()" id="muteBtn">Mute</button>
+        <button class="btn hang" onclick="hangUp()">Hang Up</button>
+      </div>
+
+      <div style="margin-top:12px" class="small">Tip: Press the language number anytime during the call to switch language instantly.</div>
+    </div>
+  </div>
+
+  <script>
+    let callStart = null;
+    let timerInterval = null;
+    let connected = false;
+    let currentLang = null;
+    function secToMMSS(s){ const mm=Math.floor(s/60); const ss=s%60; return String(mm).padStart(2,'0')+':' + String(ss).padStart(2,'0') }
+
+    function startCall(){
+      document.getElementById('callStatus').textContent = 'Calling...';
+      // emulate connection
+      setTimeout(()=>{
+        connected = true;
+        callStart = Date.now();
+        document.getElementById('callStatus').textContent = 'Connected';
+        timerInterval = setInterval(()=>{
+          const sec = Math.floor((Date.now() - callStart)/1000);
+          document.getElementById('callTimer').textContent = secToMMSS(sec);
+        }, 1000);
+        // default language
+        setLanguage(1);
+      }, 900);
+    }
+
+    function setLanguage(num){
+      const map = {1:'English',2:'Hindi',3:'Kannada',4:'Telugu',5:'Marathi',6:'Other'};
+      currentLang = map[num] || ('Key '+num);
+      document.getElementById('langSelected').textContent = 'Selected: ' + currentLang;
+      // in a real integration we'd send DTMF to call session here
+      addSystemNote('Language changed to ' + currentLang);
+    }
+
+    function pressDTMF(n){
+      if(!connected){ addSystemNote('Waiting for connection...'); return }
+      setLanguage(n);
+    }
+
+    function addSystemNote(msg){
+      // lightweight visual confirmation — could be expanded to a list
+      const status = document.getElementById('callStatus');
+      status.textContent = msg;
+      setTimeout(()=>{
+        if(connected) status.textContent = 'Connected'; else status.textContent = 'Calling...';
+      }, 1200);
+    }
+
+    function muteToggle(){
+      const b = document.getElementById('muteBtn');
+      if(b.textContent === 'Mute') b.textContent = 'Unmute'; else b.textContent = 'Mute';
+      addSystemNote(b.textContent + ' toggled');
+    }
+
+    function hangUp(){
+      if(timerInterval) clearInterval(timerInterval);
+      connected = false;
+      document.getElementById('callStatus').textContent = 'Call ended';
+      document.getElementById('callTimer').textContent = '00:00';
+      setTimeout(()=>{ window.location.href = 'index.html'; }, 700);
+    }
+
+    // start when page loads
+    window.addEventListener('DOMContentLoaded', function(){ startCall(); });
+  </script>
+</body>
+</html>
