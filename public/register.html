@@ -6,6 +6,8 @@
     <title>Register - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth.css">
+    <script src="js/auth.js" defer></script>
+    <script src="js/utils.js" defer></script>
 </head>
 <body>
     <nav class="navbar">
@@ -106,29 +108,60 @@
 
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // Simulate registration and create a simple client-side session
-            const name = document.getElementById('name').value.trim();
+
+            // Get form values
             const userType = document.getElementById('userType').value;
+            const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
-            // You may want to add proper validation here
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
 
-            // Save user info locally (for demo purposes only)
-            localStorage.setItem('loggedIn', 'true');
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('fullName', name);
-            localStorage.setItem('userType', userType);
-
-            console.log('Registration submitted', { name, userType, email });
-
-            // Redirect based on user type
-            if (userType === 'farmer') {
-                window.location.href = 'farmer-dashboard.html';
-            } else if (userType === 'retailer') {
-                window.location.href = 'retailer-dashboard.html';
-            } else {
-                // Other roles go to profile
-                window.location.href = 'profile.html';
+            // Validation
+            if (!userType) {
+                GrassRootsUtils.showToast('Please select user type', 'error');
+                return;
             }
+
+            if (!name || name.length < 3) {
+                GrassRootsUtils.showToast('Please enter a valid name (min 3 characters)', 'error');
+                return;
+            }
+
+            if (!GrassRootsUtils.isValidEmail(email)) {
+                GrassRootsUtils.showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            if (!GrassRootsUtils.isValidPhone(phone)) {
+                GrassRootsUtils.showToast('Please enter a valid 10-digit phone number', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                GrassRootsUtils.showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            // Show loading
+            GrassRootsUtils.showLoading('Creating your account...');
+
+            // Simulate API call delay
+            setTimeout(() => {
+                // Register using centralized auth system
+                GrassRootsAuth.login({
+                    email: email,
+                    fullName: name,
+                    userType: userType
+                });
+
+                GrassRootsUtils.hideLoading();
+                GrassRootsUtils.showToast('Registration successful!', 'success');
+
+                // Redirect to appropriate dashboard
+                setTimeout(() => {
+                    GrassRootsAuth.redirectToDashboard();
+                }, 500);
+            }, 1000);
         });
     </script>
 </body>
