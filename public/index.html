@@ -1,246 +1,387 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GrassRoots - Agricultural Blockchain Platform</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        .hero {
-            /* Background image placed behind the welcome text. Save your welcome photo as public/images/welcome.jpg */
-            /* Stronger dark overlay for legibility; falls back to the gradient if the image is missing */
-            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.45)), url('images/welcome.jpg');
-            background-size: cover;
-            background-position: center;
-            color: #fff;
-            padding: 120px 0 100px;
-            text-align: center;
-            margin-top: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrassRoots - Agricultural Blockchain Platform</title>
+  <link rel="stylesheet" href="css/style.css">
 
-        /* Improve hero text contrast and responsiveness */
-        .hero h1 {
-            color: #ffffff;
-            font-size: 48px;
-            line-height: 1.1;
-            font-weight: 800;
-            margin: 0 0 10px;
-            text-shadow: 0 6px 18px rgba(0,0,0,0.65);
-            letter-spacing: 0.5px;
-        }
+  <style>
+    /* ================= HERO SECTION ================= */
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.45)), url('images/welcome.jpg');
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      height: 100vh; /* full screen height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 0 1rem;
+      margin: 0;
+      animation: fadeIn 1.5s ease-in;
+    }
 
-        .hero p {
-            color: rgba(255,255,255,0.95);
-            font-size: 1.15rem;
-            margin: 0 auto;
-            max-width: 900px;
-            text-shadow: 0 3px 10px rgba(0,0,0,0.55);
-            text-align: center;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        @media (max-width: 900px) {
-            .hero {
-                padding: 100px 0 60px;
-            }
-            .hero h1 { font-size: 36px; }
-            .hero p { font-size: 1rem; }
-        }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #18be20;
+      margin-bottom: 1rem;
+      text-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    }
 
-        @media (max-width: 480px) {
-            .hero { padding: 80px 0 40px; }
-            .hero h1 { font-size: 26px; }
-            .hero p { font-size: 0.95rem; }
-            .cta-buttons .btn { padding: 0.7rem 1.2rem; }
-        }
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 900px;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+      margin-bottom: 2rem;
+    }
 
-        .features {
-            padding: 50px 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
+    .cta-buttons .btn {
+      padding: 1rem 2rem;
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-decoration: none;
+    }
 
-        .feature-card {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+    .cta-buttons .btn:hover {
+      background-color: #45a049;
+    }
 
-        .feature-card img {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 1rem;
-        }
+    /* Responsive design */
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 2.4rem; }
+      .hero p { font-size: 1rem; }
+    }
 
-        .cta-buttons {
-            margin-top: 2rem;
-        }
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero p { font-size: 0.9rem; }
+      .cta-buttons .btn { padding: 0.8rem 1.5rem; }
+    }
 
-        .cta-buttons .btn {
-            margin: 0 10px;
-            padding: 1rem 2rem;
-        }
+    /* ================= OTHER STYLES ================= */
+    .navbar {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 1rem 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-        .btn-secondary {
-            background-color: transparent;
-            border: 2px solid var(--white);
-        }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 90%;
+      margin: auto;
+    }
 
-        .btn-secondary:hover {
-            background-color: var(--white);
-            color: var(--primary-color);
-        }
-    </style>
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2e7d32;
+      text-decoration: none;
+    }
+
+    .nav-links a {
+      margin-left: 1rem;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: #4CAF50;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      padding-top: 70px; /* prevent hero from hiding under navbar */
+    }
+
+    /* ================= ABOUT SECTION ================= */
+    .about-section {
+      padding: 4rem 2rem;
+    }
+
+    .features {
+      padding: 50px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .feature-card img {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 1rem;
+    }
+
+    /* ================= CONTACT SECTION ================= */
+    .contact-section {
+      background: #04370a;
+      padding: 4rem 2rem;
+    }
+
+    .contact-title {
+      color: #FFD700;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .contact-sub {
+      color: #E0FFE0;
+      font-size: 1.05rem;
+      margin-bottom: 2rem;
+    }
+
+    .contact-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: space-between;
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .contact-form {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+    }
+
+    /* ✅ Updated text colors */
+    .contact-item h4 {
+      color: #FFD700; /* gold titles */
+      font-weight: 600;
+    }
+
+    .contact-item p,
+    .contact-item a {
+      color: #E0FFE0; /* light greenish text */
+      text-decoration: none;
+    }
+
+    .contact-item a:hover {
+      color: #90EE90; /* soft lime hover */
+    }
+
+    .contact-btn {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      border-radius: 30px;
+      padding: 0.9rem 2rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .contact-btn:hover {
+      background-color: #45a049;
+    }
+
+    /* ================= CALL BOT ICON ================= */
+    .call-bot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4CAF50;
+      border-radius: 50%;
+      padding: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 200;
+    }
+
+    .call-bot img {
+      width: 40px;
+      height: 40px;
+    }
+  </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container container">
-            <a href="index.html" class="logo">GrassRoots</a>
-            <div class="nav-links">
-                <a href="login.html">Login</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
-            </div>
-        </div>
-    </nav>
-
-    <div class="hero">
-        <div class="container">
-            <h1>Welcome to GrassRoots</h1>
-            <p style="font-size: 1.2rem; margin: 1rem 0; ">
-                Empowering farmers through blockchain technology for transparent and fair agricultural trade
-            </p>
-            <div class="cta-buttons">
-                <a href="login.html" class="btn">Get Started</a>
-            </div>
-        </div>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="login.html">Login</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </div>
     </div>
+  </nav>
 
-    <!-- About section (brief, links to full About page) -->
-    <section class="about-section">
-        <div class="container">
-            <div class="about-wrapper" style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap;">
-                <div style="flex:1;min-width:280px;">
-                    <img src="images/about.jpg" alt="farm" style="width:100%;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
-                </div>
-                <div style="flex:1;min-width:300px;">
-                    <h2>About GrassRoots</h2>
-                    <p style="color:var(--muted);font-size:1.05rem;">GrassRoots connects smallholder farmers with markets and buyers using transparent tools, traceability, and locally-accessible services. We combine simple call-in workflows, QR traceability, and direct market access to improve farmer incomes and product trust.</p>
-                    <ul style="margin-top:1rem;line-height:1.6;color:var(--muted);">
-                        <li><strong>Mission:</strong> Empower farmers with practical digital tools and fair market access.</li>
-                        <li><strong>Approach:</strong> Low-barrier tech (voice, QR) + market linkages + community support.</li>
-                    </ul>
-                    <a href="about.html" class="btn" style="margin-top:1rem;display:inline-block;">Read our story</a>
-                </div>
-            </div>
-        </div>
-    </section>
+  <!-- ================= HERO SECTION ================= -->
+  <div class="hero">
+    <h1>Welcome to GrassRoots</h1>
+    <p>Empowering farmers through blockchain technology for transparent and fair agricultural trade</p>
+    <div class="cta-buttons">
+      <a href="login.html" class="btn">Get Started</a>
+    </div>
+  </div>
 
+  <!-- ================= ABOUT SECTION ================= -->
+  <section class="about-section">
     <div class="container">
-        <div class="features" id="features">
-            <!-- Blockchain feature removed as requested -->
-
-            <div class="feature-card">
-                <img src="images/phone-icon.jpg" alt="Call Bot">
-                <h3>Smart Call Bot</h3>
-                <p>Easy crop information submission through voice calls in local languages</p>
-            </div>
-
-            <div class="feature-card">
-                <img src="images/qr-icon.png" alt="QR Code">
-                <h3>QR Traceability</h3>
-                <p>Track product journey and verify quality through QR codes</p>
-            </div>
-
-            <div class="feature-card">
-                <img src="images/market-icon.png" alt="Market">
-                <h3>Fair Pricing</h3>
-                <p>Get the best market prices by connecting directly with buyers</p>
-            </div>
+      <div class="about-wrapper" style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap;">
+        <div style="flex:1;min-width:280px;">
+          <img src="images/about.jpg" alt="farm" style="width:100%;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
         </div>
-
-            <!-- Contact section (styled like provided design) -->
-            <section class="contact-section">
-                <div class="container">
-                    <div class="contact-wrapper">
-                        <div class="contact-info">
-                            <h2 class="contact-title">Contact Us</h2>
-                            <p class="contact-sub">We'd love to hear from you! Reach out with any questions, feedback, or partnership inquiries.</p>
-
-                            <div class="contact-list">
-                                <div class="contact-item">
-                                    <img src="images/phone-icon.jpg" alt="phone" class="contact-icon">
-                                    <div>
-                                        <h4>Email</h4>
-                                        <p><a href="mailto:support@grassroots.com">support@grassroots.com</a></p>
-                                    </div>
-                                </div>
-
-                                <div class="contact-item">
-                                    <img src="images/phone-icon.png" alt="phone" class="contact-icon">
-                                    <div>
-                                        <h4>Phone</h4>
-                                        <p>+91 1234567890</p>
-                                    </div>
-                                </div>
-
-                                <div class="contact-item">
-                                    <img src="images/market-icon.png" alt="location" class="contact-icon">
-                                    <div>
-                                        <h4>Office</h4>
-                                        <p>123 Agri Tower, Tech Park Road, Bangalore - 560001</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="contact-form">
-                            <h3>Send Us a Message</h3>
-                            <form id="contactForm">
-                                <div class="form-group">
-                                    <input type="text" id="cname" placeholder="Your Name" required>
-                                </div>
-                                <div class="form-group">
-                                    <input type="email" id="cemail" placeholder="Your Email" required>
-                                </div>
-                                <div class="form-group">
-                                    <textarea id="cmessage" rows="6" placeholder="Your Message" required></textarea>
-                                </div>
-                                <button type="submit" class="btn contact-btn">Send Message</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <div style="flex:1;min-width:300px;">
+          <h2>About GrassRoots</h2>
+          <p style="color:var(--muted);font-size:1.05rem;">GrassRoots connects smallholder farmers with markets and buyers using transparent tools, traceability, and locally-accessible services. We combine simple call-in workflows, QR traceability, and direct market access to improve farmer incomes and product trust.</p>
+          <ul style="margin-top:1rem;line-height:1.6;color:var(--muted);">
+            <li><strong>Mission:</strong> Empower farmers with practical digital tools and fair market access.</li>
+            <li><strong>Approach:</strong> Low-barrier tech (voice, QR) + market linkages + community support.</li>
+          </ul>
+          <a href="about.html" class="btn" style="margin-top:1rem;display:inline-block;">Read our story</a>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <!-- Call Bot Icon -->
-    <div class="call-bot" onclick="openCallBot()">
+  <!-- ================= FEATURES ================= -->
+  <div class="container">
+    <div class="features" id="features">
+      <div class="feature-card">
         <img src="images/phone-icon.jpg" alt="Call Bot">
+        <h3>Smart Call Bot</h3>
+        <p>Easy crop information submission through voice calls in local languages</p>
+      </div>
+
+      <div class="feature-card">
+        <img src="images/qr-icon.png" alt="QR Code">
+        <h3>QR Traceability</h3>
+        <p>Track product journey and verify quality through QR codes</p>
+      </div>
+
+      <div class="feature-card">
+        <img src="images/market-icon.png" alt="Market">
+        <h3>Fair Pricing</h3>
+        <p>Get the best market prices by connecting directly with buyers</p>
+      </div>
     </div>
 
-    <script>
-        function openCallBot() {
-            alert('Connecting to call bot...');
-            // Add your call bot integration code here
-        }
-        // contact form handling
-        document.addEventListener('DOMContentLoaded', function() {
-            const cf = document.getElementById('contactForm');
-            if (cf) {
-                cf.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert('Thanks — your message has been received. (Demo)');
-                    cf.reset();
-                });
-            }
+    <!-- ================= CONTACT SECTION ================= -->
+    <section class="contact-section">
+      <div class="container">
+        <div class="contact-wrapper">
+          <div class="contact-info">
+            <h2 class="contact-title">Contact Us</h2>
+            <p class="contact-sub">We'd love to hear from you! Reach out with any questions, feedback, or partnership inquiries.</p>
+
+            <div class="contact-list">
+              <div class="contact-item">
+                <img src="images/email.jpg" alt="email" class="contact-icon">
+                <div>
+                  <h4>Email</h4>
+                  <p><a href="mailto:support@grassroots.com">support@grassroots.com</a></p>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <img src="images/phone-icon.jpg" alt="phone" class="contact-icon">
+                <div>
+                  <h4>Phone</h4>
+                  <p>+91 1234567890</p>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <img src="images/office.png" alt="location" class="contact-icon">
+                <div>
+                  <h4>Office</h4>
+                  <p>123 Agri Tower, Tech Park Road, Bangalore - 560001</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-form">
+            <h3>Send Us a Message</h3>
+            <form id="contactForm">
+              <div class="form-group">
+                <input type="text" id="cname" placeholder="Your Name" required>
+              </div>
+              <div class="form-group">
+                <input type="email" id="cemail" placeholder="Your Email" required>
+              </div>
+              <div class="form-group">
+                <textarea id="cmessage" rows="6" placeholder="Your Message" required></textarea>
+              </div>
+              <button type="submit" class="btn contact-btn">Send Message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= CALL BOT ICON ================= -->
+  <div class="call-bot" onclick="openCallBot()">
+    <img src="images/callbot.png" alt="Call Bot">
+  </div>
+
+  <script>
+    function openCallBot() {
+      alert('Connecting to call bot...');
+    }
+
+    // Contact form handling
+    document.addEventListener('DOMContentLoaded', function() {
+      const cf = document.getElementById('contactForm');
+      if (cf) {
+        cf.addEventListener('submit', function(e) {
+          e.preventDefault();
+          alert('Thanks — your message has been received. (Demo)');
+          cf.reset();
         });
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
