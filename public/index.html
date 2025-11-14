@@ -366,22 +366,22 @@
     <img src="images/callbot.png" alt="Call Bot">
   </div>
 
-  <script>
-    function openCallBot() {
-      alert('Connecting to call bot...');
-    }
-
-    // Contact form handling
-    document.addEventListener('DOMContentLoaded', function() {
-      const cf = document.getElementById('contactForm');
-      if (cf) {
-        cf.addEventListener('submit', function(e) {
-          e.preventDefault();
-          alert('Thanks — your message has been received. (Demo)');
-          cf.reset();
+    <script>
+        function openCallBot() {
+            alert('Connecting to call bot...');
+            // Add your call bot integration code here
+        }
+        // contact form handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const cf = document.getElementById('contactForm');
+            if (cf) {
+                cf.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Thanks — your message has been received. (Demo)');
+                    cf.reset();
+                });
+            }
         });
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
