@@ -47,6 +47,24 @@
                     </div>
                     <button type="submit" class="btn">Login</button>
                 </form>
+                <div style="margin-top:1rem;background:#f7f7f7;border:1px dashed #ddd;padding:0.85rem;border-radius:8px;font-size:0.95rem;">
+                    <strong>Demo credentials</strong>
+                    <p style="margin:6px 0;color:#555;">Use these demo accounts to sign in for testing. Click <em>Fill</em> to populate the form.</p>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                        <div style="background:#fff;padding:0.6rem;border-radius:6px;border:1px solid #e6e6e6;min-width:220px;">
+                            <div style="font-weight:700;color:#2f6b50">Farmer</div>
+                            <div style="color:#444;margin-top:4px">Email: <code>farmer@demo.test</code></div>
+                            <div style="color:#444">Password: <code>farmerpass</code></div>
+                            <div style="margin-top:6px;text-align:right"><button class="btn" type="button" id="fillFarmer">Fill</button></div>
+                        </div>
+                        <div style="background:#fff;padding:0.6rem;border-radius:6px;border:1px solid #e6e6e6;min-width:220px;">
+                            <div style="font-weight:700;color:#2f6b50">Retailer</div>
+                            <div style="color:#444;margin-top:4px">Email: <code>retailer@demo.test</code></div>
+                            <div style="color:#444">Password: <code>retailerpass</code></div>
+                            <div style="margin-top:6px;text-align:right"><button class="btn" type="button" id="fillRetailer">Fill</button></div>
+                        </div>
+                    </div>
+                </div>
                 <p>
                     Don't have an account? <a href="register.html">Create an account</a>
                 </p>
@@ -99,6 +117,23 @@
                 GrassRootsUtils.hideLoading();
                 GrassRootsUtils.showToast(err.message || 'Login failed', 'error');
             }
+        });
+
+        // Demo credential helpers
+        function fillDemo(email, password, userType) {
+            document.getElementById('email').value = email;
+            document.getElementById('password').value = password;
+            document.getElementById('userType').value = userType;
+        }
+
+        document.getElementById('fillFarmer').addEventListener('click', function() {
+            fillDemo('farmer@demo.test', 'farmerpass', 'farmer');
+            GrassRootsUtils.showToast('Filled farmer demo credentials', 'info');
+        });
+
+        document.getElementById('fillRetailer').addEventListener('click', function() {
+            fillDemo('retailer@demo.test', 'retailerpass', 'retailer');
+            GrassRootsUtils.showToast('Filled retailer demo credentials', 'info');
         });
     </script>
 </body>
