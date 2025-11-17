@@ -200,7 +200,7 @@
         function saveKey(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
 
         // Auth check
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', async function() {
             const loggedIn = localStorage.getItem('loggedIn');
             const userType = localStorage.getItem('userType');
             if (loggedIn !== 'true' || userType !== 'farmer') {
@@ -217,12 +217,21 @@
 
             // Load stats
             const crops = loadKey(KEY_CROPS) || [];
-            const qrCodes = loadKey(KEY_QR_CODES) || [];
             const priceChecks = loadKey(KEY_PRICE_CHECKS) || [];
             const notifications = loadKey(KEY_FARM_NOTIFS) || [];
 
+            // Try to load QR codes from server first
+            let qrCodes = [];
+            try {
+                const resp = await fetch('/api/qr');
+                if (resp.ok) qrCodes = await resp.json();
+                else qrCodes = loadKey(KEY_QR_CODES) || [];
+            } catch (e) {
+                qrCodes = loadKey(KEY_QR_CODES) || [];
+            }
+
             document.getElementById('cropCount').textContent = crops.length;
-            document.getElementById('qrCount').textContent = qrCodes.length;
+            document.getElementById('qrCount').textContent = (qrCodes && qrCodes.length) || 0;
             document.getElementById('priceCheckCount').textContent = priceChecks.length;
 
             // Render crop activity

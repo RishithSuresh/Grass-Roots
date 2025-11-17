@@ -243,15 +243,55 @@
 
     <script>
         const KEY_PROFILE = 'retailer_profile';
-        const KEY_PRODUCTS = 'retailer_products';
-        const KEY_ORDERS = 'retailer_orders';
         const KEY_NOTIFS = 'retailer_notifications';
 
-        function loadKey(k){ try { return JSON.parse(localStorage.getItem(k) || 'null') } catch(e){ return null } }
-        function saveKey(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+        async function fetchProfile() {
+            try {
+                const resp = await fetch('/api/profile');
+                if (!resp.ok) throw new Error('Failed to load profile');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to fetch profile from server, falling back to localStorage', err);
+                try { return JSON.parse(localStorage.getItem(KEY_PROFILE) || 'null') || {}; } catch(e){ return {}; }
+            }
+        }
 
-        // Auth check
-        window.addEventListener('DOMContentLoaded', function() {
+        async function saveProfileToServer(profile) {
+            try {
+                const resp = await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
+                if (!resp.ok) throw new Error('Failed to save');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to save profile to server, saving locally', err);
+                localStorage.setItem(KEY_PROFILE, JSON.stringify(profile));
+                return profile;
+            }
+        }
+
+        async function fetchProducts() {
+            try {
+                const resp = await fetch('/api/products');
+                if (!resp.ok) throw new Error('Failed to load products');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to fetch products from server, falling back to localStorage', err);
+                try { return JSON.parse(localStorage.getItem('retailer_products') || '[]'); } catch(e){ return []; }
+            }
+        }
+
+        async function fetchOrders() {
+            try {
+                const resp = await fetch('/api/orders');
+                if (!resp.ok) throw new Error('Failed to load orders');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to fetch orders from server, falling back to localStorage', err);
+                try { return JSON.parse(localStorage.getItem('retailer_orders') || '[]'); } catch(e){ return []; }
+            }
+        }
+
+        // Auth check and initial load
+        window.addEventListener('DOMContentLoaded', async function() {
             const loggedIn = localStorage.getItem('loggedIn');
             const userType = localStorage.getItem('userType');
             if (loggedIn !== 'true' || userType !== 'retailer') {
@@ -261,30 +301,30 @@
             }
 
             // Load profile form
-            loadProfileForm();
+            await loadProfileForm();
 
-            // Load stats
-            const products = loadKey(KEY_PRODUCTS) || [];
-            const orders = loadKey(KEY_ORDERS) || [];
-            const notifications = loadKey(KEY_NOTIFS) || [];
+            // Load stats and activity
+            const products = await fetchProducts();
+            const orders = await fetchOrders();
+            const notifications = (function(){ try { return JSON.parse(localStorage.getItem(KEY_NOTIFS) || '[]'); } catch(e){ return []; } })();
 
             const paidOrders = orders.filter(o => o.paid).length;
             const confirmedOrders = orders.filter(o => o.status === 'Confirmed').length;
 
-            document.getElementById('productCount').textContent = products.length;
-            document.getElementById('orderCount').textContent = orders.length;
+            document.getElementById('productCount').textContent = (products && products.length) || 0;
+            document.getElementById('orderCount').textContent = (orders && orders.length) || 0;
             document.getElementById('paidCount').textContent = paidOrders;
             document.getElementById('confirmedCount').textContent = confirmedOrders;
 
             // Render activity sections
-            renderProductsActivity(products);
-            renderOrdersActivity(orders);
-            renderNotifications(notifications);
-            renderAllActivity(products, orders, notifications);
+            renderProductsActivity(products || []);
+            renderOrdersActivity(orders || []);
+            renderNotifications(notifications || []);
+            renderAllActivity(products || [], orders || [], notifications || []);
         });
 
-        function loadProfileForm() {
-            const profile = loadKey(KEY_PROFILE) || {};
+        async function loadProfileForm() {
+            const profile = await fetchProfile();
             
             // Owner details
             document.getElementById('ownerName').value = profile.ownerName || '';
@@ -309,7 +349,7 @@
             document.getElementById('certNumber').value = profile.certNumber || '';
         }
 
-        function saveProfile() {
+        async function saveProfile() {
             const shopName = document.getElementById('shopName').value.trim();
             
             if (!shopName) {
@@ -341,7 +381,7 @@
                 certNumber: document.getElementById('certNumber').value.trim()
             };
             
-            saveKey(KEY_PROFILE, profile);
+            await saveProfileToServer(profile);
 
             // Show success message
             const msg = document.getElementById('successMsg');

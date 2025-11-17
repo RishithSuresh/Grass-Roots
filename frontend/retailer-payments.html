@@ -25,11 +25,71 @@
   </div>
   <script>
     const KEY_ORDERS='retailer_orders';
-    function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-    function saveKey(k,v){localStorage.setItem(k,JSON.stringify(v))}
-    function render(){const rows=document.querySelector('#paymentsTable tbody');rows.innerHTML='';(load(KEY_ORDERS)||[]).forEach(o=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${o.id}</td><td>₹ ${o.total.toFixed(2)}</td><td>${o.paid? 'Yes':'No'}</td><td><button class='btn' onclick="togglePaid('${o.id}')">Toggle Paid</button> <button class='btn' onclick="printInv('${o.id}')">Print</button></td>`;rows.appendChild(tr)})}
-    function togglePaid(id){ const orders=load(KEY_ORDERS)||[]; const o=orders.find(x=>x.id===id); if(!o) return; o.paid=!o.paid; saveKey(KEY_ORDERS,orders); render(); alert('Payment toggled') }
-    function printInv(id){ const o=(load(KEY_ORDERS)||[]).find(x=>x.id===id); if(!o) return; const html=`<html><body><h2>Invoice ${o.id}</h2><p>Total: ₹ ${o.total.toFixed(2)}</p></body></html>`; const w=window.open('','', 'width=700,height=600'); w.document.write(html); w.document.close(); w.print(); }
+
+    async function fetchOrders() {
+      try {
+        const resp = await fetch('/api/orders');
+        if (!resp.ok) throw new Error('Failed to load');
+        return await resp.json();
+      } catch (e) {
+        console.warn('Falling back to local orders', e);
+        try { return JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]'); } catch(e2){ return []; }
+      }
+    }
+
+    async function render(){
+      const rows=document.querySelector('#paymentsTable tbody');
+      rows.innerHTML='';
+      const orders = await fetchOrders();
+      orders.forEach(o=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${o.id}</td><td>₹ ${Number(o.total).toFixed(2)}</td><td>${o.paid? 'Yes':'No'}</td><td><button class='btn' onclick="togglePaid('${o.id}')">Toggle Paid</button> <button class='btn' onclick="printInv('${o.id}')">Print</button></td>`;
+        rows.appendChild(tr);
+      });
+    }
+
+    async function togglePaid(id){
+      try {
+        // fetch current order
+        const resp = await fetch(`/api/orders/${id}`);
+        if (!resp.ok) throw new Error('Order not found');
+        const data = await resp.json();
+        const o = data.order || data;
+        const updated = { paid: !o.paid };
+        const put = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
+        if (!put.ok) throw new Error('Update failed');
+        await render();
+        alert('Payment toggled');
+      } catch (e) {
+        console.warn('Falling back to local toggle', e);
+        const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+        const o = orders.find(x => x.id === id);
+        if (!o) return;
+        o.paid = !o.paid;
+        localStorage.setItem(KEY_ORDERS, JSON.stringify(orders));
+        await render();
+        alert('Payment toggled (local)');
+      }
+    }
+
+    async function printInv(id){
+      try {
+        const resp = await fetch(`/api/orders/${id}`);
+        if (!resp.ok) throw new Error('Order not found');
+        const data = await resp.json();
+        const o = data.order || data;
+        const html=`<html><body><h2>Invoice ${o.id}</h2><p>Total: ₹ ${Number(o.total).toFixed(2)}</p></body></html>`;
+        const w=window.open('','', 'width=700,height=600'); w.document.write(html); w.document.close(); w.print();
+      } catch (e) {
+        console.warn('Falling back to local print', e);
+        const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+        const o = orders.find(x => x.id === id);
+        if (!o) return;
+        const html=`<html><body><h2>Invoice ${o.id}</h2><p>Total: ₹ ${Number(o.total).toFixed(2)}</p></body></html>`;
+        const w=window.open('','', 'width=700,height=600'); w.document.write(html); w.document.close(); w.print();
+      }
+    }
+
     document.addEventListener('DOMContentLoaded',render);
   </script>
 </body>

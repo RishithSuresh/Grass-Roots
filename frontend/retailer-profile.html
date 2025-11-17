@@ -25,10 +25,27 @@
   </div>
   <script>
     const KEY_PROFILE='retailer_profile';
-    function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-    function saveKey(k,v){localStorage.setItem(k,JSON.stringify(v))}
-    function loadProfile(){const p=load(KEY_PROFILE)||{};document.getElementById('shopName').value=p.shopName||'';document.getElementById('shopAddress').value=p.address||'';document.getElementById('shopPhone').value=p.phone||''}
-    function save(){ const p={shopName:document.getElementById('shopName').value.trim(),address:document.getElementById('shopAddress').value.trim(),phone:document.getElementById('shopPhone').value.trim()}; saveKey(KEY_PROFILE,p); alert('Saved') }
+    async function fetchProfile() {
+      try {
+        const resp = await fetch('/api/profile');
+        if (!resp.ok) throw new Error('Failed');
+        return await resp.json();
+      } catch (e) {
+        try { return JSON.parse(localStorage.getItem(KEY_PROFILE) || 'null') || {}; } catch (e2) { return {}; }
+      }
+    }
+    async function saveProfile(p) {
+      try {
+        const resp = await fetch('/api/profile', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(p) });
+        if (!resp.ok) throw new Error('Save failed');
+        alert('Saved');
+      } catch (e) {
+        localStorage.setItem(KEY_PROFILE, JSON.stringify(p));
+        alert('Saved locally (server unavailable)');
+      }
+    }
+    async function loadProfile(){ const p = await fetchProfile(); document.getElementById('shopName').value = p.shopName || ''; document.getElementById('shopAddress').value = p.address || ''; document.getElementById('shopPhone').value = p.phone || ''; }
+    async function save(){ const p={shopName:document.getElementById('shopName').value.trim(),address:document.getElementById('shopAddress').value.trim(),phone:document.getElementById('shopPhone').value.trim()}; await saveProfile(p); }
     document.addEventListener('DOMContentLoaded',loadProfile);
   </script>
 </body>
