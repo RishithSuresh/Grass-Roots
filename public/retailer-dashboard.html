@@ -8,38 +8,186 @@
   <script src="js/auth.js" defer></script>
   <script src="js/utils.js" defer></script>
   <style>
-    /* Keep styling consistent with farmer dashboard */
-    .dashboard-header { background: linear-gradient(135deg, var(--primary-color), #4a8b5a); color: white; padding: 1.75rem 0; margin-bottom: 1.5rem; }
-    .dashboard-header h1 { margin:0; font-size:1.6rem }
-    .dashboard-header p { margin: 0.5rem 0 0 0; }
-    .dashboard-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:1.4rem; margin-bottom:1.6rem }
-    @media (max-width:900px){ .dashboard-grid { grid-template-columns: 1fr } }
-    .feature-box { background:white; border-radius:12px; padding:1.6rem; box-shadow:0 6px 18px rgba(0,0,0,0.06); transition: transform 0.2s }
-    .feature-box:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-    .feature-icon { font-size:2rem; margin-bottom:0.6rem }
-    .feature-box h3 { margin: 0.5rem 0; color: var(--primary-color); }
-    .feature-box p { margin: 0.5rem 0; }
-    .btn { background:var(--primary-color); color:white; border:none; padding:0.6rem 1rem; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-block; text-align:center; transition: background 0.2s }
-    .btn:hover { background: #1f4d35; }
+      /* Match farmer dashboard navbar size and spacing */
+      .navbar {
+        background-color: var(--primary-color);
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: opacity 0.3s ease;
+      }
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+    body {
+      background: linear-gradient(135deg, #e8f5ee 0%, #f7fafc 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      color: #23422a;
+    }
+    .navbar {
+      background: linear-gradient(90deg, var(--primary-color), #357a4b 80%);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      padding: 1.1rem 0 1.1rem 0;
+      min-height: 72px;
+      border-radius: 0;
+    }
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 56px;
+    }
+    .logo {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #fff;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2.3rem;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97rem;
+      font-weight: 500;
+      transition: opacity 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-links a:hover {
+      opacity: 0.8;
+      color: #e0ffe0;
+    }
+    .logout-btn {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem 1.5rem;
+      font-size: 1.13rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(231,76,60,0.08);
+      transition: background 0.2s;
+    }
+    .logout-btn:hover {
+      background: #c0392b;
+    }
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--primary-color), #4a8b5a 80%);
+      color: white;
+      padding: 2.2rem 0 1.2rem 0;
+        margin-bottom: 2.2rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+        border-radius: 0;
+    }
+    .dashboard-header h1 {
+      margin: 0;
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .dashboard-header p {
+      margin: 0.7rem 0 0 0;
+      font-size: 0.9rem;
+        font-size: 1.1rem;
+      color: #eaf7ee;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 18px;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 2.2rem;
+      margin-bottom: 2.5rem;
+    }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+    .feature-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 2.1rem 2rem 1.7rem 2rem;
+      box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10), 0 1.5px 6px rgba(44,62,80,0.04);
+      transition: transform 0.22s, box-shadow 0.22s;
+      border: 1.5px solid #e6f2ea;
+      min-height: 220px;
+    }
+    .feature-box:hover {
+      transform: translateY(-6px) scale(1.025);
+      box-shadow: 0 16px 40px rgba(44,62,80,0.13);
+      border-color: #b2e5c7;
+    }
+    .feature-icon {
+      font-size: 2.3rem;
+      margin-bottom: 1.1rem;
+      color: var(--primary-color);
+      filter: drop-shadow(0 2px 6px #e6f2ea);
+    }
+    .feature-box h3 {
+      margin: 0 0 0.7rem 0;
+      color: var(--primary-color);
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .feature-box p {
+      color: #6a7c6a;
+      margin: 0 0 1.2rem 0;
+      font-size: 1.02rem;
+      line-height: 1.6;
+    }
+    .feature-box .btn, .btn {
+      display: inline-block;
+      padding: 0.7rem 1.3rem;
+      font-size: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(47,107,80,0.08);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.18s;
+    }
+    .btn:hover { background: #1f4d35; box-shadow: 0 4px 16px rgba(47,107,80,0.13); transform: translateY(-2px) scale(1.04); }
     .btn a { color: white; text-decoration: none; }
-    .container { max-width:1100px; margin:0 auto; padding:0 16px }
-    table { width:100%; border-collapse:collapse; margin-top: 1rem; }
-    table th, table td { text-align:left; padding:0.6rem; border-bottom:1px solid #eee }
+    table { width:100%; border-collapse:collapse; margin-top: 1rem; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(44,62,80,0.04); }
+    table th, table td { text-align:left; padding:0.7rem; border-bottom:1px solid #f0f0f0; }
     table th { background: #f5f5f5; font-weight: 600; }
-    .small { font-size:0.9rem }
-    .muted { color:#666 }
-    .section { margin-bottom:1.8rem }
-    .flex { display:flex; gap:12px; align-items:center; flex-wrap: wrap; }
-    .logout-btn { background:#c23030 }
-    .logout-btn:hover { background: #a01d1d; }
-    .pill { display:inline-block; padding:0.25rem 0.6rem; border-radius:999px; font-size:0.85rem }
-    .status-pending { background:#fff3cd; color:#856404 }
-    .status-confirmed { background:#d1e7dd; color:#0f5132 }
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: var(--text-color); }
-    .form-group input, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 0.4rem; font-family: inherit; }
-    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(47, 107, 80, 0.1); }
-
+    .small { font-size:0.93rem; }
+    .muted { color:#8a9a8a; }
+    .section { margin-bottom:2.2rem; }
+    .flex { display:flex; gap:14px; align-items:center; flex-wrap: wrap; }
+    .pill { display:inline-block; padding:0.28rem 0.7rem; border-radius:999px; font-size:0.89rem; }
+    .status-pending { background:#fff3cd; color:#856404; }
+    .status-confirmed { background:#d1e7dd; color:#0f5132; }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-color); }
+    .form-group input, .form-group textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 0.5rem; font-family: inherit; font-size: 1rem; }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(47, 107, 80, 0.10); }
   </style>
 </head>
 <body>
@@ -47,7 +195,7 @@
     <div class="nav-container container">
       <a href="index.html" class="logo">GrassRoots</a>
       <div class="nav-links">
-        <a href="retailer-shop-profile.html" style="display:flex;align-items:center;gap:0.5rem">👤 Profile</a>
+        <a href="retailer-shop-profile.html"><span style="font-size:1.25em;vertical-align:middle;">&#128100;</span> Profile</a>
         <a href="contact.html">Contact</a>
         <button class="logout-btn btn" onclick="logout()">Logout</button>
       </div>
