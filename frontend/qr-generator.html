@@ -139,22 +139,46 @@
             // Will redirect automatically if not authorized
         }
 
-        // Load crops into dropdown (still from localStorage)
-        function loadCropSelector() {
-            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+        // Load crops into dropdown from server (fallback to localStorage)
+        async function loadCropSelector() {
             const select = document.getElementById('cropSelect');
             select.innerHTML = '<option value="">-- Select a crop --</option>';
-            crops.forEach(crop => {
-                const opt = document.createElement('option');
-                opt.value = crop.id;
-                opt.textContent = `${crop.type} (${crop.area} acres, planted ${crop.plantingDate})`;
-                select.appendChild(opt);
-            });
+            try {
+                const resp = await fetch('/api/crops');
+                if (!resp.ok) throw new Error('Failed to load crops');
+                const crops = await resp.json();
+                crops.forEach(crop => {
+                    const opt = document.createElement('option');
+                    opt.value = crop.id;
+                    opt.textContent = `${crop.name} (${crop.variety || ''})`;
+                    select.appendChild(opt);
+                });
+                return;
+            } catch (err) {
+                const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+                crops.forEach(crop => {
+                    const opt = document.createElement('option');
+                    opt.value = crop.id;
+                    opt.textContent = `${crop.type} (${crop.area} acres, planted ${crop.plantingDate})`;
+                    select.appendChild(opt);
+                });
+            }
         }
 
-        // Load crop details when selected
-        document.getElementById('cropSelect').addEventListener('change', function() {
+        // Load crop details when selected (use server-side crop when available)
+        document.getElementById('cropSelect').addEventListener('change', async function() {
             if (!this.value) return;
+            try {
+                const resp = await fetch('/api/crops/' + this.value);
+                if (resp.ok) {
+                    const c = await resp.json();
+                    document.getElementById('cropType').value = c.name || '';
+                    document.getElementById('farmLocation').value = c.notes || '';
+                    return;
+                }
+            } catch (e) {
+                // fallback
+            }
             const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
             const selected = crops.find(c => c.id == this.value);
             if (selected) {
@@ -219,13 +243,15 @@
                 document.getElementById('qrcode').appendChild(canvas);
 
                 // Save to history
-                const qrId = 'qr_' + Date.now();
-                const qrRecord = {
-                    id: qrId,
-                    ...data,
-                    qrText: qrText,
-                    canvasData: canvas.toDataURL('image/png')
-                };
+                    const qrId = 'qr_' + Date.now();
+                    const selectedCrop = document.getElementById('cropSelect').value || null;
+                    const qrRecord = {
+                        id: qrId,
+                        cropId: selectedCrop,
+                        ...data,
+                        qrText: qrText,
+                        canvasData: canvas.toDataURL('image/png')
+                    };
 
                 // POST to backend API
                 try {

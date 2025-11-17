@@ -6,6 +6,10 @@ const QR = sequelize.define('QR', {
     type: DataTypes.STRING,
     primaryKey: true
   },
+  cropId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   productName: DataTypes.STRING,
   cropType: DataTypes.STRING,
   quality: DataTypes.STRING,

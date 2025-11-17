@@ -6,6 +6,10 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING,
     primaryKey: true
   },
+  qrId: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   name: DataTypes.STRING,
   price: DataTypes.FLOAT,
   stock: DataTypes.INTEGER

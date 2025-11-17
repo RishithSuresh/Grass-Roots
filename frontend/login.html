@@ -55,56 +55,50 @@
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // Get form values
             const userType = document.getElementById('userType').value;
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
-            // Validation
-            if (!userType) {
-                GrassRootsUtils.showToast('Please select user type', 'error');
-                return;
-            }
+            if (!userType) return GrassRootsUtils.showToast('Please select user type', 'error');
+            if (!name) return GrassRootsUtils.showToast('Please enter your name', 'error');
+            if (!GrassRootsUtils.isValidEmail(email)) return GrassRootsUtils.showToast('Please enter a valid email', 'error');
+            if (password.length < 4) return GrassRootsUtils.showToast('Password must be at least 4 characters', 'error');
 
-            if (!name) {
-                GrassRootsUtils.showToast('Please enter your name', 'error');
-                return;
-            }
-
-            if (!GrassRootsUtils.isValidEmail(email)) {
-                GrassRootsUtils.showToast('Please enter a valid email', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                GrassRootsUtils.showToast('Password must be at least 6 characters', 'error');
-                return;
-            }
-
-            // Show loading
             GrassRootsUtils.showLoading('Logging in...');
-
-            // Simulate API call delay
-            setTimeout(() => {
-                // Login using centralized auth system
-                GrassRootsAuth.login({
-                    email: email,
-                    fullName: name,
-                    userType: userType
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
                 });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error((err && err.error) || 'Invalid credentials');
+                }
+                const user = await resp.json();
+
+                // Save minimal session info in localStorage (demo)
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('fullName', user.name || name);
+                localStorage.setItem('userType', user.role || userType);
 
                 GrassRootsUtils.hideLoading();
                 GrassRootsUtils.showToast('Login successful!', 'success');
 
                 // Redirect to appropriate dashboard
                 setTimeout(() => {
-                    GrassRootsAuth.redirectToDashboard();
-                }, 500);
-            }, 800);
+                    if ((user.role || userType) === 'farmer') window.location.href = 'farmer-dashboard.html';
+                    else window.location.href = 'retailer-dashboard.html';
+                }, 400);
+            } catch (err) {
+                GrassRootsUtils.hideLoading();
+                GrassRootsUtils.showToast(err.message || 'Login failed', 'error');
+            }
         });
     </script>
 </body>

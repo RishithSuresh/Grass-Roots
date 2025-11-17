@@ -25,6 +25,21 @@
       <h1>Orders</h1>
       <p class="muted">View and manage incoming orders.</p>
       <table id="ordersTable"><thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      <div style="margin-top:16px;text-align:right;">
+        <button class="btn" onclick="openNewOrder()">+ New Order</button>
+      </div>
+
+      <!-- New Order Modal -->
+      <div id="orderModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:20px; border-radius:8px; max-width:800px; width:95%; margin:40px auto;">
+          <h3>Create New Order</h3>
+          <div id="orderProductsList" style="max-height:400px; overflow:auto; margin-top:8px;"></div>
+          <div style="margin-top:12px; display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn" onclick="submitNewOrder()">Place Order</button>
+            <button class="btn" onclick="closeOrderModal()">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <script>
@@ -100,6 +115,57 @@
         }
       } catch (err) {
         console.error('Failed to load order:', err);
+      }
+    }
+
+    // New order UI
+    function openNewOrder() {
+      document.getElementById('orderModal').style.display = 'flex';
+      renderOrderProductList();
+    }
+
+    function closeOrderModal() {
+      document.getElementById('orderModal').style.display = 'none';
+    }
+
+    async function renderOrderProductList() {
+      const container = document.getElementById('orderProductsList');
+      container.innerHTML = '';
+      const products = await loadProducts();
+      if (!products || products.length === 0) {
+        container.innerHTML = '<p style="color:#666;">No products available</p>';
+        return;
+      }
+      products.forEach(p => {
+        const row = document.createElement('div');
+        row.style.display = 'flex'; row.style.gap = '8px'; row.style.alignItems = 'center'; row.style.padding = '8px 0';
+        row.innerHTML = `<div style="flex:1"><strong>${GrassRootsUtils.sanitizeHTML(p.name)}</strong> <div style="color:#666;font-size:0.9rem;">₹ ${Number(p.price).toFixed(2)} | ${p.stock} kg available</div></div><div><input type="number" min="0" max="${p.stock||0}" placeholder="0" style="width:80px;padding:6px;border-radius:6px;border:1px solid #ddd;" data-pid="${p.id}" data-price="${p.price}" /></div>`;
+        container.appendChild(row);
+      });
+    }
+
+    async function submitNewOrder() {
+      const inputs = Array.from(document.querySelectorAll('#orderProductsList input'));
+      const items = inputs.map(i => ({ productId: i.dataset.pid, qty: parseInt(i.value) || 0, price: parseFloat(i.dataset.price) || 0 })).filter(x => x.qty > 0);
+      if (!items.length) return alert('Please add at least one product to the order');
+      const total = items.reduce((s, it) => s + (it.qty * (it.price||0)), 0);
+      const order = { id: 'o_' + Date.now(), items: items.map(it => ({ productId: it.productId, name: '', qty: it.qty, price: it.price })), total, status: 'Pending', paid: false };
+      // fetch product names to include
+      try {
+        const prods = await loadProducts();
+        order.items = order.items.map(it => {
+          const p = prods.find(x => x.id === it.productId) || {};
+          return { ...it, name: p.name || it.productId };
+        });
+
+        const resp = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
+        if (!resp.ok) throw new Error('Failed to create order');
+        closeOrderModal();
+        await render();
+        alert('Order placed');
+      } catch (err) {
+        console.error('Failed to place order:', err);
+        alert('Failed to place order');
       }
     }
 
