@@ -163,12 +163,7 @@
         .nav-links a:hover {
             opacity: 0.8;
         }
-        /* Notifications in navbar */
-        .notif-btn { background: transparent; border: none; color: white; font-size:1.05rem; position:relative; cursor:pointer; margin-right:8px }
-        .notif-count { background: #e74c3c; color: white; border-radius:999px; padding:0 6px; font-size:0.75rem; margin-left:6px }
-        .notif-dropdown { position:absolute; right:16px; top:56px; background:white; color:#222; min-width:260px; max-width:320px; box-shadow:0 8px 30px rgba(0,0,0,0.12); border-radius:8px; padding:10px; z-index:50 }
-        .notif-dropdown .item { padding:8px; border-bottom:1px solid #f0f0f0; font-size:0.95rem }
-        .notif-dropdown .item:last-child { border-bottom: none }
+
     </style>
 </head>
 <body>
@@ -176,8 +171,6 @@
         <div class="nav-container container">
             <a href="index.html" class="logo">GrassRoots</a>
             <div class="nav-links">
-                <button id="farmNotifBtn" class="notif-btn" onclick="toggleFarmNotifDropdown()">🔔 <span id="farmNotifCount" class="notif-count">0</span></button>
-                <div id="farmNotifDropdown" class="notif-dropdown" style="display:none"></div>
                 <a href="farmer-profile.html" style="display:flex;align-items:center;gap:0.5rem">👤 Profile</a>
                 <a href="contact.html">Contact</a>
                 <button class="logout-btn" onclick="logout()">Logout</button>
@@ -233,23 +226,12 @@
         function loadKey(k){ try { return JSON.parse(localStorage.getItem(k) || 'null') } catch(e){ return null } }
         function saveKey(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
 
-        function renderFarmNotifCount(){ const list = loadKey(KEY_FARM_NOTIFS) || []; const el = document.getElementById('farmNotifCount'); if(el) el.textContent = list.length; }
-        function renderFarmNotifDropdown(){ const list = loadKey(KEY_FARM_NOTIFS) || []; const dd = document.getElementById('farmNotifDropdown'); if(!dd) return; dd.innerHTML=''; if(!list.length){ dd.innerHTML='<div class="item">No notifications</div>'; return } list.slice(0,10).forEach(n=>{ const div = document.createElement('div'); div.className='item'; div.textContent = `${new Date(n.at).toLocaleString()}: ${n.msg}`; dd.appendChild(div) }) }
-        function toggleFarmNotifDropdown(){ const dd=document.getElementById('farmNotifDropdown'); if(!dd) return; dd.style.display = dd.style.display==='none'?'block':'none'; if(dd.style.display==='block'){ renderFarmNotifDropdown() } }
-        function addFarmNotification(msg){ const list = loadKey(KEY_FARM_NOTIFS) || []; list.unshift({ id:'n_'+Date.now(), msg, at:new Date().toISOString() }); saveKey(KEY_FARM_NOTIFS,list); renderFarmNotifCount(); }
-
         window.addEventListener('DOMContentLoaded', function() {
             // Use centralized auth system
             if (!GrassRootsAuth.requireAuth('farmer')) {
                 return;
             }
-
-            // initial notification count
-            renderFarmNotifCount();
         });
-
-        // Close farm notif dropdown when clicking outside
-        document.addEventListener('click', function(e){ const dd=document.getElementById('farmNotifDropdown'); const btn=document.getElementById('farmNotifBtn'); if(!dd||!btn) return; if(!dd.contains(e.target) && !btn.contains(e.target)){ dd.style.display='none' } });
 
         function logout() {
             GrassRootsAuth.logout();

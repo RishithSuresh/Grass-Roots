@@ -3,8 +3,139 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Pricing Recommendations - GrassRoots</title>
+  <title>Best Pricing - GrassRoots</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
+  <style>
+    body { padding-top: 60px; }
+    .pricing-container {
+      max-width: 1200px;
+      margin: 100px auto 40px;
+      padding: 0 2rem;
+    }
+    .pricing-header {
+      background: linear-gradient(135deg, #6B9E7F 0%, #4A7C5E 100%);
+      color: white;
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .pricing-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .recommendation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .rec-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .rec-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 32px rgba(107, 158, 127, 0.25);
+    }
+    .rec-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .crop-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .crop-emoji {
+      font-size: 3rem;
+    }
+    .rating-badge {
+      display: inline-block;
+      padding: 0.5rem 1.2rem;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .rating-excellent {
+      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      color: white;
+    }
+    .rating-good {
+      background: linear-gradient(135deg, #8bc34a, #9ccc65);
+      color: white;
+    }
+    .rating-fair {
+      background: linear-gradient(135deg, #ffc107, #ffca28);
+      color: #333;
+    }
+    .rating-wait {
+      background: linear-gradient(135deg, #ff9800, #ffa726);
+      color: white;
+    }
+    .price-info {
+      background: rgba(107, 158, 127, 0.05);
+      padding: 1rem;
+      border-radius: 12px;
+      margin: 1rem 0;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+    .current-price {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      margin: 0.5rem 0;
+    }
+    .recommendation-text {
+      color: #555;
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+    .market-factors {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e0e0e0;
+    }
+    .factor-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+      color: #666;
+    }
+    .action-btn {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .action-btn:hover {
+      background: #4A7C5E;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar">
@@ -17,63 +148,246 @@
     </div>
   </nav>
 
-  <main class="container" style="padding:2.5rem 0;">
-    <div class="form-container" style="max-width:980px;margin:96px auto 40px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-        <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">⭐ Best Pricing Recommendations</h2>
-        <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">Demo recommendations</div>
-      </div>
-
-      <p style="color:var(--muted);margin-bottom:0.8rem;">Get recommendations on when to sell based on demo market signals.</p>
-
-      <section>
-        <form id="pricingFormLocal">
-          <div class="form-group">
-            <label for="cropLocal">Select Crop</label>
-            <select id="cropLocal">
-              <option value="">Select</option>
-              <option value="rice">Rice</option>
-              <option value="wheat">Wheat</option>
-              <option value="maize">Maize</option>
-              <option value="vegetables">Vegetables</option>
-            </select>
-          </div>
-          <button class="btn" type="submit">Get Recommendation</button>
-        </form>
-
-        <div id="recommendationLocal" style="margin-top:1rem;"></div>
-      </section>
+  <main class="pricing-container">
+    <div class="pricing-header">
+      <h1>⭐ Best Pricing Recommendations</h1>
+      <p style="font-size:1.2rem;opacity:0.95;">AI-powered insights to help you sell at the right time for maximum profit</p>
     </div>
+
+    <div id="recommendationGrid" class="recommendation-grid"></div>
   </main>
 
   <script>
-    // Auth guard: allow only logged-in farmers to access this page
-    (function() {
-      const loggedIn = localStorage.getItem('loggedIn');
-      const userType = localStorage.getItem('userType');
-      if (loggedIn !== 'true' || userType !== 'farmer') {
-        alert('Access denied: This page is for farmers only.');
-        window.location.href = 'login.html';
-      }
-    })();
+    // Auth guard
+    if (!GrassRootsAuth.requireAuth('farmer')) {
+      // Will redirect automatically
+    }
 
-    document.getElementById('pricingFormLocal').addEventListener('submit', function(e){
-      e.preventDefault();
-      const crop = document.getElementById('cropLocal').value;
-      const recommendations = {
-        rice: { rating: '⭐⭐⭐⭐⭐ Excellent', msg: 'Good time to sell. Market demand is high and prices are stable.' },
-        wheat: { rating: '⭐⭐⭐⭐ Good', msg: 'Moderate demand. Consider selling in next 2 weeks for better prices.' },
-        maize: { rating: '⭐⭐⭐ Fair', msg: 'Supply is high. Wait 1 week for prices to improve.' },
-        vegetables: { rating: '⭐⭐⭐⭐⭐ Excellent', msg: 'Premium pricing available. Sell immediately for maximum profit.' }
-      };
-      const rec = recommendations[crop] || { rating: '⭐⭐⭐ Average', msg: 'No strong signal.' };
-      document.getElementById('recommendationLocal').innerHTML = `
-        <div style="background:#e8f5e9;padding:1rem;border-radius:8px;border-left:4px solid var(--primary-color);">
-          <h4 style="color:var(--primary-color);margin-top:0;">${rec.rating}</h4>
-          <p style="margin:0.5rem 0 0 0;">${rec.msg}</p>
-        </div>
-      `;
-    });
+    const pricingRecommendations = [
+      {
+        crop: 'Rice',
+        emoji: '🌾',
+        rating: 'excellent',
+        ratingText: '⭐⭐⭐⭐⭐ Excellent Time to Sell',
+        currentPrice: 2500,
+        avgPrice: 2400,
+        predictedPrice: 2550,
+        recommendation: 'Strong market demand with stable prices. This is an excellent time to sell your rice harvest. Prices are expected to remain stable or increase slightly over the next 2 weeks.',
+        factors: [
+          { icon: '📈', text: 'High demand from retailers' },
+          { icon: '💰', text: 'Price 4% above average' },
+          { icon: '🌤️', text: 'Favorable weather conditions' },
+          { icon: '📊', text: 'Low supply in market' }
+        ]
+      },
+      {
+        crop: 'Wheat',
+        emoji: '🌾',
+        rating: 'good',
+        ratingText: '⭐⭐⭐⭐ Good Time to Sell',
+        currentPrice: 2200,
+        avgPrice: 2250,
+        predictedPrice: 2300,
+        recommendation: 'Moderate demand with prices expected to rise. Consider selling within the next 2 weeks for better returns. Market conditions are favorable.',
+        factors: [
+          { icon: '📈', text: 'Prices trending upward' },
+          { icon: '🏪', text: 'Moderate retailer demand' },
+          { icon: '📅', text: 'Best to sell in 1-2 weeks' },
+          { icon: '🌍', text: 'Export demand increasing' }
+        ]
+      },
+      {
+        crop: 'Tomato',
+        emoji: '🍅',
+        rating: 'excellent',
+        ratingText: '⭐⭐⭐⭐⭐ Excellent Time to Sell',
+        currentPrice: 3500,
+        avgPrice: 3000,
+        predictedPrice: 3600,
+        recommendation: 'Premium pricing available! Tomato prices are at peak due to high demand and low supply. Sell immediately for maximum profit. Prices may drop next week.',
+        factors: [
+          { icon: '🔥', text: 'Peak demand season' },
+          { icon: '💰', text: 'Price 17% above average' },
+          { icon: '⚡', text: 'Urgent: Sell within 3 days' },
+          { icon: '📉', text: 'Supply expected to increase' }
+        ]
+      },
+      {
+        crop: 'Potato',
+        emoji: '🥔',
+        rating: 'fair',
+        ratingText: '⭐⭐⭐ Fair - Consider Waiting',
+        currentPrice: 2000,
+        avgPrice: 2100,
+        predictedPrice: 2150,
+        recommendation: 'Current prices are below average. If possible, wait 1-2 weeks for prices to improve. Storage costs should be considered in your decision.',
+        factors: [
+          { icon: '📊', text: 'High supply in market' },
+          { icon: '⏳', text: 'Wait 1-2 weeks recommended' },
+          { icon: '📈', text: 'Prices expected to rise' },
+          { icon: '🏪', text: 'Retailer stocks are high' }
+        ]
+      },
+      {
+        crop: 'Onion',
+        emoji: '🧅',
+        rating: 'good',
+        ratingText: '⭐⭐⭐⭐ Good Time to Sell',
+        currentPrice: 2800,
+        avgPrice: 2700,
+        predictedPrice: 2900,
+        recommendation: 'Good market conditions with steady demand. Prices are above average and expected to rise further. Sell now or within the next week.',
+        factors: [
+          { icon: '📈', text: 'Steady price increase' },
+          { icon: '💰', text: 'Price 4% above average' },
+          { icon: '🌤️', text: 'Good storage conditions' },
+          { icon: '📊', text: 'Balanced supply-demand' }
+        ]
+      },
+      {
+        crop: 'Banana',
+        emoji: '🍌',
+        rating: 'excellent',
+        ratingText: '⭐⭐⭐⭐⭐ Excellent Time to Sell',
+        currentPrice: 3000,
+        avgPrice: 2800,
+        predictedPrice: 3100,
+        recommendation: 'Peak season with high demand! Banana prices are excellent. Sell immediately as fruits are perishable and prices are at their best.',
+        factors: [
+          { icon: '🔥', text: 'Peak demand season' },
+          { icon: '💰', text: 'Price 7% above average' },
+          { icon: '⚡', text: 'Perishable - sell quickly' },
+          { icon: '📈', text: 'Festival season demand' }
+        ]
+      },
+      {
+        crop: 'Mango',
+        emoji: '🥭',
+        rating: 'excellent',
+        ratingText: '⭐⭐⭐⭐⭐ Excellent Time to Sell',
+        currentPrice: 4500,
+        avgPrice: 4200,
+        predictedPrice: 4600,
+        recommendation: 'Premium prices for quality mangoes! High demand from both local and export markets. Sell immediately for best returns.',
+        factors: [
+          { icon: '🌟', text: 'Premium quality demand' },
+          { icon: '💰', text: 'Price 7% above average' },
+          { icon: '🌍', text: 'Strong export demand' },
+          { icon: '⚡', text: 'Sell within 2-3 days' }
+        ]
+      },
+      {
+        crop: 'Chili',
+        emoji: '🌶️',
+        rating: 'excellent',
+        ratingText: '⭐⭐⭐⭐⭐ Excellent Time to Sell',
+        currentPrice: 8000,
+        avgPrice: 7500,
+        predictedPrice: 8200,
+        recommendation: 'Exceptional prices for chili! Market demand is very high with limited supply. This is the best time to sell for maximum profit.',
+        factors: [
+          { icon: '🔥', text: 'Very high demand' },
+          { icon: '💰', text: 'Price 7% above average' },
+          { icon: '📊', text: 'Limited supply' },
+          { icon: '🌍', text: 'Export orders pending' }
+        ]
+      },
+      {
+        crop: 'Cotton',
+        emoji: '☁️',
+        rating: 'wait',
+        ratingText: '⭐⭐ Wait - Prices May Improve',
+        currentPrice: 5800,
+        avgPrice: 6000,
+        predictedPrice: 6100,
+        recommendation: 'Prices are currently below average. If you have good storage, wait 2-3 weeks for prices to improve. Market conditions are expected to get better.',
+        factors: [
+          { icon: '📉', text: 'Prices below average' },
+          { icon: '⏳', text: 'Wait 2-3 weeks' },
+          { icon: '📈', text: 'Recovery expected' },
+          { icon: '🏭', text: 'Textile demand increasing' }
+        ]
+      },
+      {
+        crop: 'Sugarcane',
+        emoji: '🎋',
+        rating: 'good',
+        ratingText: '⭐⭐⭐⭐ Good Time to Sell',
+        currentPrice: 3200,
+        avgPrice: 3100,
+        predictedPrice: 3250,
+        recommendation: 'Stable market with good prices. Sugar mills are actively buying. Sell now for guaranteed good returns.',
+        factors: [
+          { icon: '🏭', text: 'Mills actively buying' },
+          { icon: '💰', text: 'Price 3% above average' },
+          { icon: '📊', text: 'Stable demand' },
+          { icon: '✅', text: 'Good time to sell' }
+        ]
+      }
+    ];
+
+    function renderRecommendations() {
+      const grid = document.getElementById('recommendationGrid');
+      let html = '';
+
+      pricingRecommendations.forEach(rec => {
+        const ratingClass = `rating-${rec.rating}`;
+        const priceChange = ((rec.currentPrice - rec.avgPrice) / rec.avgPrice * 100).toFixed(1);
+        const changeIcon = priceChange > 0 ? '↑' : priceChange < 0 ? '↓' : '→';
+        const changeColor = priceChange > 0 ? '#4caf50' : priceChange < 0 ? '#f44336' : '#ff9800';
+
+        html += `
+          <div class="rec-card">
+            <div class="rec-header">
+              <div class="crop-title">${rec.crop}</div>
+              <div class="crop-emoji">${rec.emoji}</div>
+            </div>
+
+            <div class="rating-badge ${ratingClass}">
+              ${rec.ratingText}
+            </div>
+
+            <div class="price-info">
+              <div class="current-price">₹${rec.currentPrice.toLocaleString()}/qt</div>
+              <div class="price-row">
+                <span>Average Price:</span>
+                <strong>₹${rec.avgPrice.toLocaleString()}</strong>
+              </div>
+              <div class="price-row">
+                <span>Predicted (2 weeks):</span>
+                <strong>₹${rec.predictedPrice.toLocaleString()}</strong>
+              </div>
+              <div class="price-row">
+                <span>Change:</span>
+                <strong style="color:${changeColor};">${changeIcon} ${Math.abs(priceChange)}%</strong>
+              </div>
+            </div>
+
+            <div class="recommendation-text">
+              ${rec.recommendation}
+            </div>
+
+            <div class="market-factors">
+              <strong style="color:var(--primary-color);display:block;margin-bottom:0.75rem;">Market Factors:</strong>
+              ${rec.factors.map(f => `
+                <div class="factor-item">
+                  <span>${f.icon}</span>
+                  <span>${f.text}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <button class="action-btn" onclick="alert('Contact your nearest market or use our QR code system to connect with retailers!')">
+              Find Buyers
+            </button>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    document.addEventListener('DOMContentLoaded', renderRecommendations);
   </script>
 </body>
 </html>

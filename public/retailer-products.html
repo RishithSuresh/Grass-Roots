@@ -3,55 +3,381 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Retailer Products - GrassRoots</title>
+  <title>Product Catalog - GrassRoots</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
   <style>
-    .container{max-width:1100px;margin:24px auto;padding:0 16px}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:8px;border-bottom:1px solid #eee}
-    .btn{background:var(--primary-color);color:#fff;padding:8px 12px;border-radius:8px;border:none}
-    /* Page wrapper & card to match main site's visual style */
-    body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
-    .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
-    .card { width:100%; max-width:960px; background: #fff; border-radius:10px; padding:24px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
-    .card h1 { margin-top:0; color: #2f6b50 }
-    .muted { color:#6b7b6b; margin-top:6px }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 30%, #f1f8f4 70%, #e3f2e8 100%);
+      background-attachment: fixed;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      padding-top: 60px;
+    }
+    .page-wrapper { display:flex; justify-content:center; padding:100px 16px 40px 16px; min-height:100vh }
+    .card {
+      width:100%;
+      max-width:1100px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius:20px;
+      padding:2.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .card h1 { margin-top:0; color: var(--primary-color); font-size: 2rem; }
+    .muted { color:#666; margin-top:6px; font-size: 1.1rem; }
+    .btn{background:var(--primary-color);color:#fff;padding:12px 20px;border-radius:8px;border:none;cursor:pointer;font-size:1rem;font-weight:600;transition:background 0.3s;}
+    .btn:hover{background:#4A7C5E;}
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-left: 4px solid var(--primary-color);
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(107, 158, 127, 0.2);
+    }
+    .product-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+    .product-price {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0.5rem 0;
+    }
+    .product-stock {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .product-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .product-actions button {
+      flex: 1;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+    }
+    .btn-delete {
+      background: #f44336;
+    }
+    .btn-delete:hover {
+      background: #d32f2f;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-content h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .modal-actions button {
+      flex: 1;
+    }
+    .btn-cancel {
+      background: #999;
+    }
+    .btn-cancel:hover {
+      background: #777;
+    }
+    .qr-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background: rgba(107, 158, 127, 0.1);
+      color: var(--primary-color);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
-  <nav class="navbar"><div class="nav-container container"><a href="index.html" class="logo">GrassRoots</a><div class="nav-links"><a href="retailer-dashboard.html">Dashboard</a><a href="retailer-orders.html">Orders</a><a href="retailer-payments.html">Payments</a><a href="retailer-profile.html">Profile</a></div></div></nav>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="retailer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
 
   <div class="page-wrapper">
     <div class="card">
-      <h1>Products</h1>
-      <p class="muted">Add and manage your shop products.</p>
-      <div style="margin:12px 0"><button class="btn" onclick="openAdd()">Add Product</button></div>
-      <table id="productsTable"><thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody></tbody></table>
+      <h1>🛒 Product Catalog</h1>
+      <p class="muted">Add products from farmer QR codes and manage your inventory</p>
+      <div style="margin:20px 0">
+        <button class="btn" onclick="openAdd()">+ Add Product from QR Code</button>
+      </div>
+      <div id="productsGrid" class="products-grid"></div>
     </div>
   </div>
 
-  <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);align-items:center;justify-content:center">
-    <div style="background:#fff;padding:18px;border-radius:8px;max-width:520px;margin:auto">
-      <h3 id="mTitle">Add Product</h3>
-      <div class="form-group"><label>Name</label><input id="mName" /></div>
-      <div class="form-group"><label>Price</label><input id="mPrice" type="number" step="0.01" /></div>
-      <div class="form-group"><label>Stock</label><input id="mStock" type="number" /></div>
-      <div style="margin-top:8px"><button class="btn" onclick="save()">Save</button> <button onclick="closeModal()" class="btn" style="background:#ccc;color:#111">Cancel</button></div>
+  <!-- Add/Edit Product Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3 id="mTitle">Add Product from QR Code</h3>
+
+      <div class="form-group">
+        <label>Select Farmer QR Code *</label>
+        <select id="qrSelect" required>
+          <option value="">-- Select a QR Code --</option>
+        </select>
+        <small style="color:#666;">Only products with valid farmer QR codes can be added</small>
+      </div>
+
+      <div class="form-group">
+        <label>Product Name *</label>
+        <input id="mName" placeholder="e.g., Organic Basmati Rice" required />
+      </div>
+
+      <div class="form-group">
+        <label>Price per KG (₹) *</label>
+        <input id="mPrice" type="number" step="0.01" placeholder="50.00" required />
+      </div>
+
+      <div class="form-group">
+        <label>Available Stock (KG) *</label>
+        <input id="mStock" type="number" placeholder="100" required />
+      </div>
+
+      <div class="form-group">
+        <label>Product Description</label>
+        <textarea id="mDescription" rows="3" placeholder="Add product details..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="save()">Save Product</button>
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const KEY_PRODUCTS='retailer_products';
-    function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-    function saveKey(k,v){localStorage.setItem(k,JSON.stringify(v))}
-    function loadProducts(){return load(KEY_PRODUCTS)||[]}
-    function render(){const rows=document.querySelector('#productsTable tbody');rows.innerHTML='';loadProducts().forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${p.name}</td><td>₹ ${Number(p.price).toFixed(2)}</td><td>${p.stock}</td><td><button class='btn' onclick="edit('${p.id}')">Edit</button> <button class='btn' style='background:#e04' onclick="del('${p.id}')">Delete</button></td>`;rows.appendChild(tr)})}
-    function openAdd(){window.editId=null;document.getElementById('mTitle').textContent='Add Product';document.getElementById('mName').value='';document.getElementById('mPrice').value='';document.getElementById('mStock').value='0';document.getElementById('modal').style.display='flex'}
-    function closeModal(){document.getElementById('modal').style.display='none'}
-    function save(){const name=document.getElementById('mName').value.trim();const price=Number(document.getElementById('mPrice').value)||0;const stock=parseInt(document.getElementById('mStock').value)||0;if(!name){alert('Name required');return}let prods=loadProducts();if(window.editId){const i=prods.findIndex(x=>x.id===window.editId);if(i>-1){prods[i].name=name;prods[i].price=price;prods[i].stock=stock}}else{prods.push({id:'p_'+Date.now(),name,price,stock})}saveKey(KEY_PRODUCTS,prods);closeModal();render();alert('Saved')}
-    function edit(id){const p=loadProducts().find(x=>x.id===id);if(!p)return;window.editId=id;document.getElementById('mTitle').textContent='Edit Product';document.getElementById('mName').value=p.name;document.getElementById('mPrice').value=p.price;document.getElementById('mStock').value=p.stock;document.getElementById('modal').style.display='flex'}
-    function del(id){if(!confirm('Delete?'))return;let prods=loadProducts().filter(x=>x.id!==id);saveKey(KEY_PRODUCTS,prods);render();alert('Deleted')}
-    document.addEventListener('DOMContentLoaded',render);
+    // Auth guard
+    if (!GrassRootsAuth.requireAuth('retailer')) {
+      // Will redirect automatically
+    }
+
+    const KEY_PRODUCTS = 'retailer_products';
+    const KEY_QR_CODES = 'farmer_qr_codes';
+
+    function loadProducts() {
+      return GrassRootsUtils.loadFromStorage(KEY_PRODUCTS, []);
+    }
+
+    function loadQRCodes() {
+      return GrassRootsUtils.loadFromStorage(KEY_QR_CODES, []);
+    }
+
+    function loadQRSelector() {
+      const qrCodes = loadQRCodes();
+      const select = document.getElementById('qrSelect');
+      select.innerHTML = '<option value="">-- Select a QR Code --</option>';
+
+      if (qrCodes.length === 0) {
+        select.innerHTML += '<option value="" disabled>No QR codes available</option>';
+        return;
+      }
+
+      qrCodes.forEach(qr => {
+        const opt = document.createElement('option');
+        opt.value = qr.id;
+        opt.textContent = `${qr.productName} - ${qr.cropType} (${qr.farmerName})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function render() {
+      const grid = document.getElementById('productsGrid');
+      const products = loadProducts();
+
+      if (products.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;color:#999;grid-column:1/-1;padding:3rem;">No products added yet. Add your first product from a farmer QR code!</p>';
+        return;
+      }
+
+      grid.innerHTML = '';
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-name">${GrassRootsUtils.sanitizeHTML(p.name)}</div>
+          <div class="product-price">₹${Number(p.price).toFixed(2)}/kg</div>
+          <div class="product-stock">${p.stock} kg available</div>
+          ${p.qrId ? `<div class="qr-badge">📱 QR Verified</div>` : ''}
+          ${p.description ? `<p style="color:#666;font-size:0.9rem;margin:0.5rem 0;">${GrassRootsUtils.sanitizeHTML(p.description)}</p>` : ''}
+          <div class="product-actions">
+            <button class="btn" onclick="edit('${p.id}')">Edit</button>
+            <button class="btn btn-delete" onclick="del('${p.id}')">Delete</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function openAdd() {
+      window.editId = null;
+      document.getElementById('mTitle').textContent = 'Add Product from QR Code';
+      document.getElementById('qrSelect').value = '';
+      document.getElementById('mName').value = '';
+      document.getElementById('mPrice').value = '';
+      document.getElementById('mStock').value = '';
+      document.getElementById('mDescription').value = '';
+      document.getElementById('modal').style.display = 'flex';
+      loadQRSelector();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function save() {
+      const qrId = document.getElementById('qrSelect').value;
+      const name = document.getElementById('mName').value.trim();
+      const price = Number(document.getElementById('mPrice').value) || 0;
+      const stock = parseInt(document.getElementById('mStock').value) || 0;
+      const description = document.getElementById('mDescription').value.trim();
+
+      if (!qrId && !window.editId) {
+        GrassRootsUtils.showToast('Please select a QR code', 'error');
+        return;
+      }
+
+      if (!name) {
+        GrassRootsUtils.showToast('Product name is required', 'error');
+        return;
+      }
+
+      if (price <= 0) {
+        GrassRootsUtils.showToast('Price must be greater than 0', 'error');
+        return;
+      }
+
+      if (stock < 0) {
+        GrassRootsUtils.showToast('Stock cannot be negative', 'error');
+        return;
+      }
+
+      let products = loadProducts();
+
+      if (window.editId) {
+        const index = products.findIndex(x => x.id === window.editId);
+        if (index > -1) {
+          products[index].name = name;
+          products[index].price = price;
+          products[index].stock = stock;
+          products[index].description = description;
+        }
+      } else {
+        products.push({
+          id: GrassRootsUtils.generateId(),
+          qrId: qrId,
+          name: name,
+          price: price,
+          stock: stock,
+          description: description,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      GrassRootsUtils.saveToStorage(KEY_PRODUCTS, products);
+      closeModal();
+      render();
+      GrassRootsUtils.showToast('Product saved successfully!', 'success');
+    }
+
+    function edit(id) {
+      const product = loadProducts().find(x => x.id === id);
+      if (!product) return;
+
+      window.editId = id;
+      document.getElementById('mTitle').textContent = 'Edit Product';
+      document.getElementById('mName').value = product.name;
+      document.getElementById('mPrice').value = product.price;
+      document.getElementById('mStock').value = product.stock;
+      document.getElementById('mDescription').value = product.description || '';
+      document.getElementById('modal').style.display = 'flex';
+      loadQRSelector();
+      if (product.qrId) {
+        document.getElementById('qrSelect').value = product.qrId;
+      }
+    }
+
+    function del(id) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+
+      let products = loadProducts().filter(x => x.id !== id);
+      GrassRootsUtils.saveToStorage(KEY_PRODUCTS, products);
+      render();
+      GrassRootsUtils.showToast('Product deleted', 'success');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      render();
+      loadQRSelector();
+    });
   </script>
 </body>
 </html>

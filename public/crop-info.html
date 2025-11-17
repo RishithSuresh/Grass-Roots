@@ -32,13 +32,34 @@
           <label for="cropTypeLocal">Crop Type</label>
           <select id="cropTypeLocal" required>
             <option value="">Select Crop</option>
-            <option value="Rice">Rice</option>
-            <option value="Wheat">Wheat</option>
-            <option value="Maize">Maize</option>
-            <option value="Vegetables">Vegetables</option>
-            <option value="Cotton">Cotton</option>
-            <option value="Sugarcane">Sugarcane</option>
-            <option value="Other">Other</option>
+            <optgroup label="Cereals">
+              <option value="Rice">Rice</option>
+              <option value="Wheat">Wheat</option>
+              <option value="Maize">Maize (Corn)</option>
+            </optgroup>
+            <optgroup label="Cash Crops">
+              <option value="Cotton">Cotton</option>
+              <option value="Sugarcane">Sugarcane</option>
+            </optgroup>
+            <optgroup label="Vegetables">
+              <option value="Tomato">Tomato</option>
+              <option value="Potato">Potato</option>
+              <option value="Onion">Onion</option>
+              <option value="Cabbage">Cabbage</option>
+              <option value="Carrot">Carrot</option>
+              <option value="Beans">Beans</option>
+            </optgroup>
+            <optgroup label="Spices">
+              <option value="Chili">Chili</option>
+              <option value="Turmeric">Turmeric</option>
+              <option value="Ginger">Ginger</option>
+            </optgroup>
+            <optgroup label="Fruits">
+              <option value="Banana">Banana</option>
+              <option value="Mango">Mango</option>
+              <option value="Papaya">Papaya</option>
+              <option value="Grapes">Grapes</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-group">
@@ -73,13 +94,29 @@
       // Will redirect automatically if not authorized
     }
 
+    // TODO: Replace with API call when backend is ready
+    // API Endpoint: GET /api/farmer/crops
     // Render saved crops list
-    function renderCropList() {
+    async function renderCropList() {
+      // TODO: Uncomment when backend is ready
+      // try {
+      //   const response = await fetch('/api/farmer/crops', {
+      //     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      //   });
+      //   const data = await response.json();
+      //   const crops = data.crops;
+      // } catch (error) {
+      //   console.error('Error fetching crops:', error);
+      //   GrassRootsUtils.showToast('Error loading crops', 'error');
+      //   return;
+      // }
+
+      // Temporary: Load from localStorage
       const crops = GrassRootsUtils.loadFromStorage('farmerCrops', []);
       const out = document.getElementById('cropListLocal');
 
       if (!crops.length) {
-        out.innerHTML = '<p style="color:var(--muted);">No crops added yet.</p>';
+        out.innerHTML = '<p style="color:var(--muted);">No crops added yet. Add your first crop above!</p>';
         return;
       }
 
@@ -100,22 +137,51 @@
       out.innerHTML = html;
     }
 
+    // TODO: Replace with API call when backend is ready
+    // API Endpoint: POST /api/farmer/crops
     // Handle form submission
-    document.getElementById('cropInfoFormLocal').addEventListener('submit', function(e) {
+    document.getElementById('cropInfoFormLocal').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       // Get form values
+      const cropData = {
+        crop_type: document.getElementById('cropTypeLocal').value,
+        planting_date: document.getElementById('plantingDateLocal').value,
+        area_acres: parseFloat(document.getElementById('areaLocal').value),
+        expected_yield_quintals: parseFloat(document.getElementById('expectedYieldLocal').value),
+        notes: document.getElementById('cropNotesLocal').value
+      };
+
+      // TODO: Uncomment when backend is ready
+      // try {
+      //   const response = await fetch('/api/farmer/crops', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //       'Authorization': 'Bearer ' + localStorage.getItem('token')
+      //     },
+      //     body: JSON.stringify(cropData)
+      //   });
+      //   const data = await response.json();
+      //   if (!data.success) throw new Error(data.error);
+      //   GrassRootsUtils.showToast('Crop saved to database!', 'success');
+      // } catch (error) {
+      //   console.error('Error saving crop:', error);
+      //   GrassRootsUtils.showToast('Error saving crop', 'error');
+      //   return;
+      // }
+
+      // Temporary: Save to localStorage
       const crop = {
         id: GrassRootsUtils.generateId(),
-        type: document.getElementById('cropTypeLocal').value,
-        plantingDate: document.getElementById('plantingDateLocal').value,
-        area: document.getElementById('areaLocal').value,
-        expectedYield: document.getElementById('expectedYieldLocal').value,
-        notes: document.getElementById('cropNotesLocal').value,
+        type: cropData.crop_type,
+        plantingDate: cropData.planting_date,
+        area: cropData.area_acres,
+        expectedYield: cropData.expected_yield_quintals,
+        notes: cropData.notes,
         createdAt: new Date().toISOString()
       };
 
-      // Save to localStorage
       let crops = GrassRootsUtils.loadFromStorage('farmerCrops', []);
       crops.push(crop);
       GrassRootsUtils.saveToStorage('farmerCrops', crops);
@@ -133,7 +199,7 @@
 
       // Reset form and update list
       this.reset();
-      renderCropList();
+      await renderCropList();
 
       // Show toast notification
       GrassRootsUtils.showToast('Crop information saved successfully!', 'success');

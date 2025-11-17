@@ -122,6 +122,47 @@
     /* ================= ABOUT SECTION ================= */
     .about-section {
       padding: 4rem 2rem;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      margin: 2rem auto;
+      max-width: 1200px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .about-wrapper {
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .about-wrapper > div {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .about-wrapper h2 {
+      color: var(--primary-color);
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .about-wrapper ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .about-wrapper ul li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .about-wrapper ul li::before {
+      content: '🌱';
+      position: absolute;
+      left: 0;
     }
 
     .features {
@@ -224,23 +265,7 @@
       background-color: #45a049;
     }
 
-    /* ================= CALL BOT ICON ================= */
-    .call-bot {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #4CAF50;
-      border-radius: 50%;
-      padding: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      cursor: pointer;
-      z-index: 200;
-    }
 
-    .call-bot img {
-      width: 40px;
-      height: 40px;
-    }
   </style>
 </head>
 <body>
@@ -249,7 +274,6 @@
       <a href="index.html" class="logo">GrassRoots</a>
       <div class="nav-links">
         <a href="login.html">Login</a>
-        <a href="about.html">About</a>
         <a href="contact.html">Contact</a>
       </div>
     </div>
@@ -266,20 +290,18 @@
 
   <!-- ================= ABOUT SECTION ================= -->
   <section class="about-section">
-    <div class="container">
-      <div class="about-wrapper" style="display:flex;gap:2rem;align-items:center;flex-wrap:wrap;">
-        <div style="flex:1;min-width:280px;">
-          <img src="images/about.jpg" alt="farm" style="width:100%;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
-        </div>
-        <div style="flex:1;min-width:300px;">
-          <h2>About GrassRoots</h2>
-          <p style="color:var(--muted);font-size:1.05rem;">GrassRoots connects smallholder farmers with markets and buyers using transparent tools, traceability, and locally-accessible services. We combine simple call-in workflows, QR traceability, and direct market access to improve farmer incomes and product trust.</p>
-          <ul style="margin-top:1rem;line-height:1.6;color:var(--muted);">
-            <li><strong>Mission:</strong> Empower farmers with practical digital tools and fair market access.</li>
-            <li><strong>Approach:</strong> Low-barrier tech (voice, QR) + market linkages + community support.</li>
-          </ul>
-          <a href="about.html" class="btn" style="margin-top:1rem;display:inline-block;">Read our story</a>
-        </div>
+    <div class="about-wrapper">
+      <div>
+        <img src="images/about.jpg" alt="farm" style="width:100%;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+      </div>
+      <div>
+        <h2>About GrassRoots</h2>
+        <p style="font-size:1.05rem;line-height:1.8;color:#555;">GrassRoots connects smallholder farmers with markets and buyers using transparent tools, traceability, and locally-accessible services. We combine simple call-in workflows, QR traceability, and direct market access to improve farmer incomes and product trust.</p>
+        <ul style="margin-top:1.5rem;line-height:1.8;">
+          <li><strong>Mission:</strong> Empower farmers with practical digital tools and fair market access.</li>
+          <li><strong>Approach:</strong> Low-barrier tech (voice, QR) + market linkages + community support.</li>
+        </ul>
+        <a href="about.html" class="btn" style="margin-top:1.5rem;display:inline-block;">Learn More About Us</a>
       </div>
     </div>
   </section>
@@ -361,16 +383,7 @@
     </section>
   </div>
 
-  <!-- ================= CALL BOT ICON ================= -->
-  <div class="call-bot" onclick="openCallBot()">
-    <img src="images/callbot.png" alt="Call Bot">
-  </div>
-
     <script>
-        function openCallBot() {
-            alert('Connecting to call bot...');
-            // Add your call bot integration code here
-        }
         // contact form handling
         document.addEventListener('DOMContentLoaded', function() {
             const cf = document.getElementById('contactForm');

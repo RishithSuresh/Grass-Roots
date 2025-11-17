@@ -6,38 +6,79 @@
     <title>Farmer Profile - GrassRoots</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
-        .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
-        .card { width:100%; max-width:900px; background: #fff; border-radius:10px; padding:28px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
-        .card h1 { margin-top:0; color: #2f6b50; margin-bottom:24px; border-bottom:2px solid #ecf5ee; padding-bottom:12px }
-        .card h2 { color: #2f6b50; margin-top:24px; margin-bottom:14px; font-size:1.15rem }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 30%, #f1f8f4 70%, #e3f2e8 100%);
+            background-attachment: fixed;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+            padding-top: 60px;
+        }
+        .page-wrapper {
+            display:flex;
+            justify-content:center;
+            padding:120px 16px 40px 16px;
+            min-height:100vh;
+        }
+        .card {
+            width:100%;
+            max-width:900px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius:20px;
+            padding:2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card h1 { margin-top:0; color: var(--primary-color); margin-bottom:24px; border-bottom:2px solid #ecf5ee; padding-bottom:12px }
+        .card h2 { color: var(--primary-color); margin-top:24px; margin-bottom:14px; font-size:1.15rem }
         .section { margin-bottom:24px }
         .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px }
         @media (max-width:640px) { .info-grid { grid-template-columns:1fr } }
-        .info-item { padding:12px; background:#f5f5f5; border-radius:8px; border-left:4px solid #2f6b50 }
-        .info-label { font-weight:600; color:#2f6b50; font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px }
+        .info-item { padding:12px; background:#f5f5f5; border-radius:8px; border-left:4px solid var(--primary-color) }
+        .info-label { font-weight:600; color:var(--primary-color); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.5px }
         .info-value { color:#333; margin-top:4px; font-size:1rem }
         .activity-list { list-style:none; padding:0; margin:0 }
         .activity-list li { padding:12px 14px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; font-size:0.95rem }
         .activity-list li:last-child { border-bottom:none }
         .activity-time { color:#999; font-size:0.85rem; white-space:nowrap }
-        .activity-badge { display:inline-block; padding:4px 8px; background:#e8f5e9; color:#2f6b50; border-radius:4px; font-size:0.8rem; font-weight:600 }
-        .stat-card { background:linear-gradient(135deg, #2f6b50, #4a8f6f); color:white; padding:16px; border-radius:8px; text-align:center; margin-bottom:12px }
+        .activity-badge { display:inline-block; padding:4px 8px; background:#e8f5e9; color:var(--primary-color); border-radius:4px; font-size:0.8rem; font-weight:600 }
+        .stat-card { background:linear-gradient(135deg, #6B9E7F, #4A7C5E); color:white; padding:16px; border-radius:8px; text-align:center; margin-bottom:12px }
         .stat-number { font-size:2rem; font-weight:700; margin:0 }
         .stat-label { font-size:0.9rem; opacity:0.9; margin:4px 0 0 0 }
-        .btn { background:#2f6b50; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; font-size:0.95rem; transition:background 0.3s }
-        .btn:hover { background:#1f4a34 }
+        .btn { background:var(--primary-color); color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; font-size:0.95rem; transition:background 0.3s }
+        .btn:hover { background:#4A7C5E }
         .btn-secondary { background:#999; }
         .btn-secondary:hover { background:#777 }
-        .back-link { display:inline-block; margin-bottom:16px; color:#2f6b50; text-decoration:none; font-weight:500 }
+        .back-link { display:inline-block; margin-bottom:16px; color:var(--primary-color); text-decoration:none; font-weight:500 }
         .back-link:hover { text-decoration:underline }
         .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid #eee; flex-wrap:wrap }
         .tab-btn { background:none; border:none; padding:12px 16px; cursor:pointer; font-weight:600; color:#999; border-bottom:3px solid transparent; transition:all 0.3s }
-        .tab-btn.active { color:#2f6b50; border-bottom-color:#2f6b50 }
+        .tab-btn.active { color:var(--primary-color); border-bottom-color:var(--primary-color) }
         .tab-content { display:none }
         .tab-content.active { display:block }
         .empty-state { text-align:center; padding:32px 16px; color:#999 }
         .empty-state p { margin:12px 0 0 0 }
+        .callbot-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6B9E7F, #4A7C5E);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(107, 158, 127, 0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 1000;
+        }
+        .callbot-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(107, 158, 127, 0.6);
+        }
+        .callbot-btn span {
+            font-size: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -45,12 +86,17 @@
         <div class="nav-container container">
             <a href="index.html" class="logo">GrassRoots</a>
             <div class="nav-links">
-                <a href="farmer-dashboard.html">← Back to Dashboard</a>
+                <a href="farmer-dashboard.html">Dashboard</a>
                 <a href="contact.html">Contact</a>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <a href="login.html" style="color:white;text-decoration:none;">Logout</a>
             </div>
         </div>
     </nav>
+
+    <!-- Callbot Button -->
+    <div class="callbot-btn" onclick="openCallBot()" title="Call Bot - Get Help">
+        <span>📞</span>
+    </div>
 
     <div class="page-wrapper">
         <div class="card">
@@ -347,6 +393,10 @@
             localStorage.removeItem('userType');
             localStorage.removeItem('fullName');
             window.location.href = 'login.html';
+        }
+
+        function openCallBot() {
+            alert('📞 Call Bot Feature\n\nThis feature will connect you to our AI-powered call assistant for:\n\n• Market price inquiries\n• Crop advice\n• Technical support\n• General queries\n\nComing soon!');
         }
     </script>
 </body>

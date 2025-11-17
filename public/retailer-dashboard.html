@@ -39,14 +39,7 @@
     .form-group label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: var(--text-color); }
     .form-group input, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 0.4rem; font-family: inherit; }
     .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(47, 107, 80, 0.1); }
-    /* Notifications in navbar */
-    .notif-btn { background: transparent; border: none; color: #fff; font-size:1.05rem; position:relative; cursor:pointer; margin-right:8px }
-    .notif-count { background: #e74c3c; color: white; border-radius:999px; padding:0 6px; font-size:0.75rem; margin-left:6px }
-    .notif-dropdown { position:absolute; right:16px; top:56px; background:white; color:#222; min-width:260px; max-width:320px; box-shadow:0 8px 30px rgba(0,0,0,0.12); border-radius:8px; padding:10px; z-index:50 }
-    .notif-dropdown .item { padding:8px; border-bottom:1px solid #f0f0f0; font-size:0.95rem }
-    .notif-dropdown .item:last-child { border-bottom: none }
-    #notificationsList { list-style: none; padding: 0; margin: 0; }
-    #notificationsList li { padding: 0.8rem; background: #f9f9f9; margin: 0.5rem 0; border-radius: 0.4rem; border-left: 3px solid var(--primary-color); }
+
   </style>
 </head>
 <body>
@@ -54,8 +47,6 @@
     <div class="nav-container container">
       <a href="index.html" class="logo">GrassRoots</a>
       <div class="nav-links">
-        <button id="retNotifBtn" class="notif-btn" onclick="toggleRetNotifDropdown()">🔔 <span id="retNotifCount" class="notif-count">0</span></button>
-        <div id="retNotifDropdown" class="notif-dropdown" style="display:none"></div>
         <a href="retailer-shop-profile.html" style="display:flex;align-items:center;gap:0.5rem">👤 Profile</a>
         <a href="contact.html">Contact</a>
         <button class="logout-btn btn" onclick="logout()">Logout</button>
@@ -379,73 +370,11 @@
       addNotification('Profile saved');
     }
 
-    // Notifications
-    function addNotification(msg) {
-      const list = load(KEY_NOTIFS) || [];
-      list.unshift({
-        id: 'n_' + Date.now(),
-        msg,
-        at: new Date().toISOString()
-      });
-      save(KEY_NOTIFS, list);
-      renderNotifications();
-      renderNotifBadge();
-    }
 
-    function renderNotifications() {
-      const list = load(KEY_NOTIFS) || [];
-      const ul = document.getElementById('notificationsList');
-      ul.innerHTML = '';
-      list.forEach(n => {
-        const li = document.createElement('li');
-        li.textContent = `${new Date(n.at).toLocaleString()}: ${n.msg}`;
-        ul.appendChild(li);
-      });
-    }
-
-    function renderNotifBadge() {
-      const list = load(KEY_NOTIFS) || [];
-      const badge = document.getElementById('retNotifCount');
-      if (badge) badge.textContent = list.length;
-      const dropdown = document.getElementById('retNotifDropdown');
-      if (dropdown) {
-        dropdown.innerHTML = '';
-        if (!list.length) {
-          dropdown.innerHTML = '<div class="item">No notifications</div>';
-        } else {
-          list.slice(0, 8).forEach(n => {
-            const d = document.createElement('div');
-            d.className = 'item';
-            d.textContent = `${new Date(n.at).toLocaleString()}: ${n.msg}`;
-            dropdown.appendChild(d);
-          });
-        }
-      }
-    }
-
-    function toggleRetNotifDropdown() {
-      const dd = document.getElementById('retNotifDropdown');
-      if (!dd) return;
-      dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
-      if (dd.style.display === 'block') {
-        renderNotifBadge();
-      }
-    }
-
-    // Close notif dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      const dd = document.getElementById('retNotifDropdown');
-      const btn = document.getElementById('retNotifBtn');
-      if (!dd || !btn) return;
-      if (!dd.contains(e.target) && !btn.contains(e.target)) {
-        dd.style.display = 'none';
-      }
-    });
 
     // UI helpers
     function showSection(id) {
       document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-      document.getElementById('notifications').style.display = 'none';
       const el = document.getElementById(id);
       if (el) el.style.display = 'block';
       if (id === 'products') {
@@ -470,8 +399,6 @@
     // Init
     document.addEventListener('DOMContentLoaded', function() {
       renderProducts();
-      renderNotifications();
-      renderNotifBadge();
       renderOrders();
       renderPayments();
     });
