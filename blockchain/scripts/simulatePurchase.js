@@ -8,7 +8,7 @@ const DEPLOYED_ADDR_PATH = path.resolve(BASE, '..', 'deployed_address.json');
 const OUT_PATH = path.resolve(BASE, '..', 'last_transaction.json');
 
 const RPC = process.env.RPC_URL || 'http://127.0.0.1:8545';
-const provider = new ethers.providers.JsonRpcProvider(RPC);
+const provider = new ethers.JsonRpcProvider(RPC);
 
 async function main() {
   // Read deployed address
@@ -32,13 +32,13 @@ async function main() {
     signer = wallet;
     console.log('Using PRIVATE_KEY wallet:', await signer.getAddress());
   } else {
-    const accounts = await provider.listAccounts();
+    const accounts = await ethers.getSigners();
     if (accounts.length < 2) {
       console.error('Hardhat node should provide accounts. Start it with `npx hardhat node`');
       process.exit(1);
     }
     // Use account[1] as the signer for the purchase (buyer)
-    signer = provider.getSigner(accounts[1]);
+    signer = accounts[1];
     console.log('Using provider signer:', await signer.getAddress());
   }
 
@@ -48,8 +48,8 @@ async function main() {
   const txPayload = {
     txId: 'tx-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
     buyer: await signer.getAddress(),
-    seller: (await provider.listAccounts())[0],
-    amount: ethers.utils.parseUnits('1.25', 18), // e.g., 1.25 units (use wei-like units for demo)
+    seller: (await ethers.getSigners())[0].address,
+    amount: ethers.parseUnits('1.25', 18), // e.g., 1.25 units (use wei-like units for demo)
     metadata: JSON.stringify({ productId: 'demo-prod-001', productName: 'Demo Product' })
   };
 
@@ -68,7 +68,7 @@ async function main() {
   console.log('Transaction mined in block', receipt.blockNumber);
 
   // Try to find the event args
-  const iface = new ethers.utils.Interface(abi);
+  const iface = new ethers.Interface(abi);
   let parsed = null;
   for (const log of receipt.logs) {
     try {
