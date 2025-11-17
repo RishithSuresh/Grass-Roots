@@ -28,18 +28,117 @@
     </div>
   </div>
   <script>
-    const KEY_ORDERS='retailer_orders';
-    const KEY_PRODUCTS='retailer_products';
-    function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
-    function saveKey(k,v){localStorage.setItem(k,JSON.stringify(v))}
-    function loadOrders(){return load(KEY_ORDERS)||[]}
-    function render(){const rows=document.querySelector('#ordersTable tbody');rows.innerHTML='';loadOrders().forEach(o=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${o.id}</td><td>${o.items.map(i=>i.name+' x'+i.qty).join('<br>')}</td><td>₹ ${o.total.toFixed(2)}</td><td>${o.status}</td><td><button class='btn' onclick="view('${o.id}')">View</button></td>`;rows.appendChild(tr)})}
-    function seed(){ if(loadOrders().length) return; const prods = load(KEY_PRODUCTS)||[]; const sample=[{id:'o_'+Date.now(),items:prods.slice(0,2).map(p=>({productId:p.id,name:p.name,qty:1,price:p.price})),total:(prods.slice(0,2).reduce((s,p)=>s+(p.price||0),0)),status:'Pending',paid:false}]; saveKey(KEY_ORDERS,sample); alert('Sample order seeded'); render(); }
-    function view(id){ const o=loadOrders().find(x=>x.id===id); if(!o) return; const details=`Order ${o.id}\nItems:\n${o.items.map(i=>i.name+' x'+i.qty).join('\n')}\nTotal: ₹ ${o.total.toFixed(2)}\nStatus: ${o.status}\nPaid: ${o.paid?'Yes':'No'}`; if(confirm(details+'\n\nMark Confirmed?')){ updateStatus(id,'Confirmed') } }
-    function updateStatus(id,status){ const orders=loadOrders(); const idx=orders.findIndex(x=>x.id===id); if(idx===-1) return; orders[idx].status=status; if(status==='Confirmed'){ // decrement stock
-        orders[idx].items.forEach(it=>{ let prods = load(KEY_PRODUCTS)||[]; const p=prods.find(x=>x.id===it.productId); if(p){ p.stock = Math.max(0,(p.stock||0)-it.qty); saveKey(KEY_PRODUCTS,prods); } }); }
-      saveKey(KEY_ORDERS,orders); render(); alert('Status updated') }
-    document.addEventListener('DOMContentLoaded', function(){ render(); seed(); });
+    // Use backend APIs for orders and products
+    async function loadOrders() {
+      try {
+        const resp = await fetch('/api/orders');
+        if (!resp.ok) throw new Error('Failed to load orders');
+        return await resp.json();
+      } catch (err) {
+        console.warn('Failed to fetch orders from server, falling back to localStorage', err);
+        const o = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+        return o;
+      }
+    }
+
+    async function loadProducts() {
+      try {
+        const resp = await fetch('/api/products');
+        if (!resp.ok) throw new Error('Failed to load products');
+        return await resp.json();
+      } catch (err) {
+        console.warn('Failed to fetch products from server, falling back to localStorage', err);
+        return JSON.parse(localStorage.getItem('retailer_products') || '[]');
+      }
+    }
+
+    async function render() {
+      const rows = document.querySelector('#ordersTable tbody');
+      rows.innerHTML = '';
+      const orders = await loadOrders();
+      orders.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${o.id}</td><td>${o.items.map(i => i.name + ' x' + i.qty).join('<br>')}</td><td>₹ ${o.total.toFixed(2)}</td><td>${o.status}</td><td><button class='btn' onclick="view('${o.id}')">View</button></td>`;
+        rows.appendChild(tr);
+      });
+    }
+
+    async function seed() {
+      const existing = await loadOrders();
+      if (existing.length) return;
+      const prods = await loadProducts();
+      const sample = [{
+        id: 'o_' + Date.now(),
+        items: prods.slice(0, 2).map(p => ({ productId: p.id, name: p.name, qty: 1, price: p.price })),
+        total: prods.slice(0, 2).reduce((s, p) => s + (p.price || 0), 0),
+        status: 'Pending',
+        paid: false
+      }];
+      try {
+        for (const o of sample) {
+          await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) });
+        }
+        alert('Sample order seeded');
+        await render();
+      } catch (err) {
+        console.error('Failed to seed orders:', err);
+        localStorage.setItem('retailer_orders', JSON.stringify(sample));
+        alert('Seeded locally');
+        await render();
+      }
+    }
+
+    async function view(id) {
+      try {
+        const resp = await fetch(`/api/orders/${id}`);
+        if (!resp.ok) throw new Error('Order not found');
+        const data = await resp.json();
+        const o = data.order || data;
+        const details = `Order ${o.id}\nItems:\n${(data.items || o.items).map(i => i.name + ' x' + i.qty).join('\n')}\nTotal: ₹ ${o.total.toFixed(2)}\nStatus: ${o.status}\nPaid: ${o.paid ? 'Yes' : 'No'}`;
+        if (confirm(details + '\n\nMark Confirmed?')) {
+          updateStatus(id, 'Confirmed');
+        }
+      } catch (err) {
+        console.error('Failed to load order:', err);
+      }
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        // Update order status on server
+        const resp = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+        if (!resp.ok) throw new Error('Failed to update order');
+
+        if (status === 'Confirmed') {
+          // decrement product stock for each order item
+          const resp2 = await fetch(`/api/orders/${id}`);
+          if (resp2.ok) {
+            const data = await resp2.json();
+            const items = data.items || data.order && data.order.items || [];
+            for (const it of items) {
+              try {
+                // fetch product
+                const pResp = await fetch(`/api/products/${it.productId}`);
+                if (!pResp.ok) continue;
+                const p = await pResp.json();
+                const newStock = Math.max(0, (p.stock || 0) - (it.qty || 0));
+                await fetch(`/api/products/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stock: newStock }) });
+              } catch (e) {
+                console.warn('Failed to update product stock for', it.productId, e);
+              }
+            }
+          }
+        }
+
+        await render();
+        alert('Status updated');
+      } catch (err) {
+        console.error('Failed to update status:', err);
+        alert('Failed to update status');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() { render(); seed(); });
   </script>
 </body>
 </html>
