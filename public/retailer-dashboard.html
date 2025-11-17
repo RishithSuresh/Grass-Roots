@@ -8,24 +8,6 @@
   <script src="js/auth.js" defer></script>
   <script src="js/utils.js" defer></script>
   <style>
-      /* Match farmer dashboard navbar size and spacing */
-      .navbar {
-        background-color: var(--primary-color);
-      }
-      .nav-links {
-        display: flex;
-        gap: 2rem;
-        align-items: center;
-      }
-      .nav-links a {
-        color: white;
-        text-decoration: none;
-        font-size: 0.95rem;
-        transition: opacity 0.3s ease;
-      }
-      .nav-links a:hover {
-        opacity: 0.8;
-      }
     body {
       background: linear-gradient(135deg, #e8f5ee 0%, #f7fafc 100%);
       min-height: 100vh;
@@ -35,25 +17,18 @@
     .navbar {
       background: linear-gradient(90deg, var(--primary-color), #357a4b 80%);
       box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-      padding: 1.1rem 0 1.1rem 0;
+      padding: 1.1rem 0;
       min-height: 72px;
-      border-radius: 0;
     }
     .nav-container {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      min-height: 56px;
     }
     .logo {
       font-size: 2.2rem;
       font-weight: bold;
       color: #fff;
-      letter-spacing: 1px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
     }
     .nav-links {
       display: flex;
@@ -65,14 +40,6 @@
       text-decoration: none;
       font-size: 0.97rem;
       font-weight: 500;
-      transition: opacity 0.2s, color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .nav-links a:hover {
-      opacity: 0.8;
-      color: #e0ffe0;
     }
     .logout-btn {
       background: #e74c3c;
@@ -83,32 +50,17 @@
       font-size: 1.13rem;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(231,76,60,0.08);
-      transition: background 0.2s;
-    }
-    .logout-btn:hover {
-      background: #c0392b;
     }
     .dashboard-header {
       background: linear-gradient(135deg, var(--primary-color), #4a8b5a 80%);
       color: white;
-      padding: 2.2rem 0 1.2rem 0;
-        margin-bottom: 2.2rem;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-        border-radius: 0;
+      padding: 2.2rem 0;
+      margin-bottom: 2.2rem;
     }
     .dashboard-header h1 {
       margin: 0;
       font-size: 2.1rem;
       font-weight: 700;
-      letter-spacing: 0.5px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .dashboard-header p {
-      margin: 0.7rem 0 0 0;
-      font-size: 0.9rem;
-        font-size: 1.1rem;
-      color: #eaf7ee;
     }
     .container {
       max-width: 1100px;
@@ -121,43 +73,26 @@
       gap: 2.2rem;
       margin-bottom: 2.5rem;
     }
-    @media (max-width: 900px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-    }
     .feature-box {
       background: #fff;
       border-radius: 18px;
-      padding: 2.1rem 2rem 1.7rem 2rem;
-      box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10), 0 1.5px 6px rgba(44,62,80,0.04);
-      transition: transform 0.22s, box-shadow 0.22s;
+      padding: 2.1rem;
+      box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
       border: 1.5px solid #e6f2ea;
       min-height: 220px;
-    }
-    .feature-box:hover {
-      transform: translateY(-6px) scale(1.025);
-      box-shadow: 0 16px 40px rgba(44,62,80,0.13);
-      border-color: #b2e5c7;
-    }
-    .feature-icon {
-      font-size: 2.3rem;
-      margin-bottom: 1.1rem;
-      color: var(--primary-color);
-      filter: drop-shadow(0 2px 6px #e6f2ea);
     }
     .feature-box h3 {
       margin: 0 0 0.7rem 0;
       color: var(--primary-color);
       font-size: 1.25rem;
       font-weight: 600;
-      letter-spacing: 0.2px;
     }
     .feature-box p {
       color: #6a7c6a;
       margin: 0 0 1.2rem 0;
       font-size: 1.02rem;
-      line-height: 1.6;
     }
-    .feature-box .btn, .btn {
+    .btn {
       display: inline-block;
       padding: 0.7rem 1.3rem;
       font-size: 1rem;
@@ -166,28 +101,9 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      text-decoration: none;
       text-align: center;
       font-weight: 600;
-      box-shadow: 0 2px 8px rgba(47,107,80,0.08);
-      transition: background 0.2s, box-shadow 0.2s, transform 0.18s;
     }
-    .btn:hover { background: #1f4d35; box-shadow: 0 4px 16px rgba(47,107,80,0.13); transform: translateY(-2px) scale(1.04); }
-    .btn a { color: white; text-decoration: none; }
-    table { width:100%; border-collapse:collapse; margin-top: 1rem; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(44,62,80,0.04); }
-    table th, table td { text-align:left; padding:0.7rem; border-bottom:1px solid #f0f0f0; }
-    table th { background: #f5f5f5; font-weight: 600; }
-    .small { font-size:0.93rem; }
-    .muted { color:#8a9a8a; }
-    .section { margin-bottom:2.2rem; }
-    .flex { display:flex; gap:14px; align-items:center; flex-wrap: wrap; }
-    .pill { display:inline-block; padding:0.28rem 0.7rem; border-radius:999px; font-size:0.89rem; }
-    .status-pending { background:#fff3cd; color:#856404; }
-    .status-confirmed { background:#d1e7dd; color:#0f5132; }
-    .form-group { margin-bottom: 1.1rem; }
-    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-color); }
-    .form-group input, .form-group textarea { width: 100%; padding: 0.7rem; border: 1px solid #ddd; border-radius: 0.5rem; font-family: inherit; font-size: 1rem; }
-    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(47, 107, 80, 0.10); }
   </style>
 </head>
 <body>
@@ -195,7 +111,7 @@
     <div class="nav-container container">
       <a href="index.html" class="logo">GrassRoots</a>
       <div class="nav-links">
-        <a href="retailer-shop-profile.html"><span style="font-size:1.25em;vertical-align:middle;">&#128100;</span> Profile</a>
+        <a href="retailer-shop-profile.html">Profile</a>
         <a href="contact.html">Contact</a>
         <button class="logout-btn btn" onclick="logout()">Logout</button>
       </div>
@@ -204,347 +120,43 @@
 
   <div class="dashboard-header">
     <div class="container">
-      <h1>Retailer / Shopkeeper Dashboard</h1>
-      <p class="muted">Manage your products, inventory, orders, payments and shop profile.</p>
+      <h1>Retailer Dashboard</h1>
+      <p>Manage your products, orders, payments, and shop profile.</p>
     </div>
   </div>
 
   <div class="container">
     <div class="dashboard-grid">
       <div class="feature-box">
-        <div class="feature-icon">📦</div>
         <h3>Product Catalog</h3>
-        <p class="small muted">Add or edit products, set price & stock levels.</p>
-        <div style="margin-top:12px"><a href="retailer-products.html" class="btn">Open Products</a></div>
+        <p>Add or edit products, set price & stock levels.</p>
+        <a href="retailer-products.html" class="btn">Open Products</a>
       </div>
 
       <div class="feature-box">
-        <div class="feature-icon">📋</div>
         <h3>Orders</h3>
-        <p class="small muted">View incoming orders and update fulfillment status.</p>
-        <div style="margin-top:12px"><a href="retailer-orders.html" class="btn">Open Orders</a></div>
+        <p>View incoming orders and update fulfillment status.</p>
+        <a href="retailer-orders.html" class="btn">Open Orders</a>
       </div>
 
       <div class="feature-box">
-        <div class="feature-icon">💳</div>
         <h3>Payments & Invoices</h3>
-        <p class="small muted">Mark payments, generate printable invoices.</p>
-        <div style="margin-top:12px"><a href="retailer-payments.html" class="btn">Open Payments</a></div>
+        <p>Mark payments, generate printable invoices.</p>
+        <a href="retailer-payments.html" class="btn">Open Payments</a>
       </div>
 
       <div class="feature-box">
-        <div class="feature-icon">⚙️</div>
         <h3>Profile & Settings</h3>
-        <p class="small muted">Manage shop details, contact and delivery options.</p>
-        <div style="margin-top:12px"><a href="retailer-profile.html" class="btn">Open Profile</a></div>
-      </div>
-    </div>
-
-    <!-- Sections -->
-    <div id="products" class="section" style="display:none">
-      <h2>Products</h2>
-      <div style="margin:10px 0" class="flex">
-        <button class="btn" onclick="openAddProduct()">➕ Add Product</button>
-        <input id="productSearch" placeholder="🔍 Search products..." oninput="renderProducts()" style="flex:1;padding:0.6rem;border-radius:0.4rem;border:1px solid #ddd;margin-left:auto" />
-      </div>
-      <table id="productsTable"><thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div id="orders" class="section" style="display:none">
-      <h2>Orders</h2>
-      <p class="small muted">Orders placed by buyers. Click to view and change status.</p>
-      <table id="ordersTable"><thead><tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div id="payments" class="section" style="display:none">
-      <h2>Payments & Invoices</h2>
-      <p class="small muted">Mark orders as paid and generate invoices.</p>
-      <table id="paymentsTable"><thead><tr><th>Order</th><th>Amount</th><th>Paid</th><th>Actions</th></tr></thead><tbody></tbody></table>
-    </div>
-
-    <div id="profile" class="section" style="display:none">
-      <h2>Shop Profile</h2>
-      <form id="profileForm">
-        <div class="form-group"><label>Shop Name</label><input id="shopName" required /></div>
-        <div class="form-group"><label>Address</label><input id="shopAddress" /></div>
-        <div class="form-group"><label>Phone</label><input id="shopPhone" /></div>
-        <div style="margin-top:8px"><button class="btn" type="button" onclick="saveProfile()">Save Profile</button></div>
-      </form>
-    </div>
-
-  </div>
-
-  <!-- Add/Edit Product Modal -->
-  <div id="productModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:100;padding:20px">
-    <div style="background:white;padding:24px;border-radius:10px;max-width:500px;width:100%;margin:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);margin-top:50px">
-      <h3 id="productModalTitle">Add Product</h3>
-      <div class="form-group"><label>Product Name *</label><input id="pName" type="text" required /></div>
-      <div class="form-group"><label>Price (₹) *</label><input id="pPrice" type="number" step="0.01" required /></div>
-      <div class="form-group"><label>Stock Quantity *</label><input id="pStock" type="number" required /></div>
-      <div style="margin-top:16px;display:flex;gap:10px">
-        <button class="btn" onclick="saveProduct()">Save Product</button>
-        <button style="background:#999;color:white;border:none;padding:0.6rem 1rem;border-radius:8px;cursor:pointer" onclick="closeProductModal()">Cancel</button>
+        <p>Manage shop details, contact and delivery options.</p>
+        <a href="retailer-profile.html" class="btn">Open Profile</a>
       </div>
     </div>
   </div>
 
   <script>
-    // Auth guard - use centralized system
-    if (!GrassRootsAuth.requireAuth('retailer')) {
-      // Will redirect automatically if not authorized
-    }
-
-    // LocalStorage keys
-    const KEY_PRODUCTS = 'retailer_products';
-    const KEY_ORDERS = 'retailer_orders';
-    const KEY_PROFILE = 'retailer_profile';
-    const KEY_NOTIFS = 'retailer_notifications';
-
-    // Simple helpers
-    function load(key) {
-      try {
-        return JSON.parse(localStorage.getItem(key) || 'null');
-      } catch (e) {
-        return null;
-      }
-    }
-
-    function save(key, val) {
-      localStorage.setItem(key, JSON.stringify(val));
-    }
-
-    // Products
-    function loadProducts() {
-      return load(KEY_PRODUCTS) || [];
-    }
-
-    function renderProducts() {
-      const q = document.getElementById('productSearch').value.toLowerCase();
-      const rows = document.querySelector('#productsTable tbody');
-      rows.innerHTML = '';
-      loadProducts()
-        .filter(p => p.name.toLowerCase().includes(q))
-        .forEach(p => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${p.name}</td><td>₹ ${Number(p.price).toFixed(2)}</td><td>${p.stock}</td><td><button class="btn" onclick="editProduct('${p.id}')">Edit</button> <button class="btn" style='background:#e04' onclick="deleteProduct('${p.id}')">Delete</button></td>`;
-          rows.appendChild(tr);
-        });
-    }
-
-    function openAddProduct() {
-      window.editingProduct = null;
-      document.getElementById('productModalTitle').textContent = 'Add Product';
-      document.getElementById('pName').value = '';
-      document.getElementById('pPrice').value = '';
-      document.getElementById('pStock').value = '0';
-      document.getElementById('productModal').style.display = 'block';
-    }
-
-    function closeProductModal() {
-      document.getElementById('productModal').style.display = 'none';
-    }
-
-    function saveProduct() {
-      const name = document.getElementById('pName').value.trim();
-      const price = Number(document.getElementById('pPrice').value) || 0;
-      const stock = parseInt(document.getElementById('pStock').value) || 0;
-      if (!name) {
-        alert('Name required');
-        return;
-      }
-      let products = loadProducts();
-      if (window.editingProduct) {
-        const idx = products.findIndex(x => x.id === window.editingProduct);
-        if (idx > -1) {
-          products[idx].name = name;
-          products[idx].price = price;
-          products[idx].stock = stock;
-        }
-      } else {
-        products.push({
-          id: 'p_' + Date.now(),
-          name,
-          price,
-          stock
-        });
-      }
-      save(KEY_PRODUCTS, products);
-      closeProductModal();
-      renderProducts();
-      addNotification('Product saved: ' + name);
-    }
-
-    function editProduct(id) {
-      const p = loadProducts().find(x => x.id === id);
-      if (!p) return;
-      window.editingProduct = id;
-      document.getElementById('productModalTitle').textContent = 'Edit Product';
-      document.getElementById('pName').value = p.name;
-      document.getElementById('pPrice').value = p.price;
-      document.getElementById('pStock').value = p.stock;
-      document.getElementById('productModal').style.display = 'block';
-    }
-
-    function deleteProduct(id) {
-      if (!confirm('Delete product?')) return;
-      let products = loadProducts().filter(x => x.id !== id);
-      save(KEY_PRODUCTS, products);
-      renderProducts();
-      addNotification('Product deleted');
-    }
-
-    // Orders
-    function loadOrders() {
-      return load(KEY_ORDERS) || [];
-    }
-
-    function renderOrders() {
-      const rows = document.querySelector('#ordersTable tbody');
-      rows.innerHTML = '';
-      loadOrders().forEach(o => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${o.id}</td><td>${o.items.map(i => i.name + ' x' + i.qty).join('<br>')}</td><td>₹ ${o.total.toFixed(2)}</td><td><span class='pill ${o.status === 'Pending' ? 'status-pending' : 'status-confirmed'}'>${o.status}</span></td><td><button class='btn' onclick="viewOrder('${o.id}')">View</button></td>`;
-        rows.appendChild(tr);
-      });
-    }
-
-    function seedOrders() {
-      if (loadOrders().length) return;
-      const products = loadProducts();
-      const sample = [{
-        id: 'o_' + Date.now(),
-        items: products.slice(0, 2).map(p => ({
-          productId: p.id,
-          name: p.name,
-          qty: 1,
-          price: p.price
-        })),
-        total: products.slice(0, 2).reduce((s, p) => s + (p.price || 0), 0),
-        status: 'Pending',
-        paid: false
-      }];
-      save(KEY_ORDERS, sample);
-      addNotification('Sample order created');
-      renderOrders();
-      renderPayments();
-    }
-
-    function viewOrder(id) {
-      const o = loadOrders().find(x => x.id === id);
-      if (!o) {
-        alert('Order not found');
-        return;
-      }
-      const details = `Order ${o.id}\nItems:\n${o.items.map(i => i.name + ' x' + i.qty).join('\n')}\nTotal: ₹ ${o.total.toFixed(2)}\nStatus: ${o.status}\nPaid: ${o.paid ? 'Yes' : 'No'}`;
-      if (confirm(details + '\n\nMark as Confirmed?')) {
-        updateOrderStatus(id, 'Confirmed');
-      }
-    }
-
-    function updateOrderStatus(id, status) {
-      const orders = loadOrders();
-      const idx = orders.findIndex(x => x.id === id);
-      if (idx === -1) return;
-      orders[idx].status = status;
-      if (status === 'Confirmed') {
-        orders[idx].items.forEach(it => {
-          let products = loadProducts();
-          const p = products.find(x => x.id === it.productId);
-          if (p) {
-            p.stock = Math.max(0, (p.stock || 0) - (it.qty || 0));
-            save(KEY_PRODUCTS, products);
-          }
-        });
-        addNotification('Order ' + id + ' confirmed');
-      }
-      save(KEY_ORDERS, orders);
-      renderOrders();
-      renderProducts();
-      renderPayments();
-    }
-
-    // Payments & invoices
-    function renderPayments() {
-      const rows = document.querySelector('#paymentsTable tbody');
-      rows.innerHTML = '';
-      loadOrders().forEach(o => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${o.id}</td><td>₹ ${o.total.toFixed(2)}</td><td>${o.paid ? 'Yes' : 'No'}</td><td><button class='btn' onclick="togglePaid('${o.id}')">Mark Paid</button> <button class='btn' onclick="printInvoice('${o.id}')">Invoice</button></td>`;
-        rows.appendChild(tr);
-      });
-    }
-
-    function togglePaid(id) {
-      const orders = loadOrders();
-      const o = orders.find(x => x.id === id);
-      if (!o) return;
-      o.paid = !o.paid;
-      save(KEY_ORDERS, orders);
-      renderPayments();
-      addNotification('Payment status changed for ' + id);
-    }
-
-    function printInvoice(id) {
-      const o = loadOrders().find(x => x.id === id);
-      if (!o) return;
-      const profile = load(KEY_PROFILE) || {};
-      const html = `<!doctype html><html><head><meta charset='utf-8'><title>Invoice ${o.id}</title></head><body><h2>Invoice ${o.id}</h2><p>Shop: ${profile.shopName || 'Your Shop'}</p><p>Items:</p><ul>${o.items.map(i => '<li>' + i.name + ' x' + i.qty + ' - ₹' + (i.price).toFixed(2) + '</li>').join('')}</ul><p><strong>Total: ₹${o.total.toFixed(2)}</strong></p></body></html>`;
-      const w = window.open('', '', 'width=700,height=600');
-      w.document.write(html);
-      w.document.close();
-      w.print();
-    }
-
-    // Profile
-    function loadProfile() {
-      const p = load(KEY_PROFILE) || {};
-      document.getElementById('shopName').value = p.shopName || '';
-      document.getElementById('shopAddress').value = p.address || '';
-      document.getElementById('shopPhone').value = p.phone || '';
-    }
-
-    function saveProfile() {
-      const p = {
-        shopName: document.getElementById('shopName').value.trim(),
-        address: document.getElementById('shopAddress').value.trim(),
-        phone: document.getElementById('shopPhone').value.trim()
-      };
-      save(KEY_PROFILE, p);
-      addNotification('Profile saved');
-    }
-
-
-
-    // UI helpers
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'block';
-      if (id === 'products') {
-        renderProducts();
-      }
-      if (id === 'orders') {
-        renderOrders();
-        seedOrders();
-      }
-      if (id === 'payments') {
-        renderPayments();
-      }
-      if (id === 'profile') {
-        loadProfile();
-      }
-    }
-
     function logout() {
       GrassRootsAuth.logout();
     }
-
-    // Init
-    document.addEventListener('DOMContentLoaded', function() {
-      renderProducts();
-      renderOrders();
-      renderPayments();
-    });
   </script>
 </body>
 </html>

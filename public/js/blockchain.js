@@ -1,5 +1,4 @@
-// Minimal client-side blockchain for demo purposes
-// Stores chain in localStorage under key 'simple_blockchain'
+// Minimal client-side blockchain
 class Block {
     constructor(index, timestamp, data, previousHash, nonce, hash) {
         this.index = index;
