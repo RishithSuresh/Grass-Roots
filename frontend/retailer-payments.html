@@ -23,6 +23,8 @@
       <table id="paymentsTable"><thead><tr><th>Order</th><th>Amount</th><th>Paid</th><th>Actions</th></tr></thead><tbody></tbody></table>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="js/blockchain.js"></script>
   <script>
     const KEY_ORDERS='retailer_orders';
 
@@ -46,9 +48,36 @@
       const orders = await fetchOrders();
       orders.forEach(o=>{
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${o.id}</td><td>₹ ${Number(o.total).toFixed(2)}</td><td>${o.paid? 'Yes':'No'}</td><td><button class='btn' onclick="togglePaid('${o.id}')">Toggle Paid</button> <button class='btn' onclick="printInv('${o.id}')">Print</button></td>`;
+        tr.innerHTML=`<td>${o.id}</td><td>₹ ${Number(o.total).toFixed(2)}</td><td>${o.paid? 'Yes':'No'}</td><td>
+          <button class='btn' onclick="togglePaid('${o.id}')">Toggle Paid</button>
+          <button class='btn' onclick="printInv('${o.id}')">Print</button>
+          <button class='btn' onclick="payOrder('${o.id}', ${o.total})">Pay</button>
+        </td>`;
         rows.appendChild(tr);
       });
+        // Blockchain payment handler
+        async function payOrder(orderId, total) {
+          // Convert INR to ETH for demo (replace with real conversion in production)
+          // For demo, assume 1 ETH = 200,000 INR
+          const ethAmount = (Number(total) / 200000).toFixed(6);
+          payWithMetaMask(orderId, ethAmount,
+            function(tx) {
+              // On success, mark as paid and print receipt
+              if (window.location.protocol === 'file:') {
+                const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+                const o = orders.find(x => x.id === orderId);
+                if (o) {
+                  o.paid = true;
+                  localStorage.setItem(KEY_ORDERS, JSON.stringify(orders));
+                }
+              }
+              printInv(orderId);
+            },
+            function(err) {
+              alert('Payment failed: ' + (err && err.message ? err.message : err));
+            }
+          );
+        }
     }
 
     async function togglePaid(id){

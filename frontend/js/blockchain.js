@@ -1,4 +1,45 @@
-// Minimal client-side blockchain
+// blockchain.js: MetaMask and ethers.js integration for payment
+// Replace CONTRACT_ADDRESS with your deployed Payment contract address
+const CONTRACT_ADDRESS = "YOUR_DEPLOYED_CONTRACT_ADDRESS";
+const CONTRACT_ABI = [
+  {
+    "inputs": [
+      { "internalType": "string", "name": "orderId", "type": "string" }
+    ],
+    "name": "pay",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "payer", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "indexed": false, "internalType": "string", "name": "orderId", "type": "string" }
+    ],
+    "name": "PaymentReceived",
+    "type": "event"
+  }
+];
+
+async function payWithMetaMask(orderId, amountEth, onSuccess, onError) {
+  if (!window.ethereum) {
+    alert("MetaMask is not installed");
+    return;
+  }
+  try {
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    const tx = await contract.pay(orderId, { value: ethers.utils.parseEther(amountEth.toString()) });
+    await tx.wait();
+    onSuccess && onSuccess(tx);
+  } catch (err) {
+    onError && onError(err);
+  }
+}// Minimal client-side blockchain
 class Block {
     constructor(index, timestamp, data, previousHash, nonce, hash) {
         this.index = index;
