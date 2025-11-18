@@ -88,11 +88,25 @@
 
             GrassRootsUtils.showLoading('Logging in...');
             try {
-                const resp = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
+                // Try relative API path first (works when frontend served by backend)
+                let resp;
+                try {
+                    resp = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                } catch (networkErr) {
+                    console.warn('Relative /api request failed, attempting explicit backend URL', networkErr);
+                    // Fallback to explicit backend URL (useful when page opened from file:// or different origin)
+                    const backendOrigin = 'http://localhost:3000';
+                    resp = await fetch(backendOrigin + '/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                }
+
                 if (!resp.ok) {
                     const err = await resp.json().catch(() => ({}));
                     throw new Error((err && err.error) || 'Invalid credentials');
