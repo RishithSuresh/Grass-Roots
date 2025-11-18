@@ -45,8 +45,12 @@
             <div class="qr-section">
                 <h3>Step 1: Select Your Crop</h3>
                 <div class="form-group">
-                    <label for="cropSelect">Choose a Saved Crop (or manually enter below)</label>
-                    <select id="cropSelect">
+                    <label for="cropInput">Choose a Saved Crop (or manually enter below)</label>
+                    <!-- searchable input backed by a datalist for typing or choosing -->
+                    <input list="cropList" id="cropInput" placeholder="Type or choose a saved crop">
+                    <datalist id="cropList"></datalist>
+                    <!-- hidden select kept for id -> record mapping when a saved crop is chosen -->
+                    <select id="cropSelect" style="display:none;">
                         <option value="">-- Select a crop --</option>
                     </select>
                 </div>
@@ -125,6 +129,61 @@
             </form>
 
     <script>
+        // Auth guard - use centralized system
+        if (!GrassRootsAuth.requireAuth('farmer')) {
+            // Will redirect automatically if not authorized
+        }
+
+        // Load crops into dropdown from server (fallback to localStorage)
+        async function loadCropSelector() {
+            const select = document.getElementById('cropSelect');
+            select.innerHTML = '<option value="">-- Select a crop --</option>';
+            try {
+                const resp = await fetch('/api/crops');
+                if (!resp.ok) throw new Error('Failed to load crops');
+                const crops = await resp.json();
+                crops.forEach(crop => {
+                    const opt = document.createElement('option');
+                    opt.value = crop.id;
+                    opt.textContent = `${crop.name} (${crop.variety || ''})`;
+                    select.appendChild(opt);
+                });
+                return;
+            } catch (err) {
+                const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+                crops.forEach(crop => {
+                    const opt = document.createElement('option');
+                    opt.value = crop.id;
+                    opt.textContent = `${crop.type} (${crop.area} acres, planted ${crop.plantingDate})`;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        // Load crop details when selected (use server-side crop when available)
+        document.getElementById('cropSelect').addEventListener('change', async function() {
+            if (!this.value) return;
+            try {
+                const resp = await fetch('/api/crops/' + this.value);
+                if (resp.ok) {
+                    const c = await resp.json();
+                    document.getElementById('cropType').value = c.name || '';
+                    document.getElementById('farmLocation').value = c.notes || '';
+                    return;
+                }
+            } catch (e) {
+                // fallback
+            }
+            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+            const selected = crops.find(c => c.id == this.value);
+            if (selected) {
+                document.getElementById('cropType').value = selected.type || '';
+                document.getElementById('farmLocation').value = selected.notes || '';
+            }
+        });
+
+        // Format QR data
+        function formatQRData() {
             const data = {
                 productName: document.getElementById('productName').value,
                 cropType: document.getElementById('cropType').value,
@@ -168,170 +227,30 @@
             document.getElementById('qrDisplaySection').style.display = 'block';
             document.getElementById('qrHistorySection').style.display = 'block';
 
-            // Generate QR: try local QR library first, then fallback to qrserver API
-            async function renderCanvasFromImage(imgSrc) {
-                return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'Anonymous';
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        resolve(canvas);
-                    };
-                    img.onerror = (e) => reject(e || new Error('Image load error'));
-                    img.src = imgSrc;
-                });
-            }
-
-            async function generateAndSaveQRCode(qrText, data) {
-                // Try server-side generation first (most reliable for CORS-free PNG)
-                try {
-                    const payload = Object.assign({}, data, { text: qrText });
-                    const resp = await GrassRootsUtils.apiFetch('/api/qr/generate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (resp) {
-                        console.debug('Server /api/qr/generate response:', resp);
-                    }
-                    if (resp && resp.ok) {
-                        const json = await resp.json();
-                        console.debug('Server /api/qr/generate JSON:', json && (json.dataUrl ? '[dataUrl present]' : json));
-                        const dataUrl = json.dataUrl || (json.record && json.record.canvasData) || null;
-                        // Render returned dataUrl
-                        document.getElementById('qrcode').innerHTML = '';
-                        if (dataUrl) {
-                            try {
-                                const img = new Image();
-                                img.onload = () => {
-                                    // draw to canvas for consistent UI and to allow download/print as canvas
-                                    const canvas = document.createElement('canvas');
-                                    canvas.width = img.width;
-                                    canvas.height = img.height;
-                                    const ctx = canvas.getContext('2d');
-                                    ctx.drawImage(img, 0, 0);
-                                    document.getElementById('qrcode').appendChild(canvas);
-                                };
-                                img.onerror = () => {
-                                    // fallback: show image element
-                                    const fallbackImg = document.createElement('img');
-                                    fallbackImg.src = dataUrl;
-                                    fallbackImg.style.maxWidth = '300px';
-                                    document.getElementById('qrcode').appendChild(fallbackImg);
-                                };
-                                img.src = dataUrl;
-                                // update status when image load starts
-                                const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Generated by server';
-                            } catch (renderErr) {
-                                console.warn('Rendering dataUrl failed, showing as image instead', renderErr);
-                                const img = document.createElement('img');
-                                img.src = dataUrl;
-                                img.style.maxWidth = '300px';
-                                document.getElementById('qrcode').appendChild(img);
-                            }
-                        } else {
-                            document.getElementById('qrcode').innerHTML = '<p style="color:#c00;">Server generated QR but no image returned</p>';
-                            const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Server returned no image';
-                        }
-
-                        // Persisted on server; also update local history view
-                        try {
-                            const record = json.record || {
-                                id: 'qr_' + Date.now(),
-                                qrText,
-                                ...data,
-                                canvasData: dataUrl || null,
-                                generatedAt: new Date().toISOString()
-                            };
-                            // Save locally for quick access
-                            let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
-                            qrHistory.unshift(record);
-                            qrHistory = qrHistory.slice(0, 20);
-                            localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
-                        } catch (localErr) {
-                            console.warn('Failed to update local history:', localErr);
-                        }
-
-                        return true;
-                    }
-                } catch (serverErr) {
-                    console.warn('Server-side QR generation failed, falling back to client/remote:', serverErr && serverErr.message ? serverErr.message : serverErr);
-                    // fall through to existing client-side / remote fallback below
+            // Generate using qrcode.js
+            QRCode.toCanvas(document.createElement('canvas'), qrText, { width: 300, margin: 2 }, async function (error, canvas) {
+                if (error) {
+                    console.error(error);
+                    document.getElementById('qrcode').innerHTML = '<p style="color: #c00;">Error generating QR code</p>';
+                    return;
                 }
-
-                // Existing client-side / remote fallback
-                let canvas = null;
-                // Try local library
-                try {
-                    if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
-                        canvas = document.createElement('canvas');
-                        await new Promise((res, rej) => {
-                            QRCode.toCanvas(canvas, qrText, { width: 300, margin: 2 }, (err) => err ? rej(err) : res());
-                        });
-                    } else if (typeof qrcode !== 'undefined' && typeof qrcode.toCanvas === 'function') {
-                        canvas = document.createElement('canvas');
-                        await new Promise((res, rej) => {
-                            qrcode.toCanvas(canvas, qrText, { width: 300, margin: 2 }, (err) => err ? rej(err) : res());
-                        });
-                    } else {
-                        throw new Error('QR library not available');
-                    }
-                } catch (err) {
-                    console.warn('Local QR generation failed, falling back to remote API:', err && err.message ? err.message : err);
-                    // Fallback to external QR image service
-                    try {
-                        const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrText);
-                        canvas = await renderCanvasFromImage(apiUrl);
-                    } catch (err2) {
-                        console.error('Remote QR fallback failed:', err2);
-                        document.getElementById('qrcode').innerHTML = '<p style="color:#c00;">Error generating QR code</p>';
-                        return null;
-                    }
-                }
-
-                // Append canvas to UI (or image fallback)
                 document.getElementById('qrcode').innerHTML = '';
-                if (canvas) {
-                    document.getElementById('qrcode').appendChild(canvas);
-                    const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Generated locally';
-                } else {
-                    // show remote image as fallback
-                    const img = document.createElement('img');
-                    const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrText);
-                    img.src = apiUrl;
-                    img.alt = 'QR code';
-                    img.style.maxWidth = '300px';
-                    document.getElementById('qrcode').appendChild(img);
-                    const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Generated via remote API fallback';
-                }
+                document.getElementById('qrcode').appendChild(canvas);
 
-                // Save to history record
-                const qrId = 'qr_' + Date.now();
-                const selectedCrop = document.getElementById('cropSelect').value || null;
-                const qrRecord = {
-                    id: qrId,
-                    cropId: selectedCrop,
-                    ...data,
-                    qrText: qrText,
-                    // attempt to include canvasData if available (may fail due to cross-origin)
-                    canvasData: (function(){
-                        try {
-                            return canvas ? canvas.toDataURL('image/png') : null;
-                        } catch (e) {
-                            console.warn('Could not generate canvas dataURL:', e);
-                            return null;
-                        }
-                    })()
-                };
+                // Save to history
+                    const qrId = 'qr_' + Date.now();
+                    const selectedCrop = document.getElementById('cropSelect').value || null;
+                    const qrRecord = {
+                        id: qrId,
+                        cropId: selectedCrop,
+                        ...data,
+                        qrText: qrText,
+                        canvasData: canvas.toDataURL('image/png')
+                    };
 
                 // POST to backend API
                 try {
-                    const resp = await GrassRootsUtils.apiFetch('/api/qr', {
+                    const resp = await fetch('/api/qr', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(qrRecord)
@@ -440,84 +359,49 @@
             printWindow.print();
         });
 
-        // Render QR History (fetch from backend)
-        async function renderQRHistory() {
+        // Render QR History
+        function renderQRHistory() {
+            const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
             const historyDiv = document.getElementById('qrHistory');
-                try {
-                const resp = await GrassRootsUtils.apiFetch('/api/qr');
+            try {
+                const resp = await fetch('/api/qr');
                 if (!resp.ok) throw new Error('Failed to load');
                 const qrHistory = await resp.json();
 
-                if (!qrHistory || qrHistory.length === 0) {
-                    historyDiv.innerHTML = '<p style="color: var(--muted);">No QR codes generated yet.</p>';
-                    return;
-                }
-
-                let html = '';
-                qrHistory.forEach(qr => {
-                    html += `
-                        <div class="qr-item">
-                            <div class="qr-item-preview" id="preview-${qr.id}"></div>
-                            <div class="qr-item-info">
-                                <div class="qr-item-name">${GrassRootsUtils.sanitizeHTML(qr.productName)}</div>
-                                <div class="qr-item-detail">Crop: ${GrassRootsUtils.sanitizeHTML(qr.cropType)} | Quality: ${GrassRootsUtils.sanitizeHTML(qr.quality)}</div>
-                                <div class="qr-item-detail">Harvest: ${GrassRootsUtils.sanitizeHTML(qr.harvestDate)} | Generated: ${new Date(qr.generatedAt).toLocaleDateString()}</div>
-                            </div>
-                            <div class="qr-item-actions">
-                                <button onclick="downloadQRFromHistory('${qr.id}')">Download</button>
-                                <button onclick="printQRFromHistory('${qr.id}')">Print</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                historyDiv.innerHTML = html;
-
-                // Render preview images
-                qrHistory.forEach(qr => {
-                    const previewDiv = document.getElementById(`preview-${qr.id}`);
-                    if (previewDiv && qr.canvasData) {
-                        const img = document.createElement('img');
-                        img.src = qr.canvasData;
-                        img.style.maxWidth = '100%';
-                        previewDiv.appendChild(img);
-                    }
-                });
-            } catch (err) {
-                console.error('Failed to load QR history:', err);
-                // Fallback to localStorage for older records
-                const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
-                if (!qrHistory.length) {
-                    historyDiv.innerHTML = '<p style="color: var(--muted);">No QR codes generated yet.</p>';
-                    return;
-                }
-                let html = '';
-                qrHistory.forEach(qr => {
-                    html += `
-                        <div class="qr-item">
-                            <div class="qr-item-preview" id="preview-${qr.id}"></div>
-                            <div class="qr-item-info">
-                                <div class="qr-item-name">${GrassRootsUtils.sanitizeHTML(qr.productName)}</div>
-                                <div class="qr-item-detail">Crop: ${GrassRootsUtils.sanitizeHTML(qr.cropType)} | Quality: ${GrassRootsUtils.sanitizeHTML(qr.quality)}</div>
-                                <div class="qr-item-detail">Harvest: ${GrassRootsUtils.sanitizeHTML(qr.harvestDate)} | Generated: ${new Date(qr.generatedAt).toLocaleDateString()}</div>
-                            </div>
-                            <div class="qr-item-actions">
-                                <button onclick="downloadQRFromHistory('${qr.id}')">Download</button>
-                                <button onclick="printQRFromHistory('${qr.id}')">Print</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                historyDiv.innerHTML = html;
-                qrHistory.forEach(qr => {
-                    const previewDiv = document.getElementById(`preview-${qr.id}`);
-                    if (previewDiv && qr.canvasData) {
-                        const img = document.createElement('img');
-                        img.src = qr.canvasData;
-                        img.style.maxWidth = '100%';
-                        previewDiv.appendChild(img);
-                    }
-                });
+            if (!qrHistory.length) {
+                historyDiv.innerHTML = '<p style="color: var(--muted);">No QR codes generated yet.</p>';
+                return;
             }
+
+            let html = '';
+            qrHistory.forEach(qr => {
+                html += `
+                    <div class="qr-item">
+                        <div class="qr-item-preview" id="preview-${qr.id}"></div>
+                        <div class="qr-item-info">
+                            <div class="qr-item-name">${qr.productName}</div>
+                            <div class="qr-item-detail">Crop: ${qr.cropType} | Quality: ${qr.quality}</div>
+                            <div class="qr-item-detail">Harvest: ${qr.harvestDate} | Generated: ${new Date(qr.generatedAt).toLocaleDateString()}</div>
+                        </div>
+                        <div class="qr-item-actions">
+                            <button onclick="downloadQRFromHistory('${qr.id}')">Download</button>
+                            <button onclick="printQRFromHistory('${qr.id}')">Print</button>
+                        </div>
+                    </div>
+                `;
+            });
+            historyDiv.innerHTML = html;
+
+            // Render preview canvases
+            qrHistory.forEach(qr => {
+                const previewDiv = document.getElementById(`preview-${qr.id}`);
+                if (previewDiv && qr.canvasData) {
+                    const img = document.createElement('img');
+                    img.src = qr.canvasData;
+                    img.style.maxWidth = '100%';
+                    previewDiv.appendChild(img);
+                }
+            });
         }
 
         // Download from history
