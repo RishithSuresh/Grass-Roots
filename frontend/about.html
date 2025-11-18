@@ -38,10 +38,15 @@
             margin-bottom: 1rem;
         }
         .team-grid {
-            display:grid;
-            grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
-            gap:2rem;
-            margin-top:2rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 700px) {
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .team-card {
             background:#fff;
@@ -125,27 +130,25 @@
                     <div class="team-card">
                         <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">RS</div>
                         <h4 style="text-align:center;color:var(--primary-color);">Rishith Suresh</h4>
-                        <p style="color:var(--muted);text-align:center;">Team Lead & Developer</p>
                     </div>
                     <div class="team-card">
                         <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">NH</div>
                         <h4 style="text-align:center;color:var(--primary-color);">Neha H</h4>
-                        <p style="color:var(--muted);text-align:center;">Frontend Developer</p>
                     </div>
                     <div class="team-card">
                         <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">NN</div>
                         <h4 style="text-align:center;color:var(--primary-color);">Nisha Nandisha</h4>
-                        <p style="color:var(--muted);text-align:center;">Backend Developer</p>
                     </div>
                     <div class="team-card">
                         <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">NG</div>
                         <h4 style="text-align:center;color:var(--primary-color);">Neha Gujjar</h4>
-                        <p style="color:var(--muted);text-align:center;">UI/UX Designer</p>
                     </div>
                 </div>
             </section>
 
             <section style="margin-top:2.5rem;text-align:center;">
+                <a href="index.html" class="btn" style="margin-bottom:1rem;display:inline-block;">Back to Dashboard</a>
+                <br />
                 <a href="contact.html" class="btn">Get in touch</a>
             </section>
         </div>
