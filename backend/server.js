@@ -23,8 +23,15 @@ const Order = require('./models/order');
 const OrderItem = require('./models/orderItem');
 
 const app = express();
-app.use(cors());
+// Allow CORS (including file:// null origin) during development
+app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json({ limit: '5mb' }));
+
+// Simple request logger to aid debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} - Origin: ${req.get('origin') || 'none'}`);
+  next();
+});
 
 // API
 app.use('/api/qr', qrRoutes);
@@ -75,6 +82,7 @@ async function start() {
     QR.belongsTo(Crop, { foreignKey: 'cropId', targetKey: 'id' });
     Order.hasMany(OrderItem, { foreignKey: 'orderId' });
 
+    // Use plain sync to avoid destructive ALTERs on production-like schemas
     await sequelize.sync();
 
     // seed demo users and some sample data if missing

@@ -57,138 +57,74 @@
                 <h3>Step 2: Enter Product & Agricultural Details</h3>
 
                 <div class="form-group">
-                    <label for="productName">Product Name *</label>
-                    <input type="text" id="productName" placeholder="e.g., Basmati Rice - Premium Grade" required>
+                    <label for="productName">Product Name</label>
+                    <input id="productName" type="text" placeholder="e.g. Cherry Tomatoes" />
                 </div>
 
                 <div class="form-group">
-                    <label for="cropType">Crop Type *</label>
-                    <input type="text" id="cropType" placeholder="e.g., Rice, Wheat, Vegetables" required>
+                    <label for="cropType">Crop Type</label>
+                    <input id="cropType" type="text" placeholder="e.g. Tomato" />
                 </div>
 
                 <div class="form-group">
-                    <label for="quality">Quality Grade *</label>
-                    <select id="quality" required>
-                        <option value="">-- Select Quality --</option>
-                        <option value="Premium (Grade A)">Premium (Grade A) - Best quality</option>
-                        <option value="Good (Grade B)">Good (Grade B) - Standard quality</option>
-                        <option value="Standard (Grade C)">Standard (Grade C) - Regular quality</option>
-                        <option value="Economy">Economy - Budget option</option>
-                    </select>
+                    <label for="quality">Quality</label>
+                    <input id="quality" type="text" placeholder="e.g. Grade A" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:0.5rem;">
+                        <label for="harvestDate">Harvest Date</label>
+                        <input id="harvestDate" type="date" />
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="price">Price (optional)</label>
+                        <input id="price" type="number" step="0.01" placeholder="0.00" />
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="harvestDate">Harvest Date *</label>
-                    <input type="date" id="harvestDate" required>
+                    <label for="farmLocation">Farm Location</label>
+                    <input id="farmLocation" type="text" placeholder="e.g. Village, District" />
                 </div>
 
-                <div class="form-group">
-                    <label for="farmLocation">Farm Location *</label>
-                    <input type="text" id="farmLocation" placeholder="e.g., Punjab, District Name" required>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:0.5rem;">
+                        <label for="fertilizerUsed">Fertilizer Used</label>
+                        <input id="fertilizerUsed" type="text" />
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="pesticidesUsed">Pesticides Used</label>
+                        <input id="pesticidesUsed" type="text" />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="fertilizerUsed">Fertilizer Used *</label>
-                    <textarea id="fertilizerUsed" rows="2" placeholder="e.g., Organic compost, NPK 20:20:20, Urea dosage..." required></textarea>
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:0.5rem;">
+                        <label for="batchNumber">Batch Number</label>
+                        <input id="batchNumber" type="text" />
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>&nbsp;</label>
+                        <button type="submit" style="width:100%;">Generate QR</button>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="pesticidesUsed">Pesticides Used *</label>
-                    <textarea id="pesticidesUsed" rows="2" placeholder="e.g., Neem oil spray, Organic BioInsecticide, or 'None - Organic'" required></textarea>
+                <div id="qrDisplaySection" style="display:none; margin-top:1rem;">
+                    <div id="qrcode"></div>
+                    <div id="qrStatus" style="margin-top:0.5rem; color:var(--muted); font-size:0.95rem;"></div>
+                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+                        <button id="downloadBtn" type="button">Download</button>
+                        <button id="printBtn" type="button">Print</button>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="batchNumber">Batch Number (Optional)</label>
-                    <input type="text" id="batchNumber" placeholder="e.g., BATCH-2024-001">
+                <div id="qrHistorySection" style="display:none; margin-top:1rem;">
+                    <h4>QR History</h4>
+                    <div id="qrHistory" class="qr-history"></div>
                 </div>
-
-                <div class="form-group">
-                    <label for="price">Price (Optional)</label>
-                    <input type="text" id="price" placeholder="e.g., ₹80/kg">
-                </div>
-
-                <div class="form-group">
-                    <label for="additionalNotes">Additional Notes</label>
-                    <textarea id="additionalNotes" rows="2" placeholder="Any special certifications, handling instructions, etc."></textarea>
-                </div>
-
-                <button type="submit" class="btn" style="width: 100%; background: var(--primary-color); color: white; padding: 0.75rem; font-weight: 600;">Generate QR Code</button>
             </form>
 
-            <!-- QR Display -->
-            <div class="qr-section" id="qrDisplaySection" style="display: none; text-align: center;">
-                <h3>Your Generated QR Code</h3>
-                <div id="qrcode" style="display: inline-block; margin: 1rem 0;"></div>
-                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                    <button id="downloadBtn" class="btn" style="background: #2f6b50; color: white; padding: 0.6rem 1.2rem;">📥 Download QR</button>
-                    <button id="printBtn" class="btn" style="background: #666; color: white; padding: 0.6rem 1.2rem;">🖨️ Print QR</button>
-                </div>
-            </div>
-
-            <!-- QR History -->
-            <div class="qr-section" id="qrHistorySection" style="display: none;">
-                <h3>QR Code History</h3>
-                <div class="qr-history" id="qrHistory"></div>
-            </div>
-        </div>
-    </main>
-
     <script>
-        // Auth guard - use centralized system
-        if (!GrassRootsAuth.requireAuth('farmer')) {
-            // Will redirect automatically if not authorized
-        }
-
-        // Load crops into dropdown from server (fallback to localStorage)
-        async function loadCropSelector() {
-            const select = document.getElementById('cropSelect');
-            select.innerHTML = '<option value="">-- Select a crop --</option>';
-            try {
-                const resp = await fetch('/api/crops');
-                if (!resp.ok) throw new Error('Failed to load crops');
-                const crops = await resp.json();
-                crops.forEach(crop => {
-                    const opt = document.createElement('option');
-                    opt.value = crop.id;
-                    opt.textContent = `${crop.name} (${crop.variety || ''})`;
-                    select.appendChild(opt);
-                });
-                return;
-            } catch (err) {
-                const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
-                crops.forEach(crop => {
-                    const opt = document.createElement('option');
-                    opt.value = crop.id;
-                    opt.textContent = `${crop.type} (${crop.area} acres, planted ${crop.plantingDate})`;
-                    select.appendChild(opt);
-                });
-            }
-        }
-
-        // Load crop details when selected (use server-side crop when available)
-        document.getElementById('cropSelect').addEventListener('change', async function() {
-            if (!this.value) return;
-            try {
-                const resp = await fetch('/api/crops/' + this.value);
-                if (resp.ok) {
-                    const c = await resp.json();
-                    document.getElementById('cropType').value = c.name || '';
-                    document.getElementById('farmLocation').value = c.notes || '';
-                    return;
-                }
-            } catch (e) {
-                // fallback
-            }
-            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
-            const selected = crops.find(c => c.id == this.value);
-            if (selected) {
-                document.getElementById('cropType').value = selected.type || '';
-                document.getElementById('farmLocation').value = selected.notes || '';
-            }
-        });
-
-        // Format QR data
-        function formatQRData() {
             const data = {
                 productName: document.getElementById('productName').value,
                 cropType: document.getElementById('cropType').value,
@@ -232,30 +168,170 @@
             document.getElementById('qrDisplaySection').style.display = 'block';
             document.getElementById('qrHistorySection').style.display = 'block';
 
-            // Generate using qrcode.js
-            QRCode.toCanvas(document.createElement('canvas'), qrText, { width: 300, margin: 2 }, async function (error, canvas) {
-                if (error) {
-                    console.error(error);
-                    document.getElementById('qrcode').innerHTML = '<p style="color: #c00;">Error generating QR code</p>';
-                    return;
-                }
-                document.getElementById('qrcode').innerHTML = '';
-                document.getElementById('qrcode').appendChild(canvas);
-
-                // Save to history
-                    const qrId = 'qr_' + Date.now();
-                    const selectedCrop = document.getElementById('cropSelect').value || null;
-                    const qrRecord = {
-                        id: qrId,
-                        cropId: selectedCrop,
-                        ...data,
-                        qrText: qrText,
-                        canvasData: canvas.toDataURL('image/png')
+            // Generate QR: try local QR library first, then fallback to qrserver API
+            async function renderCanvasFromImage(imgSrc) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'Anonymous';
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas);
                     };
+                    img.onerror = (e) => reject(e || new Error('Image load error'));
+                    img.src = imgSrc;
+                });
+            }
+
+            async function generateAndSaveQRCode(qrText, data) {
+                // Try server-side generation first (most reliable for CORS-free PNG)
+                try {
+                    const payload = Object.assign({}, data, { text: qrText });
+                    const resp = await GrassRootsUtils.apiFetch('/api/qr/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (resp) {
+                        console.debug('Server /api/qr/generate response:', resp);
+                    }
+                    if (resp && resp.ok) {
+                        const json = await resp.json();
+                        console.debug('Server /api/qr/generate JSON:', json && (json.dataUrl ? '[dataUrl present]' : json));
+                        const dataUrl = json.dataUrl || (json.record && json.record.canvasData) || null;
+                        // Render returned dataUrl
+                        document.getElementById('qrcode').innerHTML = '';
+                        if (dataUrl) {
+                            try {
+                                const img = new Image();
+                                img.onload = () => {
+                                    // draw to canvas for consistent UI and to allow download/print as canvas
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = img.width;
+                                    canvas.height = img.height;
+                                    const ctx = canvas.getContext('2d');
+                                    ctx.drawImage(img, 0, 0);
+                                    document.getElementById('qrcode').appendChild(canvas);
+                                };
+                                img.onerror = () => {
+                                    // fallback: show image element
+                                    const fallbackImg = document.createElement('img');
+                                    fallbackImg.src = dataUrl;
+                                    fallbackImg.style.maxWidth = '300px';
+                                    document.getElementById('qrcode').appendChild(fallbackImg);
+                                };
+                                img.src = dataUrl;
+                                // update status when image load starts
+                                const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Generated by server';
+                            } catch (renderErr) {
+                                console.warn('Rendering dataUrl failed, showing as image instead', renderErr);
+                                const img = document.createElement('img');
+                                img.src = dataUrl;
+                                img.style.maxWidth = '300px';
+                                document.getElementById('qrcode').appendChild(img);
+                            }
+                        } else {
+                            document.getElementById('qrcode').innerHTML = '<p style="color:#c00;">Server generated QR but no image returned</p>';
+                            const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Server returned no image';
+                        }
+
+                        // Persisted on server; also update local history view
+                        try {
+                            const record = json.record || {
+                                id: 'qr_' + Date.now(),
+                                qrText,
+                                ...data,
+                                canvasData: dataUrl || null,
+                                generatedAt: new Date().toISOString()
+                            };
+                            // Save locally for quick access
+                            let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                            qrHistory.unshift(record);
+                            qrHistory = qrHistory.slice(0, 20);
+                            localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+                        } catch (localErr) {
+                            console.warn('Failed to update local history:', localErr);
+                        }
+
+                        return true;
+                    }
+                } catch (serverErr) {
+                    console.warn('Server-side QR generation failed, falling back to client/remote:', serverErr && serverErr.message ? serverErr.message : serverErr);
+                    // fall through to existing client-side / remote fallback below
+                }
+
+                // Existing client-side / remote fallback
+                let canvas = null;
+                // Try local library
+                try {
+                    if (typeof QRCode !== 'undefined' && typeof QRCode.toCanvas === 'function') {
+                        canvas = document.createElement('canvas');
+                        await new Promise((res, rej) => {
+                            QRCode.toCanvas(canvas, qrText, { width: 300, margin: 2 }, (err) => err ? rej(err) : res());
+                        });
+                    } else if (typeof qrcode !== 'undefined' && typeof qrcode.toCanvas === 'function') {
+                        canvas = document.createElement('canvas');
+                        await new Promise((res, rej) => {
+                            qrcode.toCanvas(canvas, qrText, { width: 300, margin: 2 }, (err) => err ? rej(err) : res());
+                        });
+                    } else {
+                        throw new Error('QR library not available');
+                    }
+                } catch (err) {
+                    console.warn('Local QR generation failed, falling back to remote API:', err && err.message ? err.message : err);
+                    // Fallback to external QR image service
+                    try {
+                        const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrText);
+                        canvas = await renderCanvasFromImage(apiUrl);
+                    } catch (err2) {
+                        console.error('Remote QR fallback failed:', err2);
+                        document.getElementById('qrcode').innerHTML = '<p style="color:#c00;">Error generating QR code</p>';
+                        return null;
+                    }
+                }
+
+                // Append canvas to UI (or image fallback)
+                document.getElementById('qrcode').innerHTML = '';
+                if (canvas) {
+                    document.getElementById('qrcode').appendChild(canvas);
+                    const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Generated locally';
+                } else {
+                    // show remote image as fallback
+                    const img = document.createElement('img');
+                    const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qrText);
+                    img.src = apiUrl;
+                    img.alt = 'QR code';
+                    img.style.maxWidth = '300px';
+                    document.getElementById('qrcode').appendChild(img);
+                    const st = document.getElementById('qrStatus'); if (st) st.innerText = 'Generated via remote API fallback';
+                }
+
+                // Save to history record
+                const qrId = 'qr_' + Date.now();
+                const selectedCrop = document.getElementById('cropSelect').value || null;
+                const qrRecord = {
+                    id: qrId,
+                    cropId: selectedCrop,
+                    ...data,
+                    qrText: qrText,
+                    // attempt to include canvasData if available (may fail due to cross-origin)
+                    canvasData: (function(){
+                        try {
+                            return canvas ? canvas.toDataURL('image/png') : null;
+                        } catch (e) {
+                            console.warn('Could not generate canvas dataURL:', e);
+                            return null;
+                        }
+                    })()
+                };
 
                 // POST to backend API
                 try {
-                    const resp = await fetch('/api/qr', {
+                    const resp = await GrassRootsUtils.apiFetch('/api/qr', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(qrRecord)
@@ -271,29 +347,76 @@
                     localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
                 }
 
-                renderQRHistory();
-            });
+                return true;
+            }
+
+            // Run generation
+            await generateAndSaveQRCode(qrText, data);
+
+            // Refresh history
+            renderQRHistory();
         });
 
         // Download QR
         document.getElementById('downloadBtn').addEventListener('click', function() {
             const canvas = document.querySelector('#qrcode canvas');
-            if (!canvas) return;
-            const url = canvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.download = `QR-${document.getElementById('productName').value || 'product'}-${Date.now()}.png`;
-            a.href = url;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            if (canvas) {
+                const url = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.download = `QR-${document.getElementById('productName').value || 'product'}-${Date.now()}.png`;
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+            }
+            // fallback to image src
+            const img = document.querySelector('#qrcode img');
+            if (!img || !img.src) return;
+            fetch(img.src).then(r => r.blob()).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.download = `QR-${document.getElementById('productName').value || 'product'}-${Date.now()}.png`;
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }).catch(err => console.error('Download fallback failed', err));
         });
 
         // Print QR
         document.getElementById('printBtn').addEventListener('click', function() {
             const canvas = document.querySelector('#qrcode canvas');
-            if (!canvas) return;
-            const printWindow = window.open('', '', 'width=800,height=600');
             const productName = document.getElementById('productName').value;
+            const printWindow = window.open('', '', 'width=800,height=600');
+            if (canvas) {
+                printWindow.document.write(`
+                    <html><head><title>Print QR Code</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                        h2 { color: #2f6b50; }
+                        img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
+                        .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
+                    </style>
+                    </head><body>
+                    <h2>${productName}</h2>
+                    <img src="${canvas.toDataURL('image/png')}" />
+                    <div class="details">
+                        <p><strong>Crop Type:</strong> ${document.getElementById('cropType').value}</p>
+                        <p><strong>Quality:</strong> ${document.getElementById('quality').value}</p>
+                        <p><strong>Harvest Date:</strong> ${document.getElementById('harvestDate').value}</p>
+                        <p><strong>Fertilizer:</strong> ${document.getElementById('fertilizerUsed').value}</p>
+                        <p><strong>Pesticides:</strong> ${document.getElementById('pesticidesUsed').value}</p>
+                    </div>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+                return;
+            }
+            // fallback to image
+            const img = document.querySelector('#qrcode img');
+            if (!img) return;
             printWindow.document.write(`
                 <html><head><title>Print QR Code</title>
                 <style>
@@ -304,11 +427,11 @@
                 </style>
                 </head><body>
                 <h2>${productName}</h2>
-                <img src="${canvas.toDataURL('image/png')}" />
+                <img src="${img.src}" />
                 <div class="details">
                     <p><strong>Crop Type:</strong> ${document.getElementById('cropType').value}</p>
                     <p><strong>Quality:</strong> ${document.getElementById('quality').value}</p>
-                    <p><strong>Harvest Date:</strong> ${document.getElementById('harvestDate').value}</p>
+                    <p><strong>Location:</strong> ${document.getElementById('farmLocation').value}</p>
                     <p><strong>Fertilizer:</strong> ${document.getElementById('fertilizerUsed').value}</p>
                     <p><strong>Pesticides:</strong> ${document.getElementById('pesticidesUsed').value}</p>
                 </div>
@@ -320,8 +443,8 @@
         // Render QR History (fetch from backend)
         async function renderQRHistory() {
             const historyDiv = document.getElementById('qrHistory');
-            try {
-                const resp = await fetch('/api/qr');
+                try {
+                const resp = await GrassRootsUtils.apiFetch('/api/qr');
                 if (!resp.ok) throw new Error('Failed to load');
                 const qrHistory = await resp.json();
 
@@ -401,21 +524,63 @@
         window.downloadQRFromHistory = function(qrId) {
             const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
             const qr = qrHistory.find(q => q.id === qrId);
-            if (!qr || !qr.canvasData) return;
-            const a = document.createElement('a');
-            a.href = qr.canvasData;
-            a.download = `QR-${qr.productName}-${qr.id}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            if (!qr) return;
+            if (qr.canvasData) {
+                const a = document.createElement('a');
+                a.href = qr.canvasData;
+                a.download = `QR-${qr.productName}-${qr.id}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+            }
+            // fallback to remote image
+            const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr.qrText || qr.productName || qr.id);
+            fetch(apiUrl).then(r => r.blob()).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QR-${qr.productName || qr.id}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }).catch(err => console.error('Download history fallback failed', err));
         };
 
         // Print from history
         window.printQRFromHistory = function(qrId) {
             const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
             const qr = qrHistory.find(q => q.id === qrId);
-            if (!qr || !qr.canvasData) return;
+            if (!qr) return;
             const printWindow = window.open('', '', 'width=800,height=600');
+            if (qr.canvasData) {
+                printWindow.document.write(`
+                    <html><head><title>Print QR Code</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+                        h2 { color: #2f6b50; }
+                        img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
+                        .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
+                    </style>
+                    </head><body>
+                    <h2>${qr.productName}</h2>
+                    <img src="${qr.canvasData}" />
+                    <div class="details">
+                        <p><strong>Crop Type:</strong> ${qr.cropType}</p>
+                        <p><strong>Quality:</strong> ${qr.quality}</p>
+                        <p><strong>Location:</strong> ${qr.farmLocation}</p>
+                        <p><strong>Fertilizer:</strong> ${qr.fertilizerUsed}</p>
+                        <p><strong>Pesticides:</strong> ${qr.pesticidesUsed}</p>
+                        <p><strong>Farmer:</strong> ${qr.farmerName} (${qr.farmerEmail})</p>
+                    </div>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+                return;
+            }
+            // fallback to remote image
+            const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr.qrText || qr.productName || qr.id);
             printWindow.document.write(`
                 <html><head><title>Print QR Code</title>
                 <style>
@@ -426,7 +591,7 @@
                 </style>
                 </head><body>
                 <h2>${qr.productName}</h2>
-                <img src="${qr.canvasData}" />
+                <img src="${apiUrl}" />
                 <div class="details">
                     <p><strong>Crop Type:</strong> ${qr.cropType}</p>
                     <p><strong>Quality:</strong> ${qr.quality}</p>
@@ -442,8 +607,73 @@
 
         // Initialize on page load
         window.addEventListener('load', function() {
+            async function loadCropSelector() {
+                const sel = document.getElementById('cropSelect');
+                sel.innerHTML = '<option value="">-- Select a crop --</option>';
+                try {
+                    const resp = await GrassRootsUtils.apiFetch('/api/crops');
+                    if (resp.ok) {
+                        const crops = await resp.json();
+                        crops.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.id || c.id;
+                            opt.text = c.name || c.productName || (c.cropType || c.type) || (`Crop ${c.id}`);
+                            sel.appendChild(opt);
+                        });
+                    }
+                } catch (err) {
+                    // ignore and fallback to localStorage
+                }
+
+                // localStorage fallback
+                try {
+                    const local = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+                    local.forEach(c => {
+                        // don't duplicate options if already present
+                        if (![...sel.options].some(o => o.value == c.id)) {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.text = c.name || c.productName || (c.type || 'Crop');
+                            sel.appendChild(opt);
+                        }
+                    });
+                } catch (e) {
+                    // ignore
+                }
+
+                sel.addEventListener('change', function() {
+                    const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+                    // attempt to get from last fetched list via API if available
+                    (async () => {
+                        let list = crops;
+                        try {
+                            const resp = await GrassRootsUtils.apiFetch('/api/crops');
+                            if (resp.ok) list = await resp.json();
+                        } catch (e) {}
+
+                        const selected = list.find(c => String(c.id) === String(this.value));
+                        if (selected) {
+                            document.getElementById('cropType').value = selected.cropType || selected.type || '';
+                            document.getElementById('farmLocation').value = selected.notes || selected.farmLocation || '';
+                        }
+                    })();
+                });
+
+            
+            }
             loadCropSelector();
             renderQRHistory();
+        });
+
+        // Global error handlers to capture uncaught errors/rejections during QR generation
+        window.addEventListener('error', function (evt) {
+            console.error('Global error captured:', evt.error || evt.message || evt);
+            GrassRootsUtils.showToast('Unexpected error: ' + (evt.message || 'see console'), 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function (evt) {
+            console.error('Unhandled rejection:', evt.reason || evt);
+            GrassRootsUtils.showToast('Unexpected error (promise): see console', 'error');
         });
     </script>
 </body>
