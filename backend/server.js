@@ -5,6 +5,7 @@ const path = require('path');
 require('dotenv').config();
 
 const { sequelize } = require('./db');
+const mysql = require('mysql2/promise');
 
 const qrRoutes = require('./routes/qr');
 const productsRoutes = require('./routes/products');
@@ -33,6 +34,11 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/crops', cropsRoutes);
 
+// Simple health check / debug endpoint
+app.get('/api/ping', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
 // Serve frontend static files
 const frontendPath = path.join(__dirname, '..', 'frontend');
 app.use(express.static(frontendPath));
@@ -46,6 +52,22 @@ const PORT = process.env.PORT || 3000;
 
 async function start() {
   try {
+    // Ensure the target database exists (helps when DB not created yet)
+    const DB_HOST = process.env.DB_HOST || '127.0.0.1';
+    const DB_PORT = process.env.DB_PORT || 3306;
+    const DB_NAME = process.env.DB_NAME || 'grassroots_db';
+    const DB_USER = process.env.DB_USER || 'root';
+    const DB_PASS = process.env.DB_PASS || '';
+
+    try {
+      const adminConn = await mysql.createConnection({ host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASS });
+      await adminConn.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+      await adminConn.end();
+      console.log('Ensured database exists:', DB_NAME);
+    } catch (dbErr) {
+      console.warn('Could not ensure database exists (check MySQL), continuing and letting Sequelize handle it:', dbErr && dbErr.message ? dbErr.message : dbErr);
+    }
+
     await sequelize.authenticate();
     // sync models (safe for initial development)
     // define basic associations
