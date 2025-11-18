@@ -101,8 +101,8 @@
     async function renderCropList() {
       let crops = [];
       try {
-        const resp = await fetch('/api/crops');
-        if (resp.ok) {
+        const resp = await GrassRootsUtils.apiFetch('/api/crops');
+        if (resp && resp.ok) {
           crops = await resp.json();
         } else {
           crops = GrassRootsUtils.loadFromStorage('farmerCrops', []);
@@ -146,7 +146,7 @@
       };
 
       try {
-        const resp = await fetch('/api/crops', {
+        const resp = await GrassRootsUtils.apiFetch('/api/crops', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
