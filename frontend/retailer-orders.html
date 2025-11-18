@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Retailer Orders - GrassRoots</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/utils.js"></script>
   <style>
     .container{max-width:1100px;margin:24px auto;padding:0 16px}
     table{width:100%;border-collapse:collapse}
@@ -45,18 +46,23 @@
   <script>
     // Use backend APIs for orders and products
     async function loadOrders() {
+      if (window.location.protocol === 'file:') {
+        return JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+      }
       try {
         const resp = await fetch('/api/orders');
         if (!resp.ok) throw new Error('Failed to load orders');
         return await resp.json();
       } catch (err) {
         console.warn('Failed to fetch orders from server, falling back to localStorage', err);
-        const o = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
-        return o;
+        return JSON.parse(localStorage.getItem('retailer_orders') || '[]');
       }
     }
 
     async function loadProducts() {
+      if (window.location.protocol === 'file:') {
+        return JSON.parse(localStorage.getItem('retailer_products') || '[]');
+      }
       try {
         const resp = await fetch('/api/products');
         if (!resp.ok) throw new Error('Failed to load products');
@@ -104,6 +110,15 @@
     }
 
     async function view(id) {
+      if (window.location.protocol === 'file:') {
+        // Load order from localStorage
+        const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+        const o = orders.find(x => x.id === id);
+        if (!o) return alert('Order not found');
+        const details = `Order ${o.id}\nItems:\n${(o.items || []).map(i => i.name + ' x' + i.qty).join('\n')}\nTotal: ₹ ${o.total.toFixed(2)}\nStatus: ${o.status}\nPaid: ${o.paid ? 'Yes' : 'No'}`;
+        alert(details);
+        return;
+      }
       try {
         const resp = await fetch(`/api/orders/${id}`);
         if (!resp.ok) throw new Error('Order not found');
@@ -151,13 +166,24 @@
       const total = items.reduce((s, it) => s + (it.qty * (it.price||0)), 0);
       const order = { id: 'o_' + Date.now(), items: items.map(it => ({ productId: it.productId, name: '', qty: it.qty, price: it.price })), total, status: 'Pending', paid: false };
       // fetch product names to include
-      try {
-        const prods = await loadProducts();
-        order.items = order.items.map(it => {
-          const p = prods.find(x => x.id === it.productId) || {};
-          return { ...it, name: p.name || it.productId };
-        });
+      const prods = await loadProducts();
+      order.items = order.items.map(it => {
+        const p = prods.find(x => x.id === it.productId) || {};
+        return { ...it, name: p.name || it.productId };
+      });
 
+      if (window.location.protocol === 'file:') {
+        // Save order to localStorage
+        const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+        orders.push(order);
+        localStorage.setItem('retailer_orders', JSON.stringify(orders));
+        closeOrderModal();
+        await render();
+        alert('Order placed');
+        return;
+      }
+
+      try {
         const resp = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
         if (!resp.ok) throw new Error('Failed to create order');
         closeOrderModal();

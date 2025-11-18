@@ -102,6 +102,18 @@ async function start() {
       // create a QR for this crop
       await QR.create({ id: 'QR-DEMO-1', cropId: c.id, productName: 'Tomato (Cherry)', cropType: 'Tomato', generatedAt: new Date(), canvasData: '' });
     }
+
+    // DEMO PRODUCTS for retailer
+    const demoProducts = [
+      { id: 'P-DEMO-1', qrId: 'QR-DEMO-1', name: 'Tomato (Cherry)', price: 45.0, stock: 120, description: 'Fresh cherry tomatoes from demo farm.' },
+      { id: 'P-DEMO-2', qrId: null, name: 'Organic Basmati Rice', price: 80.0, stock: 60, description: 'Premium organic rice, long grain.' },
+      { id: 'P-DEMO-3', qrId: null, name: 'Green Chilli', price: 30.0, stock: 200, description: 'Spicy green chillies, locally sourced.' },
+      { id: 'P-DEMO-4', qrId: null, name: 'Potato', price: 25.0, stock: 300, description: 'Farm-fresh potatoes, best for fries.' }
+    ];
+    for (const prod of demoProducts) {
+      const exists = await Product.findByPk(prod.id);
+      if (!exists) await Product.create(prod);
+    }
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
