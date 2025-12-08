@@ -1,13 +1,16 @@
 :root {
-    /* New earthy green color palette */
-    --primary-color: #6B9E7F;         /* sage green */
-    --secondary-color: #A8C9B1;       /* light sage */
-    --accent-tan: #8B9D8F;            /* muted forest green */
-    --accent-cream: #D4E1D8;          /* soft light green */
-    --accent-charcoal: #5A7A6B;       /* dark teal-charcoal */
-    --background-color: #D4E1D8;      /* soft light green bg */
-    --text-color: #3D4A42;            /* dark green text */
+    /* Modern vibrant green color palette */
+    --primary-color: #2f6b50;         /* deep forest green */
+    --secondary-color: #4a9d6f;       /* vibrant green */
+    --accent-tan: #6bb88a;            /* light green */
+    --accent-cream: #e8f5f0;          /* very light green */
+    --accent-charcoal: #1f4d35;       /* dark forest */
+    --background-color: #f5faf8;      /* off-white green tint */
+    --text-color: #2c3e35;            /* dark text */
     --white: #ffffff;
+    --shadow-sm: 0 2px 8px rgba(47, 107, 80, 0.08);
+    --shadow-md: 0 4px 16px rgba(47, 107, 80, 0.12);
+    --shadow-lg: 0 8px 32px rgba(47, 107, 80, 0.16);
 }
 
 /* Modern font from Google Fonts (will load if online) */
@@ -22,13 +25,21 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 30%, #f1f8f4 70%, #e3f2e8 100%);
+    background: linear-gradient(135deg, #e8f5f0 0%, #f0f9f5 25%, #e3f2ed 50%, #d8ede5 75%, #e8f5f0 100%);
     background-attachment: fixed;
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
     color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .container {
@@ -40,14 +51,15 @@ body {
 
 /* Navigation with Gradient */
 .navbar {
-    background: linear-gradient(135deg, #6B9E7F 0%, #4A7C5E 50%, #2D5A3D 100%);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    padding: 0.5rem 0; /* compact header */
+    background: linear-gradient(90deg, #2f6b50 0%, #357a5b 40%, #3d8a68 70%, #4a9d6f 100%);
+    box-shadow: 0 4px 20px rgba(47, 107, 80, 0.25);
+    padding: 1rem 0;
     position: fixed;
     width: 100%;
     top: 0;
     z-index: 1000;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .nav-container {
@@ -102,13 +114,26 @@ body {
 
 /* Forms */
 .form-container {
-    background-color: var(--white);
-    padding: 1.5rem; /* slightly smaller form padding */
-    border-radius: 10px;
-    box-shadow: 0 6px 20px rgba(59, 59, 59, 0.06);
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
+    backdrop-filter: blur(10px);
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
     max-width: 520px;
-    margin: 80px auto 20px; /* adjust for navbar */
-    border: 1px solid rgba(201, 184, 163, 0.15);
+    margin: 100px auto 20px;
+    border: 1px solid rgba(47, 107, 80, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-tan));
 }
 
 /* When showing login + register on the same page */
@@ -156,29 +181,46 @@ body {
 
 /* Button Styles - Unified */
 .btn {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     color: var(--white);
-    padding: 0.85rem 1.25rem;
+    padding: 0.9rem 1.8rem;
     border: none;
-    border-radius: 999px; /* pill button */
+    border-radius: 50px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-    box-shadow: 0 6px 18px rgba(107, 158, 127, 0.15);
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     display: inline-block;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(107, 158, 127, 0.2);
-    background-color: var(--accent-charcoal);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-tan) 100%);
 }
 
 .btn:active {
-    transform: translateY(0);
+    transform: translateY(-1px);
 }
 
 /* Hero heading styles */
@@ -472,19 +514,106 @@ h1, h2, h3, h4 {
 /* small adjustment for the save button specifically on crop page */
 .save-btn { padding: 0.7rem 1.25rem; border-radius: 999px; }
 
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.toast.success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.toast.error {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.toast.info {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Loading Spinner */
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Card Hover Effects */
+.feature-box,
+.crop-card,
+.contact-card,
+.dashboard-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-box:hover,
+.crop-card:hover,
+.contact-card:hover,
+.dashboard-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--shadow-lg);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-container {
         flex-direction: column;
         gap: 1rem;
     }
-    
+
     .nav-links {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .dashboard {
         grid-template-columns: 1fr;
+    }
+
+    .toast {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
     }
 }

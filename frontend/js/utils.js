@@ -105,25 +105,27 @@ const GrassRootsUtils = {
         // Create toast
         const toast = document.createElement('div');
         toast.id = 'grassroots-toast';
-        toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2196f3'};
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
+        toast.className = `toast ${type}`;
+
+        // Add icon based on type
+        const icons = {
+            success: '✓',
+            error: '✕',
+            info: 'ℹ'
+        };
+
+        toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.5rem; font-weight: bold;">${icons[type] || icons.info}</span>
+                <span style="flex: 1;">${message}</span>
+            </div>
         `;
 
         document.body.appendChild(toast);
 
         // Auto remove after 3 seconds
         setTimeout(() => {
-            toast.style.animation = 'slideOut 0.3s ease';
+            toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     },
