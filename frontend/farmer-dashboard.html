@@ -216,11 +216,12 @@
                 <a href="qr-generator.html" class="btn">Generate QR Code</a>
             </div>
 
-            <div class="feature-box">
+            <div class="feature-box" id="callbot-box">
                 <div class="feature-icon">🤖</div>
-                <h3>Call the Bot</h3>
+                <h3>Call the Bot <small id="callbot-status" style="font-size:0.8rem;color:var(--muted);margin-left:0.5rem">Checking...</small></h3>
                 <p>Access the GrassRoots Callbot for assistance and queries.</p>
-                <a href="callbot.html" class="btn">Access Callbot</a>
+                <a href="http://localhost:3000/" class="btn" target="_blank" rel="noopener">Access Callbot</a>
+                <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted)">Note: Start the callbot backend from <code>bot/farmer-voice-bot</code> (see its README) to enable voice features.</p>
             </div>
         </div>
 
@@ -243,6 +244,26 @@
         function logout() {
             GrassRootsAuth.logout();
         }
+
+        // 🔧 Callbot health check — polls the local bot backend and updates the status
+        async function checkCallbotHealth() {
+            const statusEl = document.getElementById('callbot-status');
+            if (!statusEl) return;
+            try {
+                const resp = await fetch('http://localhost:3000/health', { cache: 'no-store' });
+                if (!resp.ok) throw new Error('not ok');
+                const body = await resp.json();
+                statusEl.textContent = 'Online';
+                statusEl.style.color = '#2e7d32';
+            } catch (err) {
+                statusEl.textContent = 'Offline';
+                statusEl.style.color = '#c62828';
+            }
+        }
+
+        // initial check and periodic polling
+        checkCallbotHealth();
+        setInterval(checkCallbotHealth, 15000);
     </script>
 </body>
 </html>

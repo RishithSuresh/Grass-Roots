@@ -179,6 +179,18 @@ npm run dev
 npm start
 ```
 
+### Callbot (Farmer Voice Bot)
+The callbot lives under `bot/farmer-voice-bot/farmer-voice-bot`. It serves both the bot frontend and backend on port **3000** by default.
+
+To start the callbot backend:
+```bash
+cd bot/farmer-voice-bot/farmer-voice-bot/backend
+npm install
+npm start
+```
+
+After the callbot backend is running, the dashboard's **Access Callbot** button will open the bot UI at `http://localhost:3000/` and the dashboard will show the bot health status.
+
 ### Expected Output:
 ```
 ============================================================
