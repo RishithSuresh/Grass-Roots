@@ -220,8 +220,8 @@
                 <div class="feature-icon">🤖</div>
                 <h3>Call the Bot <small id="callbot-status" style="font-size:0.8rem;color:var(--muted);margin-left:0.5rem">Checking...</small></h3>
                 <p>Access the GrassRoots Callbot for assistance and queries.</p>
-                <a href="http://localhost:3000/" class="btn" target="_blank" rel="noopener">Access Callbot</a>
-                <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted)">Note: Start the callbot backend from <code>bot/farmer-voice-bot</code> (see its README) to enable voice features.</p>
+                <a href="http://localhost:4000/callbot/" id="callbot-link" class="btn" target="_blank" rel="noopener">Access Callbot</a>
+                <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted)">Note: If you can't open the Callbot UI, start the main backend (see <code>backend/</code> README) or open the bot frontend directly from <code>bot/farmer-voice-bot/farmer-voice-bot/frontend/index.html</code>.</p>
             </div>
         </div>
 
@@ -238,6 +238,25 @@
             // Use centralized auth system
             if (!GrassRootsAuth.requireAuth('farmer')) {
                 return;
+            }
+
+            // Intercept Callbot link to check health before opening
+            const callbotLink = document.getElementById('callbot-link');
+            if (callbotLink) {
+                callbotLink.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const uiUrl = 'http://localhost:4000/callbot/';
+                    try {
+                        const resp = await fetch(uiUrl, { cache: 'no-store' });
+                        if (resp.ok) {
+                            window.open(uiUrl, '_blank', 'noopener');
+                        } else {
+                            alert('Callbot UI not available. Start the main backend to serve the UI:\n\ncd backend\nnpm install\nnpm start\n\n(If you need voice features, also start the bot backend under bot/farmer-voice-bot)');
+                        }
+                    } catch (err) {
+                        alert('Callbot UI not available. Start the main backend to serve the UI:\n\ncd backend\nnpm install\nnpm start\n\n(If you need voice features, also start the bot backend under bot/farmer-voice-bot)');
+                    }
+                });
             }
         });
 

@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
+const path = require('path');
 require('dotenv').config();
 
 const { testConnection } = require('./config/database');
@@ -19,6 +20,10 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(compression());
+
+// Serve Farmer Voice Bot frontend under /callbot
+// This exposes the nested project frontend so users can open it from the main dashboard
+app.use('/callbot', express.static(path.join(__dirname, '..', 'bot', 'farmer-voice-bot', 'farmer-voice-bot', 'frontend')));
 
 // Routes
 app.use('/api/auth', authRoutes);
