@@ -8,26 +8,26 @@ const { execSync } = require('child_process');
  */
 async function transcribeAudio(audioPath, language = 'en') {
     try {
-        // Check if audio file exists
+        // Check if audio file exists; if missing, fall back to mock instead of throwing
         if (!fs.existsSync(audioPath)) {
-            throw new Error(`Audio file not found: ${audioPath}`);
-        }
-        
-        console.log(`[Vosk] Transcribing: ${audioPath} (${language})`);
-        
-        try {
-            // Try to use Vosk Python script for real transcription
-            const result = execSync(`python3 ${path.join(__dirname, 'vosk_transcriber.py')} "${audioPath}" "${language}"`, {
-                encoding: 'utf-8',
-                timeout: 30000,
-            }).trim();
+            console.warn(`[ASR] Audio file not found: ${audioPath}; falling back to mock transcription`);
+        } else {
+            console.log(`[Vosk] Transcribing: ${audioPath} (${language})`);
             
-            if (result && result.length > 0) {
-                console.log(`[Vosk] Result: "${result}"`);
-                return result;
+            try {
+                // Try to use Vosk Python script for real transcription
+                const result = execSync(`python3 ${path.join(__dirname, 'vosk_transcriber.py')} "${audioPath}" "${language}"`, {
+                    encoding: 'utf-8',
+                    timeout: 30000,
+                }).trim();
+                
+                if (result && result.length > 0) {
+                    console.log(`[Vosk] Result: "${result}"`);
+                    return result;
+                }
+            } catch (vosk_error) {
+                console.log(`[Vosk] Vosk not available, using mock: ${vosk_error.message}`);
             }
-        } catch (vosk_error) {
-            console.log(`[Vosk] Vosk not available, using mock: ${vosk_error.message}`);
         }
         
         // Fallback to mock transcription
