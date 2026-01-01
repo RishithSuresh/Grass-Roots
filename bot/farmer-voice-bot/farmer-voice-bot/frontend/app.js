@@ -430,21 +430,33 @@ async function askQuestionWithAudio(promptText, timeoutMs = 10000) {
                 if (chosen) utter.voice = chosen;
             } catch (e) { /* ignore */ }
             
-            // Start listening after a short delay
-            const delay = setTimeout(() => {
-                const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            // Start listening after the TTS finishes speaking to avoid capturing the assistant voice.
+            let recognition = null;
+            let listenTimeout = null;
+            const startRecognition = () => {
+                try {
+                    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                } catch (e) {
+                    console.warn('SpeechRecognition not available:', e);
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                    resolve({ transcript: '', audioBlob: null });
+                    return;
+                }
+
                 recognition.lang = langMap[state.language] || 'en-US';
                 recognition.continuous = false;
                 recognition.interimResults = true;
-                
+
                 let transcript = '';
                 let isFinal = false;
-                
+
                 recognition.onstart = () => {
                     elements.transcriptionCard.classList.remove('hidden');
                     elements.transcriptionText.textContent = '🎤 Listening...';
                 };
-                
+
                 recognition.onresult = (event) => {
                     transcript = '';
                     for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -455,23 +467,22 @@ async function askQuestionWithAudio(promptText, timeoutMs = 10000) {
                     }
                     elements.transcriptionText.textContent = transcript || '🎤 Listening...';
                 };
-                
+
                 recognition.onerror = (event) => {
                     console.error('Speech recognition error:', event.error);
                 };
-                
+
                 recognition.onend = () => {
-                    clearTimeout(timeout);
+                    if (listenTimeout) clearTimeout(listenTimeout);
                     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                         mediaRecorder.stop();
                     }
-                    recognition.abort();
-                    
-                    // Return both audio and transcript
+                    try { recognition.abort(); } catch (e) {}
+
                     const audioBlob = mediaRecorder ? new Blob(audioChunks, { type: 'audio/webm' }) : null;
                     resolve({ transcript: transcript.trim(), audioBlob: audioBlob });
                 };
-                
+
                 try {
                     recognition.start();
                 } catch (e) {
@@ -480,22 +491,29 @@ async function askQuestionWithAudio(promptText, timeoutMs = 10000) {
                         mediaRecorder.stop();
                     }
                     resolve({ transcript: '', audioBlob: null });
+                    return;
                 }
-                
-                // Timeout after 15 seconds of listening
-                const timeout = setTimeout(() => {
-                    recognition.abort();
+
+                // Timeout after `timeoutMs` milliseconds of listening
+                listenTimeout = setTimeout(() => {
+                    try { recognition.abort(); } catch (e) {}
                     if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                         mediaRecorder.stop();
                     }
                     const audioBlob = mediaRecorder ? new Blob(audioChunks, { type: 'audio/webm' }) : null;
                     resolve({ transcript: transcript.trim(), audioBlob: audioBlob });
-                }, 15000);
-            }, 500);
-            
-            // Speak the question
+                }, timeoutMs);
+            };
+
+            // Speak the question and start recognition after speech ends
             speechSynthesis.cancel();
             speechSynthesis.speak(utter);
+            utter.onend = () => {
+                // small delay to allow audio hardware to settle
+                setTimeout(startRecognition, 150);
+            };
+            // If TTS fails to play, fallback to starting recognition after a short delay
+            utter.onerror = () => setTimeout(startRecognition, 250);
             
         } catch (error) {
             console.error('Ask question error:', error);
