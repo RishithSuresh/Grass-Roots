@@ -28,12 +28,14 @@
   <script>
     const KEY_ORDERS='retailer_orders';
 
+    const BACKEND_URL = 'http://localhost:4000';
+
     async function fetchOrders() {
       if (window.location.protocol === 'file:') {
         try { return JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]'); } catch(e2){ return []; }
       }
       try {
-        const resp = await fetch('/api/orders');
+        const resp = await fetch(BACKEND_URL + '/api/orders');
         if (!resp.ok) throw new Error('Failed to load');
         return await resp.json();
       } catch (e) {
@@ -75,12 +77,12 @@
       }
       try {
         // fetch current order
-        const resp = await fetch(`/api/orders/${id}`);
+        const resp = await fetch(BACKEND_URL + `/api/orders/${id}`);
         if (!resp.ok) throw new Error('Order not found');
         const data = await resp.json();
         const o = data.order || data;
         const updated = { paid: !o.paid };
-        const put = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
+        const put = await fetch(BACKEND_URL + `/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updated) });
         if (!put.ok) throw new Error('Update failed');
         await render();
         alert('Payment toggled');
@@ -106,7 +108,7 @@
         return;
       }
       try {
-        const resp = await fetch(`/api/orders/${id}`);
+        const resp = await fetch(BACKEND_URL + `/api/orders/${id}`);
         if (!resp.ok) throw new Error('Order not found');
         const data = await resp.json();
         const o = data.order || data;

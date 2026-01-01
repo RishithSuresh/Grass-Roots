@@ -244,9 +244,10 @@
         return local;
       }
       // Otherwise, try backend first, fallback to demo products
+      const BACKEND_URL = 'http://localhost:4000';
       try {
-        const resp = await fetch('/api/products');
-        if (resp.ok) {
+        const resp = await GrassRootsUtils.apiFetch('/api/products');
+        if (resp && resp.ok) {
           const data = await resp.json();
           if (Array.isArray(data) && data.length > 0) return data;
         }
@@ -384,15 +385,16 @@
       }
 
       // Otherwise, use backend API
+      const BACKEND_URL = 'http://localhost:4000';
       if (window.editId) {
         // update existing product via API
         try {
-          const resp = await fetch(`/api/products/${window.editId}`, {
+          const resp = await GrassRootsUtils.apiFetch(`/api/products/${window.editId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, price, stock, description })
           });
-          if (!resp.ok) throw new Error('Update failed');
+          if (!resp || !resp.ok) throw new Error('Update failed');
         } catch (err) {
           console.error('Failed to update product:', err);
           GrassRootsUtils.showToast('Failed to update product', 'error');
@@ -409,12 +411,12 @@
           createdAt: new Date().toISOString()
         };
         try {
-          const resp = await fetch('/api/products', {
+          const resp = await GrassRootsUtils.apiFetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newProduct)
           });
-          if (!resp.ok) throw new Error('Create failed');
+          if (!resp || !resp.ok) throw new Error('Create failed');
         } catch (err) {
           console.error('Failed to create product:', err);
           GrassRootsUtils.showToast('Failed to create product', 'error');
@@ -444,9 +446,10 @@
 
     async function del(id) {
       if (!confirm('Are you sure you want to delete this product?')) return;
+      const BACKEND_URL = 'http://localhost:4000';
       try {
-        const resp = await fetch(`/api/products/${id}`, { method: 'DELETE' });
-        if (!resp.ok) throw new Error('Delete failed');
+        const resp = await GrassRootsUtils.apiFetch(`/api/products/${id}`, { method: 'DELETE' });
+        if (!resp || !resp.ok) throw new Error('Delete failed');
         await render();
         GrassRootsUtils.showToast('Product deleted', 'success');
       } catch (err) {

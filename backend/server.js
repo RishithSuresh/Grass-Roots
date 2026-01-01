@@ -4,13 +4,15 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { testConnection } = require('./config/database');
 
 const authRoutes = require('./routes/auth.routes');
 const botRoutes = require('./routes/bot.routes');
 const mlRoutes = require('./routes/ml.routes');
+const ordersRoutes = require('./routes/orders.routes');
+const productsRoutes = require('./routes/products.routes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -30,6 +32,8 @@ app.use('/callbot', express.static(path.join(__dirname, '..', 'bot', 'farmer-voi
 app.use('/api/auth', authRoutes);
 app.use('/api/bot', botRoutes);
 app.use('/api/ml', mlRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/products', productsRoutes);
 
 // Health
 app.get('/health', (req, res) => {

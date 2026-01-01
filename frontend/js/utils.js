@@ -202,27 +202,15 @@ const GrassRootsUtils = {
     ,
 
     /**
-     * Robust fetch helper: try relative path first, then fallback to explicit backend origin
+     * Robust fetch helper: always uses explicit backend origin (port 4000)
      * Does NOT throw on HTTP errors (returns Response) but will throw on network failures
      * @param {string} path - Request path (e.g. '/api/crops')
      * @param {object} options - fetch options
      */
     async apiFetch(path, options = {}) {
-        // First try relative request
-        try {
-            return await fetch(path, options);
-        } catch (err) {
-            console.warn('Relative fetch failed for', path, err);
-            // If page opened via file:// or different origin, try explicit backend
-            const backendOrigin = 'http://localhost:4000';
-            try {
-                return await fetch(backendOrigin + path, options);
-            } catch (err2) {
-                console.error('Backend fetch failed for', backendOrigin + path, err2);
-                // Re-throw the last network error so callers can fallback
-                throw err2;
-            }
-        }
+        // Always use explicit backend URL (backend runs on port 4000)
+        const backendOrigin = 'http://localhost:4000';
+        return await fetch(backendOrigin + path, options);
     }
 };
 

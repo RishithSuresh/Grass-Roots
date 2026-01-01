@@ -221,9 +221,10 @@
             const notifications = loadKey(KEY_FARM_NOTIFS) || [];
 
             // Try to load QR codes from server first
+            const BACKEND_URL = 'http://localhost:4000';
             let qrCodes = [];
             try {
-                const resp = await fetch('/api/qr');
+                const resp = await fetch(BACKEND_URL + '/api/qr');
                 if (resp.ok) qrCodes = await resp.json();
                 else qrCodes = loadKey(KEY_QR_CODES) || [];
             } catch (e) {

@@ -45,12 +45,14 @@
   </div>
   <script>
     // Use backend APIs for orders and products
+    const BACKEND_URL = 'http://localhost:4000';
+
     async function loadOrders() {
       if (window.location.protocol === 'file:') {
         return JSON.parse(localStorage.getItem('retailer_orders') || '[]');
       }
       try {
-        const resp = await fetch('/api/orders');
+        const resp = await fetch(BACKEND_URL + '/api/orders');
         if (!resp.ok) throw new Error('Failed to load orders');
         return await resp.json();
       } catch (err) {
@@ -64,7 +66,7 @@
         return JSON.parse(localStorage.getItem('retailer_products') || '[]');
       }
       try {
-        const resp = await fetch('/api/products');
+        const resp = await fetch(BACKEND_URL + '/api/products');
         if (!resp.ok) throw new Error('Failed to load products');
         return await resp.json();
       } catch (err) {
@@ -79,7 +81,10 @@
       const orders = await loadOrders();
       orders.forEach(o => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${o.id}</td><td>${o.items.map(i => i.name + ' x' + i.qty).join('<br>')}</td><td>₹ ${o.total.toFixed(2)}</td><td>${o.status}</td><td><button class='btn' onclick="view('${o.id}')">View</button></td>`;
+        const items = o.items || [];
+        const itemsText = items.length > 0 ? items.map(i => i.name + ' x' + i.qty).join('<br>') : 'No items';
+        const total = o.total || 0;
+        tr.innerHTML = `<td>${o.id || o.orderNumber || 'N/A'}</td><td>${itemsText}</td><td>₹ ${Number(total).toFixed(2)}</td><td>${o.status || 'pending'}</td><td><button class='btn' onclick="view('${o.id}')">View</button></td>`;
         rows.appendChild(tr);
       });
     }
@@ -88,6 +93,10 @@
       const existing = await loadOrders();
       if (existing.length) return;
       const prods = await loadProducts();
+      if (!prods || prods.length === 0) {
+        console.log('No products available to seed orders');
+        return;
+      }
       const sample = [{
         id: 'o_' + Date.now(),
         items: prods.slice(0, 2).map(p => ({ productId: p.id, name: p.name, qty: 1, price: p.price })),
@@ -97,14 +106,14 @@
       }];
       try {
         for (const o of sample) {
-          await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) });
+          await fetch(BACKEND_URL + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) });
         }
-        alert('Sample order seeded');
+        console.log('Sample order seeded');
         await render();
       } catch (err) {
         console.error('Failed to seed orders:', err);
         localStorage.setItem('retailer_orders', JSON.stringify(sample));
-        alert('Seeded locally');
+        console.log('Seeded locally');
         await render();
       }
     }
@@ -120,7 +129,7 @@
         return;
       }
       try {
-        const resp = await fetch(`/api/orders/${id}`);
+        const resp = await fetch(BACKEND_URL + `/api/orders/${id}`);
         if (!resp.ok) throw new Error('Order not found');
         const data = await resp.json();
         const o = data.order || data;
@@ -184,7 +193,7 @@
       }
 
       try {
-        const resp = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
+        const resp = await fetch(BACKEND_URL + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
         if (!resp.ok) throw new Error('Failed to create order');
         closeOrderModal();
         await render();
@@ -198,23 +207,23 @@
     async function updateStatus(id, status) {
       try {
         // Update order status on server
-        const resp = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+        const resp = await fetch(BACKEND_URL + `/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
         if (!resp.ok) throw new Error('Failed to update order');
 
         if (status === 'Confirmed') {
           // decrement product stock for each order item
-          const resp2 = await fetch(`/api/orders/${id}`);
+          const resp2 = await fetch(BACKEND_URL + `/api/orders/${id}`);
           if (resp2.ok) {
             const data = await resp2.json();
             const items = data.items || data.order && data.order.items || [];
             for (const it of items) {
               try {
                 // fetch product
-                const pResp = await fetch(`/api/products/${it.productId}`);
+                const pResp = await fetch(BACKEND_URL + `/api/products/${it.productId}`);
                 if (!pResp.ok) continue;
                 const p = await pResp.json();
                 const newStock = Math.max(0, (p.stock || 0) - (it.qty || 0));
-                await fetch(`/api/products/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stock: newStock }) });
+                await fetch(BACKEND_URL + `/api/products/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stock: newStock }) });
               } catch (e) {
                 console.warn('Failed to update product stock for', it.productId, e);
               }

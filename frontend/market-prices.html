@@ -322,7 +322,8 @@
             btn.textContent = 'Predicting…';
 
             try {
-              const resp = await fetch('/api/ml/predict', {
+              const BACKEND_URL = 'http://localhost:4000';
+              const resp = await fetch(BACKEND_URL + '/api/ml/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ crop: crop, location: location }) // backend will use latest DB values

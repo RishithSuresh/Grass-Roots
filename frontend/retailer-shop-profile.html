@@ -244,10 +244,11 @@
     <script>
         const KEY_PROFILE = 'retailer_profile';
         const KEY_NOTIFS = 'retailer_notifications';
+        const BACKEND_URL = 'http://localhost:4000';
 
         async function fetchProfile() {
             try {
-                const resp = await fetch('/api/profile');
+                const resp = await fetch(BACKEND_URL + '/api/profile');
                 if (!resp.ok) throw new Error('Failed to load profile');
                 return await resp.json();
             } catch (err) {
@@ -270,7 +271,7 @@
 
         async function fetchProducts() {
             try {
-                const resp = await fetch('/api/products');
+                const resp = await fetch(BACKEND_URL + '/api/products');
                 if (!resp.ok) throw new Error('Failed to load products');
                 return await resp.json();
             } catch (err) {
@@ -281,7 +282,7 @@
 
         async function fetchOrders() {
             try {
-                const resp = await fetch('/api/orders');
+                const resp = await fetch(BACKEND_URL + '/api/orders');
                 if (!resp.ok) throw new Error('Failed to load orders');
                 return await resp.json();
             } catch (err) {
