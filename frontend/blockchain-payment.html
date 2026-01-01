@@ -299,7 +299,11 @@
     // Contract configuration
     const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Update after deployment
     const RPC_URL = "http://127.0.0.1:8545";
-    const BACKEND_URL = "http://localhost:4000";
+
+    // Auto-detect backend URL based on current page
+    const BACKEND_URL = window.location.protocol === 'file:'
+      ? 'http://localhost:5000'
+      : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
     // Payment contract ABI
     const CONTRACT_ABI = [

@@ -44,8 +44,10 @@
     </div>
   </div>
   <script>
-    // Use backend APIs for orders and products
-    const BACKEND_URL = 'http://localhost:4000';
+    // Auto-detect backend URL based on current page
+    const BACKEND_URL = window.location.protocol === 'file:'
+      ? 'http://localhost:5000'
+      : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
     async function loadOrders() {
       if (window.location.protocol === 'file:') {
@@ -195,12 +197,32 @@
       try {
         const resp = await fetch(BACKEND_URL + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
         if (!resp.ok) throw new Error('Failed to create order');
+
+        // Also save to localStorage as backup
+        try {
+          const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+          orders.push(order);
+          localStorage.setItem('retailer_orders', JSON.stringify(orders));
+        } catch (e) {
+          console.warn('Failed to save to localStorage:', e);
+        }
+
         closeOrderModal();
         await render();
         alert('Order placed');
       } catch (err) {
         console.error('Failed to place order:', err);
-        alert('Failed to place order');
+        // Fallback to localStorage if backend fails
+        try {
+          const orders = JSON.parse(localStorage.getItem('retailer_orders') || '[]');
+          orders.push(order);
+          localStorage.setItem('retailer_orders', JSON.stringify(orders));
+          closeOrderModal();
+          await render();
+          alert('Order placed (saved locally)');
+        } catch (e2) {
+          alert('Failed to place order');
+        }
       }
     }
 
