@@ -4,9 +4,16 @@
     box-sizing: border-box;
 }
 
+:root {
+    --primary-color: #357a4b;
+    --primary-dark: #2f6b3f;
+    --accent-cream: #f3fbf5;
+    --muted: #6b6b6b;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #1e40af 0%, #0369a1 100%);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -24,7 +31,7 @@ body {
 }
 
 header {
-    background: linear-gradient(135deg, #1e40af 0%, #0369a1 100%);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     color: white;
     padding: 30px 20px;
     text-align: center;
@@ -47,9 +54,9 @@ main {
 .card {
     margin-bottom: 20px;
     padding: 20px;
-    background: #f0f9ff;
+    background: var(--accent-cream);
     border-radius: 12px;
-    border-left: 4px solid #0284c7;
+    border-left: 4px solid var(--primary-color);
 }
 
 .card h3 {
@@ -78,7 +85,7 @@ select {
 select:hover,
 select:focus {
     outline: none;
-    border-color: #0284c7;
+    border-color: var(--primary-color);
 }
 
 .btn {
@@ -93,13 +100,13 @@ select:focus {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #1e40af 0%, #0369a1 100%);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(30, 64, 175, 0.3);
+    box-shadow: 0 10px 20px rgba(53, 122, 75, 0.25);
 }
 
 .btn-secondary {
@@ -183,7 +190,7 @@ select:focus {
     background: white;
     padding: 12px;
     border-radius: 8px;
-    border-left: 3px solid #0284c7;
+    border-left: 3px solid var(--primary-color);
     margin-bottom: 12px;
     font-size: 14px;
 }
@@ -221,8 +228,8 @@ select:focus {
 footer {
     text-align: center;
     padding: 20px;
-    background: #f8f9fa;
-    color: #999;
+    background: var(--accent-cream);
+    color: var(--muted);
     font-size: 12px;
 }
 

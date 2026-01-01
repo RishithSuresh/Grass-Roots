@@ -1,7 +1,19 @@
 // Frontend WebRTC Audio Capture & Session Management
 
-const API_BASE = 'http://localhost:3000/api';
-const WS_BASE = 'ws://localhost:3000/ws';
+// Use same-origin API by default to avoid cross-origin / CSP issues.
+// When this UI is served under the main GrassRoots backend (/callbot),
+// the bot routes are mounted at `/api/bot` there — detect and use that.
+let API_BASE = '/api';
+try {
+    if (location.pathname.startsWith('/callbot') || (location.hostname === 'localhost' && location.port === '4000')) {
+        API_BASE = '/api/bot';
+    }
+} catch (e) {
+    API_BASE = '/api';
+}
+
+// Build WebSocket URL from current location to match the origin (ws or wss)
+const WS_BASE = (location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + location.host + '/ws';
 
 // State Management
 const state = {
@@ -121,6 +133,98 @@ function pickPreferredVoice(locale) {
 
     // Otherwise return first available
     return voices[0];
+}
+
+// Parse a spoken number from free-text (handles digits, decimals, and common number words)
+function parseNumberFromText(text) {
+    if (!text || typeof text !== 'string') return null;
+    const s = text.toLowerCase().trim();
+    // Try direct numeric match first (integers, decimals)
+    const numMatch = s.match(/-?\d+(?:\.\d+)?/);
+    if (numMatch) return parseFloat(numMatch[0]);
+
+    // Word -> value maps
+    const SMALL = {
+        zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9,
+        ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19
+    };
+    const TENS = { twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90 };
+    const SCALES = { hundred:100, thousand:1000, million:1000000 };
+
+    const words = s.replace(/[^a-z0-9\s/-]/g, ' ').split(/[\s-]+/).filter(Boolean);
+    if (words.length === 0) return null;
+
+    let total = 0;
+    let current = 0;
+    let decimalMode = false;
+    let decimalDigits = '';
+
+    const digitForWord = (w) => {
+        if (SMALL[w] !== undefined) return String(SMALL[w]);
+        if (TENS[w] !== undefined) return String(TENS[w] / 10 | 0);
+        if (/^\d$/.test(w)) return w;
+        return null;
+    };
+
+    for (let i = 0; i < words.length; i++) {
+        const w = words[i];
+        if (w === 'and') continue;
+        if (w === 'point' || w === 'dot') {
+            decimalMode = true;
+            continue;
+        }
+        if (decimalMode) {
+            const d = digitForWord(w);
+            if (d !== null) {
+                decimalDigits += d;
+                continue;
+            }
+            // try numeric digit token like '5' or '0'
+            if (/^\d+$/.test(w)) {
+                decimalDigits += w;
+                continue;
+            }
+            // unknown token in decimal part — stop decimal parsing
+            break;
+        }
+
+        if (SMALL[w] !== undefined) {
+            current += SMALL[w];
+            continue;
+        }
+        if (TENS[w] !== undefined) {
+            current += TENS[w];
+            continue;
+        }
+        if (w in SCALES) {
+            if (current === 0) current = 1;
+            current = current * SCALES[w];
+            // scale may need to be added to total for thousand/million
+            if (SCALES[w] >= 1000) {
+                total += current;
+                current = 0;
+            }
+            continue;
+        }
+        // fractions like 'half' or 'quarter'
+        if (w === 'half') { current += 0.5; continue; }
+        if (w === 'quarter') { current += 0.25; continue; }
+        // explicit numeric token
+        if (/^\d+$/.test(w)) { current += parseInt(w, 10); continue; }
+        // fallback: try to parse floats like '2.5'
+        const f = parseFloat(w);
+        if (!isNaN(f)) { current += f; continue; }
+        // otherwise ignore unknown word
+    }
+
+    total += current;
+    if (total === 0 && decimalDigits === '') return null;
+    if (decimalDigits) {
+        const intPart = total;
+        const dec = parseFloat('0.' + decimalDigits);
+        return intPart + dec;
+    }
+    return total;
 }
 
 async function initializeSession() {
@@ -283,7 +387,10 @@ async function startAssistantDialogue() {
     const [crop, acreage, stage, issues] = answers;
     state.recordJson = state.recordJson || {};
     if (crop) state.recordJson.crop_type = crop;
-    if (acreage) state.recordJson.acreage = Number((acreage.match(/\d+/) || [])[0]) || acreage;
+    if (acreage) {
+        const parsed = parseNumberFromText(acreage);
+        state.recordJson.acreage = (parsed !== null) ? parsed : (Number((acreage.match(/\d+/) || [])[0]) || acreage);
+    }
     if (stage) state.recordJson.current_stage = stage;
     if (issues) state.recordJson.observed_issues = issues.split(/,|and|\band\b/).map(s => s.trim()).filter(Boolean);
 
