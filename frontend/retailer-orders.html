@@ -46,7 +46,7 @@
   <script>
     // Auto-detect backend URL based on current page
     const BACKEND_URL = window.location.protocol === 'file:'
-      ? 'http://localhost:5000'
+      ? 'http://localhost:4000'
       : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
 
     async function loadOrders() {
@@ -54,8 +54,8 @@
         return JSON.parse(localStorage.getItem('retailer_orders') || '[]');
       }
       try {
-        const resp = await fetch(BACKEND_URL + '/api/orders');
-        if (!resp.ok) throw new Error('Failed to load orders');
+        const resp = await GrassRootsUtils.apiFetch('/api/orders');
+        if (!resp || !resp.ok) throw new Error('Failed to load orders');
         return await resp.json();
       } catch (err) {
         console.warn('Failed to fetch orders from server, falling back to localStorage', err);
@@ -68,9 +68,11 @@
         return JSON.parse(localStorage.getItem('retailer_products') || '[]');
       }
       try {
-        const resp = await fetch(BACKEND_URL + '/api/products');
-        if (!resp.ok) throw new Error('Failed to load products');
-        return await resp.json();
+        const resp = await GrassRootsUtils.apiFetch('/api/products');
+        if (!resp || !resp.ok) throw new Error('Failed to load products');
+        const data = await resp.json();
+        if (Array.isArray(data) && data.length > 0) return data;
+        throw new Error('No products returned from backend');
       } catch (err) {
         console.warn('Failed to fetch products from server, falling back to localStorage', err);
         return JSON.parse(localStorage.getItem('retailer_products') || '[]');
@@ -81,10 +83,42 @@
       const rows = document.querySelector('#ordersTable tbody');
       rows.innerHTML = '';
       const orders = await loadOrders();
+      const products = await loadProducts();
+      const productMap = {};
+      (products || []).forEach(p => { productMap[String(p.id)] = p; if (typeof p.id === 'number') productMap[String(Number(p.id))] = p; });
+
+      // find any productIds in orders that are missing from productMap
+      const missingIds = new Set();
+      (orders || []).forEach(o => {
+        (o.items || []).forEach(i => {
+          const pid = i.productId !== undefined ? String(i.productId) : (i.product_id !== undefined ? String(i.product_id) : null);
+          if (pid && !productMap[pid]) missingIds.add(pid);
+        });
+      });
+
+      // fetch missing products from backend (if any)
+      if (missingIds.size > 0) {
+        await Promise.all(Array.from(missingIds).map(async (pid) => {
+          try {
+            const resp = await GrassRootsUtils.apiFetch(`/api/products/${pid}`);
+            if (resp && resp.ok) {
+              const p = await resp.json();
+              productMap[String(p.id)] = p;
+            }
+          } catch (e) {
+            // ignore
+          }
+        }));
+      }
+
       orders.forEach(o => {
         const tr = document.createElement('tr');
         const items = o.items || [];
-        const itemsText = items.length > 0 ? items.map(i => i.name + ' x' + i.qty).join('<br>') : 'No items';
+        const itemsText = items.length > 0 ? items.map(i => {
+          const name = i.name || (productMap[String(i.productId)] && productMap[String(i.productId)].name) || i.productId || 'Unknown';
+          const qty = i.qty !== undefined ? i.qty : (i.quantity || 0);
+          return `${name} x${qty}`;
+        }).join('<br>') : 'No items';
         const total = o.total || 0;
         tr.innerHTML = `<td>${o.id || o.orderNumber || 'N/A'}</td><td>${itemsText}</td><td>₹ ${Number(total).toFixed(2)}</td><td>${o.status || 'pending'}</td><td><button class='btn' onclick="view('${o.id}')">View</button></td>`;
         rows.appendChild(tr);
@@ -108,7 +142,7 @@
       }];
       try {
         for (const o of sample) {
-          await fetch(BACKEND_URL + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) });
+          await GrassRootsUtils.apiFetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(o) });
         }
         console.log('Sample order seeded');
         await render();
@@ -131,11 +165,38 @@
         return;
       }
       try {
-        const resp = await fetch(BACKEND_URL + `/api/orders/${id}`);
-        if (!resp.ok) throw new Error('Order not found');
+        const resp = await GrassRootsUtils.apiFetch(`/api/orders/${id}`);
+        if (!resp || !resp.ok) throw new Error('Order not found');
         const data = await resp.json();
         const o = data.order || data;
-        const details = `Order ${o.id}\nItems:\n${(data.items || o.items).map(i => i.name + ' x' + i.qty).join('\n')}\nTotal: ₹ ${o.total.toFixed(2)}\nStatus: ${o.status}\nPaid: ${o.paid ? 'Yes' : 'No'}`;
+        const products = await loadProducts();
+        const productMap = {};
+        (products || []).forEach(p => { productMap[String(p.id)] = p; });
+
+        // fetch any missing products referenced by this order
+        const missing = new Set();
+        (data.items || o.items || []).forEach(i => {
+          const pid = i.productId !== undefined ? String(i.productId) : (i.product_id !== undefined ? String(i.product_id) : null);
+          if (pid && !productMap[pid]) missing.add(pid);
+        });
+        if (missing.size > 0) {
+          await Promise.all(Array.from(missing).map(async pid => {
+            try {
+              const r = await GrassRootsUtils.apiFetch(`/api/products/${pid}`);
+              if (r && r.ok) {
+                const p = await r.json();
+                productMap[String(p.id)] = p;
+              }
+            } catch (e) { /* ignore */ }
+          }));
+        }
+
+        const itemsList = (data.items || o.items || []).map(i => {
+          const name = i.name || (productMap[String(i.productId)] && productMap[String(i.productId)].name) || i.productId || 'Unknown';
+          const qty = i.qty !== undefined ? i.qty : (i.quantity || 0);
+          return `${name} x${qty}`;
+        });
+        const details = `Order ${o.id}\nItems:\n${itemsList.join('\n')}\nTotal: ₹ ${o.total.toFixed(2)}\nStatus: ${o.status}\nPaid: ${o.paid ? 'Yes' : 'No'}`;
         if (confirm(details + '\n\nMark Confirmed?')) {
           updateStatus(id, 'Confirmed');
         }
@@ -195,8 +256,8 @@
       }
 
       try {
-        const resp = await fetch(BACKEND_URL + '/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
-        if (!resp.ok) throw new Error('Failed to create order');
+        const resp = await GrassRootsUtils.apiFetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) });
+        if (!resp || !resp.ok) throw new Error('Failed to create order');
 
         // Also save to localStorage as backup
         try {
@@ -229,23 +290,23 @@
     async function updateStatus(id, status) {
       try {
         // Update order status on server
-        const resp = await fetch(BACKEND_URL + `/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-        if (!resp.ok) throw new Error('Failed to update order');
+        const resp = await GrassRootsUtils.apiFetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+        if (!resp || !resp.ok) throw new Error('Failed to update order');
 
         if (status === 'Confirmed') {
           // decrement product stock for each order item
-          const resp2 = await fetch(BACKEND_URL + `/api/orders/${id}`);
-          if (resp2.ok) {
+          const resp2 = await GrassRootsUtils.apiFetch(`/api/orders/${id}`);
+          if (resp2 && resp2.ok) {
             const data = await resp2.json();
             const items = data.items || data.order && data.order.items || [];
             for (const it of items) {
               try {
                 // fetch product
-                const pResp = await fetch(BACKEND_URL + `/api/products/${it.productId}`);
-                if (!pResp.ok) continue;
+                const pResp = await GrassRootsUtils.apiFetch(`/api/products/${it.productId}`);
+                if (!pResp || !pResp.ok) continue;
                 const p = await pResp.json();
                 const newStock = Math.max(0, (p.stock || 0) - (it.qty || 0));
-                await fetch(BACKEND_URL + `/api/products/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stock: newStock }) });
+                await GrassRootsUtils.apiFetch(`/api/products/${p.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stock: newStock }) });
               } catch (e) {
                 console.warn('Failed to update product stock for', it.productId, e);
               }

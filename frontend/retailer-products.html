@@ -220,10 +220,36 @@
     // Constants and demo data (must be before any function uses them)
     const KEY_PRODUCTS = 'retailer_products';
     const DEMO_PRODUCTS = [
-      { name: 'Tomato (Cherry)', price: 45.0, stock: 120, description: 'Fresh cherry tomatoes from demo farm.' },
-      { name: 'Organic Basmati Rice', price: 80.0, stock: 60, description: 'Premium organic rice, long grain.' },
-      { name: 'Green Chilli', price: 30.0, stock: 200, description: 'Spicy green chillies, locally sourced.' },
-      { name: 'Potato', price: 25.0, stock: 300, description: 'Farm-fresh potatoes, best for fries.' }
+      // Vegetables (10 items)
+      { name: 'Tomato (Cherry)', price: 45.0, stock: 120, description: 'Fresh cherry tomatoes, sweet and juicy.' },
+      { name: 'Potato', price: 25.0, stock: 300, description: 'Farm-fresh potatoes, perfect for all dishes.' },
+      { name: 'Onion (Red)', price: 35.0, stock: 250, description: 'Premium red onions, locally sourced.' },
+      { name: 'Green Chilli', price: 30.0, stock: 200, description: 'Spicy green chillies, fresh from farm.' },
+      { name: 'Carrot', price: 40.0, stock: 180, description: 'Crunchy orange carrots, rich in vitamins.' },
+      { name: 'Cabbage', price: 20.0, stock: 150, description: 'Fresh green cabbage, crisp and healthy.' },
+      { name: 'Cauliflower', price: 35.0, stock: 100, description: 'White cauliflower, perfect for curries.' },
+      { name: 'Spinach', price: 30.0, stock: 90, description: 'Fresh spinach leaves, iron-rich greens.' },
+      { name: 'Brinjal (Eggplant)', price: 28.0, stock: 140, description: 'Purple brinjal, great for bharta.' },
+      { name: 'Cucumber', price: 25.0, stock: 160, description: 'Fresh cucumbers, cool and refreshing.' },
+
+      // Grains & Pulses (8 items)
+      { name: 'Organic Basmati Rice', price: 80.0, stock: 500, description: 'Premium organic rice, long grain aromatic.' },
+      { name: 'Brown Rice', price: 70.0, stock: 400, description: 'Healthy brown rice, high in fiber.' },
+      { name: 'Wheat Flour (Atta)', price: 45.0, stock: 600, description: 'Stone-ground whole wheat flour.' },
+      { name: 'Toor Dal (Pigeon Pea)', price: 120.0, stock: 200, description: 'Premium quality toor dal, protein-rich.' },
+      { name: 'Moong Dal (Green Gram)', price: 110.0, stock: 180, description: 'Split moong dal, easy to digest.' },
+      { name: 'Chana Dal (Bengal Gram)', price: 100.0, stock: 220, description: 'Yellow chana dal, rich in protein.' },
+      { name: 'Rajma (Kidney Beans)', price: 130.0, stock: 150, description: 'Red kidney beans, perfect for curry.' },
+      { name: 'Chickpeas (Kabuli Chana)', price: 90.0, stock: 170, description: 'White chickpeas, versatile legume.' },
+
+      // Fruits (7 items)
+      { name: 'Banana (Robusta)', price: 50.0, stock: 200, description: 'Fresh robusta bananas, naturally sweet.' },
+      { name: 'Apple (Shimla)', price: 150.0, stock: 100, description: 'Crisp Shimla apples, premium quality.' },
+      { name: 'Mango (Alphonso)', price: 200.0, stock: 80, description: 'King of mangoes, sweet and juicy.' },
+      { name: 'Papaya', price: 40.0, stock: 120, description: 'Ripe papayas, rich in vitamins.' },
+      { name: 'Watermelon', price: 30.0, stock: 150, description: 'Sweet watermelons, perfect for summer.' },
+      { name: 'Grapes (Green)', price: 80.0, stock: 90, description: 'Seedless green grapes, fresh and sweet.' },
+      { name: 'Pomegranate', price: 120.0, stock: 70, description: 'Ruby red pomegranates, antioxidant-rich.' }
     ];
 
     async function loadProducts() {
@@ -245,7 +271,7 @@
       }
       // Otherwise, try backend first, fallback to demo products
       const BACKEND_URL = window.location.protocol === 'file:'
-        ? 'http://localhost:5000'
+        ? 'http://localhost:4000'
         : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
       try {
         const resp = await GrassRootsUtils.apiFetch('/api/products');
@@ -271,14 +297,9 @@
     function loadDemoProductSelector() {
       const select = document.getElementById('demoProductSelect');
       select.innerHTML = '<option value="">-- Select a Demo Product --</option>';
-      // Always use a hardcoded demo list to guarantee options
-      const demoList = [
-        { name: 'Tomato (Cherry)', price: 45.0, stock: 120, description: 'Fresh cherry tomatoes from demo farm.' },
-        { name: 'Organic Basmati Rice', price: 80.0, stock: 60, description: 'Premium organic rice, long grain.' },
-        { name: 'Green Chilli', price: 30.0, stock: 200, description: 'Spicy green chillies, locally sourced.' },
-        { name: 'Potato', price: 25.0, stock: 300, description: 'Farm-fresh potatoes, best for fries.' }
-      ];
-      demoList.forEach((prod, idx) => {
+
+      // Use the main DEMO_PRODUCTS array
+      DEMO_PRODUCTS.forEach((prod, idx) => {
         const opt = document.createElement('option');
         opt.value = idx;
         opt.textContent = `${prod.name} - ₹${prod.price}/kg`;
@@ -388,7 +409,7 @@
 
       // Otherwise, use backend API
       const BACKEND_URL = window.location.protocol === 'file:'
-        ? 'http://localhost:5000'
+        ? 'http://localhost:4000'
         : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
       if (window.editId) {
         // update existing product via API
@@ -451,7 +472,7 @@
     async function del(id) {
       if (!confirm('Are you sure you want to delete this product?')) return;
       const BACKEND_URL = window.location.protocol === 'file:'
-        ? 'http://localhost:5000'
+        ? 'http://localhost:4000'
         : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
       try {
         const resp = await GrassRootsUtils.apiFetch(`/api/products/${id}`, { method: 'DELETE' });
