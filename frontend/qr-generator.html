@@ -327,58 +327,102 @@
             }).catch(err => console.error('Download fallback failed', err));
         });
 
-        // Print QR
+        // Print QR - receipt style
         document.getElementById('printBtn').addEventListener('click', function() {
             const canvas = document.querySelector('#qrcode canvas');
-            const productName = document.getElementById('productName').value;
-            const printWindow = window.open('', '', 'width=800,height=600');
-            if (canvas) {
-                printWindow.document.write(`
-                    <html><head><title>Print QR Code</title>
+            const productName = document.getElementById('productName').value || '';
+            const printWindow = window.open('', '', 'width=800,height=1000');
+
+            // build receipt HTML
+            const details = {
+                productName,
+                cropType: document.getElementById('cropType').value || '',
+                quality: document.getElementById('quality').value || '',
+                harvestDate: document.getElementById('harvestDate').value || '',
+                farmLocation: document.getElementById('farmLocation').value || '',
+                fertilizerUsed: document.getElementById('fertilizerUsed').value || '',
+                pesticidesUsed: document.getElementById('pesticidesUsed').value || '',
+                batchNumber: document.getElementById('batchNumber').value || '',
+                price: document.getElementById('price').value || '',
+                farmerName: localStorage.getItem('fullName') || '',
+                farmerEmail: localStorage.getItem('userEmail') || '',
+                generatedAt: new Date().toLocaleString()
+            };
+
+            const qrSrc = canvas ? canvas.toDataURL('image/png') : (document.querySelector('#qrcode img') ? document.querySelector('#qrcode img').src : '');
+
+            const html = `
+                <html>
+                <head>
+                    <title>GrassRoots QR Receipt</title>
                     <style>
-                        body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-                        h2 { color: #2f6b50; }
-                        img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
-                        .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
+                        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #222; }
+                        .receipt { width: 680px; margin: 12px auto; border: 1px solid #e6e6e6; padding: 18px; border-radius: 8px; }
+                        .header { display:flex; align-items:center; justify-content:space-between; }
+                        .brand { display:flex; gap:12px; align-items:center; }
+                        .brand .logo { width:48px; height:48px; background:#2f6b50; color:white; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; }
+                        .brand h1 { margin:0; font-size:18px; color:#1f4d35; }
+                        .meta { text-align:right; font-size:12px; color:#666; }
+                        .separator { height:1px; background:linear-gradient(90deg,#eee,#fff); margin:12px 0; }
+                        .grid { display:flex; gap:18px; }
+                        .left { flex:1; }
+                        .right { width:180px; text-align:center; }
+                        .right img { width:160px; height:160px; border:1px solid #ddd; padding:6px; background:white; }
+                        table { width:100%; border-collapse:collapse; margin-top:10px; }
+                        th, td { padding:8px 6px; text-align:left; font-size:14px; }
+                        th { color:#444; width:30%; }
+                        .footer { text-align:center; margin-top:18px; font-size:12px; color:#666; }
                     </style>
-                    </head><body>
-                    <h2>${productName}</h2>
-                    <img src="${canvas.toDataURL('image/png')}" />
-                    <div class="details">
-                        <p><strong>Crop Type:</strong> ${document.getElementById('cropType').value}</p>
-                        <p><strong>Quality:</strong> ${document.getElementById('quality').value}</p>
-                        <p><strong>Harvest Date:</strong> ${document.getElementById('harvestDate').value}</p>
-                        <p><strong>Fertilizer:</strong> ${document.getElementById('fertilizerUsed').value}</p>
-                        <p><strong>Pesticides:</strong> ${document.getElementById('pesticidesUsed').value}</p>
+                </head>
+                <body>
+                    <div class="receipt">
+                        <div class="header">
+                            <div class="brand">
+                                <div class="logo">GR</div>
+                                <div>
+                                    <h1>GrassRoots</h1>
+                                    <div style="font-size:12px;color:#666;">Product QR Receipt</div>
+                                </div>
+                            </div>
+                            <div class="meta">
+                                <div>Generated: ${details.generatedAt}</div>
+                                <div>${details.farmerName || ''}</div>
+                                <div style="color:#888;">${details.farmerEmail || ''}</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+
+                        <div class="grid">
+                            <div class="left">
+                                <table>
+                                    <tr><th>Product</th><td>${details.productName}</td></tr>
+                                    <tr><th>Crop Type</th><td>${details.cropType}</td></tr>
+                                    <tr><th>Quality</th><td>${details.quality}</td></tr>
+                                    <tr><th>Harvest Date</th><td>${details.harvestDate}</td></tr>
+                                    <tr><th>Batch</th><td>${details.batchNumber}</td></tr>
+                                    <tr><th>Location</th><td>${details.farmLocation}</td></tr>
+                                    <tr><th>Fertilizer</th><td>${details.fertilizerUsed}</td></tr>
+                                    <tr><th>Pesticides</th><td>${details.pesticidesUsed}</td></tr>
+                                    <tr><th>Price</th><td>${details.price ? '₹' + Number(details.price).toFixed(2) : '—'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="right">
+                                ${qrSrc ? `<img src="${qrSrc}" alt="QR" />` : ''}
+                                <div style="font-size:12px;color:#888;margin-top:8px;">Scan to view product data</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+                        <div class="footer">Thank you for using GrassRoots — share trusted produce with your buyers.</div>
                     </div>
-                `);
-                printWindow.document.close();
-                printWindow.print();
-                return;
-            }
-            // fallback to image
-            const img = document.querySelector('#qrcode img');
-            if (!img) return;
-            printWindow.document.write(`
-                <html><head><title>Print QR Code</title>
-                <style>
-                    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-                    h2 { color: #2f6b50; }
-                    img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
-                    .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
-                </style>
-                </head><body>
-                <h2>${productName}</h2>
-                <img src="${img.src}" />
-                <div class="details">
-                    <p><strong>Crop Type:</strong> ${document.getElementById('cropType').value}</p>
-                    <p><strong>Quality:</strong> ${document.getElementById('quality').value}</p>
-                    <p><strong>Location:</strong> ${document.getElementById('farmLocation').value}</p>
-                    <p><strong>Fertilizer:</strong> ${document.getElementById('fertilizerUsed').value}</p>
-                    <p><strong>Pesticides:</strong> ${document.getElementById('pesticidesUsed').value}</p>
-                </div>
-            `);
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(html);
             printWindow.document.close();
+            printWindow.focus();
             printWindow.print();
         });
 
@@ -472,55 +516,97 @@
             const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
             const qr = qrHistory.find(q => q.id === qrId);
             if (!qr) return;
-            const printWindow = window.open('', '', 'width=800,height=600');
-            if (qr.canvasData) {
-                printWindow.document.write(`
-                    <html><head><title>Print QR Code</title>
+            const printWindow = window.open('', '', 'width=800,height=1000');
+
+            const details = {
+                productName: qr.productName || '',
+                cropType: qr.cropType || '',
+                quality: qr.quality || '',
+                harvestDate: qr.harvestDate || '',
+                farmLocation: qr.farmLocation || '',
+                fertilizerUsed: qr.fertilizerUsed || '',
+                pesticidesUsed: qr.pesticidesUsed || '',
+                batchNumber: qr.batchNumber || '',
+                price: qr.price || '',
+                farmerName: qr.farmerName || localStorage.getItem('fullName') || '',
+                farmerEmail: qr.farmerEmail || localStorage.getItem('userEmail') || '',
+                generatedAt: qr.generatedAt ? new Date(qr.generatedAt).toLocaleString() : new Date().toLocaleString()
+            };
+
+            const qrSrc = qr.canvasData || ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr.qrText || qr.productName || qr.id));
+
+            const html = `
+                <html>
+                <head>
+                    <title>GrassRoots QR Receipt</title>
                     <style>
-                        body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-                        h2 { color: #2f6b50; }
-                        img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
-                        .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
+                        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #222; }
+                        .receipt { width: 680px; margin: 12px auto; border: 1px solid #e6e6e6; padding: 18px; border-radius: 8px; }
+                        .header { display:flex; align-items:center; justify-content:space-between; }
+                        .brand { display:flex; gap:12px; align-items:center; }
+                        .brand .logo { width:48px; height:48px; background:#2f6b50; color:white; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; }
+                        .brand h1 { margin:0; font-size:18px; color:#1f4d35; }
+                        .meta { text-align:right; font-size:12px; color:#666; }
+                        .separator { height:1px; background:linear-gradient(90deg,#eee,#fff); margin:12px 0; }
+                        .grid { display:flex; gap:18px; }
+                        .left { flex:1; }
+                        .right { width:180px; text-align:center; }
+                        .right img { width:160px; height:160px; border:1px solid #ddd; padding:6px; background:white; }
+                        table { width:100%; border-collapse:collapse; margin-top:10px; }
+                        th, td { padding:8px 6px; text-align:left; font-size:14px; }
+                        th { color:#444; width:30%; }
+                        .footer { text-align:center; margin-top:18px; font-size:12px; color:#666; }
                     </style>
-                    </head><body>
-                    <h2>${qr.productName}</h2>
-                    <img src="${qr.canvasData}" />
-                    <div class="details">
-                        <p><strong>Crop Type:</strong> ${qr.cropType}</p>
-                        <p><strong>Quality:</strong> ${qr.quality}</p>
-                        <p><strong>Location:</strong> ${qr.farmLocation}</p>
-                        <p><strong>Fertilizer:</strong> ${qr.fertilizerUsed}</p>
-                        <p><strong>Pesticides:</strong> ${qr.pesticidesUsed}</p>
-                        <p><strong>Farmer:</strong> ${qr.farmerName} (${qr.farmerEmail})</p>
+                </head>
+                <body>
+                    <div class="receipt">
+                        <div class="header">
+                            <div class="brand">
+                                <div class="logo">GR</div>
+                                <div>
+                                    <h1>GrassRoots</h1>
+                                    <div style="font-size:12px;color:#666;">Product QR Receipt</div>
+                                </div>
+                            </div>
+                            <div class="meta">
+                                <div>Generated: ${details.generatedAt}</div>
+                                <div>${details.farmerName || ''}</div>
+                                <div style="color:#888;">${details.farmerEmail || ''}</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+
+                        <div class="grid">
+                            <div class="left">
+                                <table>
+                                    <tr><th>Product</th><td>${details.productName}</td></tr>
+                                    <tr><th>Crop Type</th><td>${details.cropType}</td></tr>
+                                    <tr><th>Quality</th><td>${details.quality}</td></tr>
+                                    <tr><th>Harvest Date</th><td>${details.harvestDate}</td></tr>
+                                    <tr><th>Batch</th><td>${details.batchNumber}</td></tr>
+                                    <tr><th>Location</th><td>${details.farmLocation}</td></tr>
+                                    <tr><th>Fertilizer</th><td>${details.fertilizerUsed}</td></tr>
+                                    <tr><th>Pesticides</th><td>${details.pesticidesUsed}</td></tr>
+                                    <tr><th>Price</th><td>${details.price ? '₹' + Number(details.price).toFixed(2) : '—'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="right">
+                                ${qrSrc ? `<img src="${qrSrc}" alt="QR" />` : ''}
+                                <div style="font-size:12px;color:#888;margin-top:8px;">Scan to view product data</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+                        <div class="footer">Thank you for using GrassRoots — share trusted produce with your buyers.</div>
                     </div>
-                `);
-                printWindow.document.close();
-                printWindow.print();
-                return;
-            }
-            // fallback to remote image
-            const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr.qrText || qr.productName || qr.id);
-            printWindow.document.write(`
-                <html><head><title>Print QR Code</title>
-                <style>
-                    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-                    h2 { color: #2f6b50; }
-                    img { max-width: 400px; margin: 1rem 0; border: 1px solid #ddd; padding: 0.5rem; }
-                    .details { text-align: left; max-width: 600px; margin: 1rem auto; font-size: 0.9rem; }
-                </style>
-                </head><body>
-                <h2>${qr.productName}</h2>
-                <img src="${apiUrl}" />
-                <div class="details">
-                    <p><strong>Crop Type:</strong> ${qr.cropType}</p>
-                    <p><strong>Quality:</strong> ${qr.quality}</p>
-                    <p><strong>Location:</strong> ${qr.farmLocation}</p>
-                    <p><strong>Fertilizer:</strong> ${qr.fertilizerUsed}</p>
-                    <p><strong>Pesticides:</strong> ${qr.pesticidesUsed}</p>
-                    <p><strong>Farmer:</strong> ${qr.farmerName} (${qr.farmerEmail})</p>
-                </div>
-            `);
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(html);
             printWindow.document.close();
+            printWindow.focus();
             printWindow.print();
         };
 
