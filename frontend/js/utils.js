@@ -214,7 +214,7 @@ const GrassRootsUtils = {
         } catch (err) {
             console.warn('Relative fetch failed for', path, err);
             // If page opened via file:// or different origin, try explicit backend
-            const backendOrigin = 'http://localhost:3000';
+            const backendOrigin = 'http://localhost:4000';
             try {
                 return await fetch(backendOrigin + path, options);
             } catch (err2) {

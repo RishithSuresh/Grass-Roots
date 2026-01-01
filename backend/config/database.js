@@ -20,8 +20,7 @@ const dbConfig = {
     keepAliveInitialDelay: 0,
     timezone: '+00:00',
     dateStrings: false,
-    multipleStatements: false,
-    namedPlaceholders: true
+    multipleStatements: false
 };
 
 // Create connection pool

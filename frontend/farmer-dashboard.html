@@ -269,7 +269,7 @@
             const statusEl = document.getElementById('callbot-status');
             if (!statusEl) return;
             try {
-                const resp = await fetch('http://localhost:3000/health', { cache: 'no-store' });
+                const resp = await fetch('http://localhost:4000/health', { cache: 'no-store' });
                 if (!resp.ok) throw new Error('not ok');
                 const body = await resp.json();
                 statusEl.textContent = 'Online';
