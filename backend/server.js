@@ -10,6 +10,7 @@ const { testConnection } = require('./config/database');
 
 const authRoutes = require('./routes/auth.routes');
 const botRoutes = require('./routes/bot.routes');
+const mlRoutes = require('./routes/ml.routes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,6 +29,7 @@ app.use('/callbot', express.static(path.join(__dirname, '..', 'bot', 'farmer-voi
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/bot', botRoutes);
+app.use('/api/ml', mlRoutes);
 
 // Health
 app.get('/health', (req, res) => {
