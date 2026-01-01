@@ -229,6 +229,9 @@
         const trendIcon = item.trend === 'up' ? '↑' : item.trend === 'down' ? '↓' : '→';
         const trendText = item.change > 0 ? `+${item.change}%` : `${item.change}%`;
 
+        // safe ids for rendered elements
+        const safeId = `${item.crop}-${item.location}`.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
+
         html += `
           <div class="price-card">
             <div class="price-card-header">
@@ -241,6 +244,12 @@
               <span class="trend ${trendClass}">${trendIcon} ${trendText}</span>
             </div>
             <div class="market-location">📍 ${item.location}</div>
+
+            <div style="margin-top:0.8rem;display:flex;gap:0.5rem;align-items:center;">
+              <button class="predict-btn" data-crop="${encodeURIComponent(item.crop)}" data-location="${encodeURIComponent(item.location)}">🔮 Predict</button>
+              <div id="pred-${safeId}" class="predicted-price" style="font-weight:700;color:#2c3e50;margin-left:0.5rem;"></div>
+            </div>
+
             <div class="price-details">
               <div class="price-detail-row">
                 <span>Min Price:</span>
@@ -293,6 +302,64 @@
 
       document.getElementById('categoryFilter').addEventListener('change', applyFilters);
       document.getElementById('locationFilter').addEventListener('change', applyFilters);
+
+      // Attach predict button handlers
+      function attachPredictButtons() {
+        document.querySelectorAll('.predict-btn').forEach(btn => {
+          btn.removeEventListener('click', btn._predictHandler);
+          const handler = async () => {
+            const crop = decodeURIComponent(btn.dataset.crop);
+            const location = decodeURIComponent(btn.dataset.location);
+
+            // Find item to get current price and change
+            const item = marketPrices.find(p => p.crop === crop && p.location === location);
+            if (!item) return;
+
+            const targetId = `pred-${(crop + '-' + location).replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').toLowerCase()}`;
+            const placeholder = document.getElementById(targetId);
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Predicting…';
+
+            try {
+              const resp = await fetch('/api/ml/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ crop: crop, location: location }) // backend will use latest DB values
+              });
+
+              const data = await resp.json();
+              if (!resp.ok) {
+                placeholder.textContent = data && data.error ? data.error : 'Prediction unavailable';
+                console.warn('ML prediction error (status):', resp.status, data);
+              } else if (data && data.predictedPrice) {
+                let txt = `Predicted: ₹${data.predictedPrice.toLocaleString()}`;
+                if (data._db_source && data._db_source.market_name) {
+                  txt += ` (market: ${data._db_source.market_name}, date: ${data._db_source.price_date || 'N/A'})`;
+                }
+                placeholder.textContent = txt;
+              } else {
+                placeholder.textContent = 'Prediction unavailable';
+                console.warn('ML prediction unexpected response:', data);
+              }
+            } catch (err) {
+              console.error('Prediction request failed', err);
+              placeholder.textContent = 'Prediction failed';
+            } finally {
+              btn.disabled = false;
+              btn.textContent = originalText;
+            }
+          };
+          btn.addEventListener('click', handler);
+          btn._predictHandler = handler;
+        });
+      }
+
+      // Re-attach after initial render and whenever filters change
+      attachPredictButtons();
+      const _origApplyFilters = applyFilters;
+      applyFilters = function () { _origApplyFilters(); attachPredictButtons(); };
+
     });
   </script>
 </body>
