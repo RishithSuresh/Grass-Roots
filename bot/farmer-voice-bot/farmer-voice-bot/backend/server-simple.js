@@ -4,9 +4,39 @@ const path = require('path');
 const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 const fileUpload = require('express-fileupload');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Database connection pool
+let db;
+async function initDatabase() {
+    try {
+        db = await mysql.createPool({
+            host: process.env.DB_HOST || 'localhost',
+            port: process.env.DB_PORT || 3306,
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || '',
+            database: process.env.DB_NAME || 'grassroots_db',
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        });
+
+        // Test connection
+        const connection = await db.getConnection();
+        console.log('✅ Database connected successfully');
+        console.log(`📊 Database: ${process.env.DB_NAME || 'grassroots_db'}`);
+        connection.release();
+        return true;
+    } catch (error) {
+        console.error('❌ Database connection failed:', error.message);
+        console.log('⚠️  Running in memory-only mode');
+        return false;
+    }
+}
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -124,23 +154,96 @@ app.post('/api/confirm-store', (req, res) => {
 /**
  * GET /api/crops - Get all saved crops
  */
-app.get('/api/crops', (req, res) => {
-    console.log(`📋 GET /api/crops - Returning ${crops.length} crops`);
-    res.json(crops);
+app.get('/api/crops', async (req, res) => {
+    try {
+        if (db) {
+            // Get from database
+            const [rows] = await db.execute('SELECT * FROM crops ORDER BY created_at DESC');
+            console.log(`📋 GET /api/crops - Returning ${rows.length} crops from database`);
+            res.json(rows);
+        } else {
+            // Fallback to in-memory
+            console.log(`📋 GET /api/crops - Returning ${crops.length} crops from memory`);
+            res.json(crops);
+        }
+    } catch (error) {
+        console.error('❌ Error fetching crops:', error.message);
+        res.status(500).json({ error: 'Failed to fetch crops' });
+    }
 });
 
 /**
  * POST /api/crops - Save a new crop
  */
-app.post('/api/crops', (req, res) => {
-    const crop = {
-        id: uuidv4(),
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    crops.push(crop);
-    console.log(`✅ Crop saved: ${crop.cropType} - ${crop.area} acres`);
-    res.json({ success: true, crop });
+app.post('/api/crops', async (req, res) => {
+    try {
+        const { cropType, area, plantingDate, notes, farmerEmail } = req.body;
+
+        if (db) {
+            // Save to database
+            // First, get or create farmer user
+            let farmerId = 1; // Default farmer ID
+
+            if (farmerEmail) {
+                const [users] = await db.execute(
+                    'SELECT user_id FROM users WHERE email = ? AND user_type = ?',
+                    [farmerEmail, 'farmer']
+                );
+                if (users.length > 0) {
+                    farmerId = users[0].user_id;
+                }
+            }
+
+            // Insert crop
+            const [result] = await db.execute(
+                `INSERT INTO crops (
+                    farmer_id, crop_name, crop_type, quantity_available,
+                    unit, price_per_unit, harvest_date, description,
+                    status, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+                [
+                    farmerId,
+                    cropType || 'Unknown',
+                    'other', // crop_type enum
+                    parseFloat(area) || 0,
+                    'kg',
+                    0, // price_per_unit (default)
+                    plantingDate || null,
+                    notes || null,
+                    'available'
+                ]
+            );
+
+            console.log(`✅ Crop saved to database: ${cropType} - ${area} acres (ID: ${result.insertId})`);
+            res.json({
+                success: true,
+                crop: {
+                    crop_id: result.insertId,
+                    cropType,
+                    area,
+                    plantingDate,
+                    notes
+                }
+            });
+        } else {
+            // Fallback to in-memory
+            const crop = {
+                id: uuidv4(),
+                cropType,
+                area,
+                plantingDate,
+                notes,
+                farmerEmail,
+                createdAt: new Date().toISOString()
+            };
+            crops.push(crop);
+            console.log(`✅ Crop saved to memory: ${cropType} - ${area} acres`);
+            res.json({ success: true, crop });
+        }
+    } catch (error) {
+        console.error('❌ Error saving crop:', error.message);
+        res.status(500).json({ error: 'Failed to save crop', details: error.message });
+    }
 });
 
 /**
@@ -150,17 +253,24 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
-    console.log('');
-    console.log('╔════════════════════════════════════════════════════════╗');
-    console.log('║   🌾 FARMER VOICE CALL-BOT BACKEND RUNNING! 🚜        ║');
-    console.log('╚════════════════════════════════════════════════════════╝');
-    console.log('');
-    console.log(`✅ Server: http://localhost:${PORT}`);
-    console.log(`📱 Frontend: http://localhost:${PORT}`);
-    console.log(`🏥 Health: http://localhost:${PORT}/health`);
-    console.log('');
-    console.log('Ready to receive voice calls from farmers!');
-    console.log('');
-});
+// Initialize database and start server
+async function startServer() {
+    await initDatabase();
+
+    app.listen(PORT, () => {
+        console.log('');
+        console.log('╔════════════════════════════════════════════════════════╗');
+        console.log('║   🌾 FARMER VOICE CALL-BOT BACKEND RUNNING! 🚜        ║');
+        console.log('╚════════════════════════════════════════════════════════╝');
+        console.log('');
+        console.log(`✅ Server: http://localhost:${PORT}`);
+        console.log(`📱 Frontend: http://localhost:${PORT}`);
+        console.log(`🏥 Health: http://localhost:${PORT}/health`);
+        console.log('');
+        console.log('Ready to receive voice calls from farmers!');
+        console.log('');
+    });
+}
+
+startServer();
 

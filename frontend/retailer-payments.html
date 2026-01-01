@@ -51,33 +51,15 @@
         tr.innerHTML=`<td>${o.id}</td><td>₹ ${Number(o.total).toFixed(2)}</td><td>${o.paid? 'Yes':'No'}</td><td>
           <button class='btn' onclick="togglePaid('${o.id}')">Toggle Paid</button>
           <button class='btn' onclick="printInv('${o.id}')">Print</button>
-          <button class='btn' onclick="payOrder('${o.id}', ${o.total})">Pay</button>
+          <button class='btn' onclick="payOrder('${o.id}', ${o.total})" ${o.paid ? 'disabled' : ''}>Pay</button>
         </td>`;
         rows.appendChild(tr);
       });
-        // Blockchain payment handler
-        async function payOrder(orderId, total) {
-          // Convert INR to ETH for demo (replace with real conversion in production)
-          // For demo, assume 1 ETH = 200,000 INR
-          const ethAmount = (Number(total) / 200000).toFixed(6);
-          payWithMetaMask(orderId, ethAmount,
-            function(tx) {
-              // On success, mark as paid and print receipt
-              if (window.location.protocol === 'file:') {
-                const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
-                const o = orders.find(x => x.id === orderId);
-                if (o) {
-                  o.paid = true;
-                  localStorage.setItem(KEY_ORDERS, JSON.stringify(orders));
-                }
-              }
-              printInv(orderId);
-            },
-            function(err) {
-              alert('Payment failed: ' + (err && err.message ? err.message : err));
-            }
-          );
-        }
+    }
+
+    // Redirect to blockchain payment page
+    function payOrder(orderId, total) {
+      window.location.href = `blockchain-payment.html?orderId=${orderId}&amount=${total}`;
     }
 
     async function togglePaid(id){
@@ -138,6 +120,17 @@
         const html=`<html><body><h2>Invoice ${o.id}</h2><p>Total: ₹ ${Number(o.total).toFixed(2)}</p></body></html>`;
         const w=window.open('','', 'width=700,height=600'); w.document.write(html); w.document.close(); w.print();
       }
+    }
+
+    // Check for payment success callback
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      const successOrderId = urlParams.get('orderId');
+      setTimeout(() => {
+        alert(`Payment successful for Order ${successOrderId}!`);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 500);
     }
 
     document.addEventListener('DOMContentLoaded',render);
