@@ -13,6 +13,8 @@ const botRoutes = require('./routes/bot.routes');
 const mlRoutes = require('./routes/ml.routes');
 const ordersRoutes = require('./routes/orders.routes');
 const productsRoutes = require('./routes/products.routes');
+const qrRoutes = require('./routes/qr.routes');
+const cropsRoutes = require('./routes/crops.routes');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -34,6 +36,8 @@ app.use('/api/bot', botRoutes);
 app.use('/api/ml', mlRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/qr', qrRoutes);
+app.use('/api/crops', cropsRoutes);
 
 // Health
 app.get('/health', (req, res) => {

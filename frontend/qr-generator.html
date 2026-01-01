@@ -276,20 +276,24 @@
                         if (!resp.ok) throw new Error('Failed to save QR');
                     } catch (err) {
                         console.error('Failed to save QR to server:', err);
-                        GrassRootsUtils.showToast('Saved locally but server save failed', 'error');
-                        // fallback: save locally so user doesn't lose data
-                        let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
-                        qrHistory.unshift(qrRecord);
-                        qrHistory = qrHistory.slice(0, 10);
-                        localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+                        // fallback: save locally so user doesn't lose data (no popup)
+                            let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                            // avoid duplicates (same QR text)
+                            if (!qrHistory.some(q => q.qrText === qrRecord.qrText)) {
+                                qrHistory.unshift(qrRecord);
+                                qrHistory = qrHistory.slice(0, 10);
+                                localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+                            }
                     }
                 } else {
-                    // Backend not available — save locally
-                    let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
-                    qrHistory.unshift(qrRecord);
-                    qrHistory = qrHistory.slice(0, 10);
-                    localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
-                    GrassRootsUtils && GrassRootsUtils.showToast && GrassRootsUtils.showToast('Saved locally (offline)', 'info');
+                    // Backend not available — save locally (no popup)
+                        let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                        // avoid duplicates (same QR text)
+                        if (!qrHistory.some(q => q.qrText === qrRecord.qrText)) {
+                            qrHistory.unshift(qrRecord);
+                            qrHistory = qrHistory.slice(0, 10);
+                            localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+                        }
                 }
 
                 // Refresh history after generation
@@ -451,6 +455,14 @@
                 historyDiv.innerHTML = '<p style="color: var(--muted);">No QR codes generated yet.</p>';
                 return;
             }
+            // dedupe displayed list by qrText to avoid showing duplicates
+            const seen = new Set();
+            qrHistory = qrHistory.filter(q => {
+                if (!q || !q.qrText) return false;
+                if (seen.has(q.qrText)) return false;
+                seen.add(q.qrText);
+                return true;
+            });
 
             let html = '';
             qrHistory.forEach(qr => {
@@ -465,6 +477,7 @@
                         <div class="qr-item-actions">
                             <button onclick="downloadQRFromHistory('${qr.id}')">Download</button>
                             <button onclick="printQRFromHistory('${qr.id}')">Print</button>
+                            <button onclick="deleteQRFromHistory('${qr.id}')" style="background:#c0392b;color:#fff;border:none;padding:6px 8px;border-radius:4px;">Delete</button>
                         </div>
                     </div>
                 `;
@@ -509,6 +522,31 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }).catch(err => console.error('Download history fallback failed', err));
+        };
+
+        // Delete from history
+        window.deleteQRFromHistory = async function(qrId) {
+            if (!confirm('Delete this QR record? This action cannot be undone.')) return;
+
+            // Remove from localStorage first
+            let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const idx = qrHistory.findIndex(q => q.id === qrId);
+            if (idx !== -1) {
+                qrHistory.splice(idx, 1);
+                localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+            }
+
+            // If backend available, attempt server delete (best-effort, silent)
+            try {
+                if (await checkApiAvailable() && typeof GrassRootsUtils !== 'undefined' && typeof GrassRootsUtils.apiFetch === 'function') {
+                    await GrassRootsUtils.apiFetch('/api/qr/' + encodeURIComponent(qrId), { method: 'DELETE' });
+                }
+            } catch (e) {
+                console.warn('Server delete failed (ignored):', e);
+            }
+
+            // Re-render history
+            if (typeof renderQRHistory === 'function') renderQRHistory();
         };
 
         // Print from history
