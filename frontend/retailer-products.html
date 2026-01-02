@@ -1,0 +1,514 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Product Catalog - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 30%, #f1f8f4 70%, #e3f2e8 100%);
+      background-attachment: fixed;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      padding-top: 60px;
+    }
+    .page-wrapper { display:flex; justify-content:center; padding:100px 16px 40px 16px; min-height:100vh }
+    .card {
+      width:100%;
+      max-width:1100px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius:20px;
+      padding:2.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .card h1 { margin-top:0; color: var(--primary-color); font-size: 2rem; }
+    .muted { color:#666; margin-top:6px; font-size: 1.1rem; }
+    .btn{background:var(--primary-color);color:#fff;padding:12px 20px;border-radius:8px;border:none;cursor:pointer;font-size:1rem;font-weight:600;transition:background 0.3s;}
+    .btn:hover{background:#4A7C5E;}
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .product-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-left: 4px solid var(--primary-color);
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(107, 158, 127, 0.2);
+    }
+    .product-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+    .product-price {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0.5rem 0;
+    }
+    .product-stock {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .product-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .product-actions button {
+      flex: 1;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+    }
+    .btn-delete {
+      background: #f44336;
+    }
+    .btn-delete:hover {
+      background: #d32f2f;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-content h3 {
+      color: var(--primary-color);
+      margin-top: 0;
+      font-size: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .modal-actions button {
+      flex: 1;
+    }
+    .btn-cancel {
+      background: #999;
+    }
+    .btn-cancel:hover {
+      background: #777;
+    }
+    .qr-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background: rgba(107, 158, 127, 0.1);
+      color: var(--primary-color);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="retailer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="card">
+      <h1>🛒 Product Catalog</h1>
+      <p class="muted">Add products to your catalog and manage your inventory</p>
+      <div style="margin:20px 0">
+        <button class="btn" onclick="openAdd()">+ Add Product</button>
+      </div>
+      <div id="productsGrid" class="products-grid"></div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Product Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3 id="mTitle">Add Product</h3>
+
+      <div class="form-group">
+        <label>Select Demo Product *</label>
+        <select id="demoProductSelect" required>
+          <option value="">-- Select a Demo Product --</option>
+        </select>
+        <small style="color:#666;">Choose from a set of demo products</small>
+      </div>
+
+      <div class="form-group">
+        <label>Product Name *</label>
+        <input id="mName" placeholder="e.g., Organic Basmati Rice" required />
+      </div>
+
+      <div class="form-group">
+        <label>Price per KG (₹) *</label>
+        <input id="mPrice" type="number" step="0.01" placeholder="50.00" required />
+      </div>
+
+      <div class="form-group">
+        <label>Available Stock (KG) *</label>
+        <input id="mStock" type="number" placeholder="100" required />
+      </div>
+
+      <div class="form-group">
+        <label>Product Description</label>
+        <textarea id="mDescription" rows="3" placeholder="Add product details..."></textarea>
+      </div>
+
+      <form id="productForm" onsubmit="event.preventDefault(); save();">
+        <div class="modal-actions">
+          <button type="submit" class="btn">Save Product</button>
+          <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Constants and demo data (must be before any function uses them)
+    const KEY_PRODUCTS = 'retailer_products';
+    const DEMO_PRODUCTS = [
+      // Vegetables (10 items)
+      { name: 'Tomato (Cherry)', price: 45.0, stock: 120, description: 'Fresh cherry tomatoes, sweet and juicy.' },
+      { name: 'Potato', price: 25.0, stock: 300, description: 'Farm-fresh potatoes, perfect for all dishes.' },
+      { name: 'Onion (Red)', price: 35.0, stock: 250, description: 'Premium red onions, locally sourced.' },
+      { name: 'Green Chilli', price: 30.0, stock: 200, description: 'Spicy green chillies, fresh from farm.' },
+      { name: 'Carrot', price: 40.0, stock: 180, description: 'Crunchy orange carrots, rich in vitamins.' },
+      { name: 'Cabbage', price: 20.0, stock: 150, description: 'Fresh green cabbage, crisp and healthy.' },
+      { name: 'Cauliflower', price: 35.0, stock: 100, description: 'White cauliflower, perfect for curries.' },
+      { name: 'Spinach', price: 30.0, stock: 90, description: 'Fresh spinach leaves, iron-rich greens.' },
+      { name: 'Brinjal (Eggplant)', price: 28.0, stock: 140, description: 'Purple brinjal, great for bharta.' },
+      { name: 'Cucumber', price: 25.0, stock: 160, description: 'Fresh cucumbers, cool and refreshing.' },
+
+      // Grains & Pulses (8 items)
+      { name: 'Organic Basmati Rice', price: 80.0, stock: 500, description: 'Premium organic rice, long grain aromatic.' },
+      { name: 'Brown Rice', price: 70.0, stock: 400, description: 'Healthy brown rice, high in fiber.' },
+      { name: 'Wheat Flour (Atta)', price: 45.0, stock: 600, description: 'Stone-ground whole wheat flour.' },
+      { name: 'Toor Dal (Pigeon Pea)', price: 120.0, stock: 200, description: 'Premium quality toor dal, protein-rich.' },
+      { name: 'Moong Dal (Green Gram)', price: 110.0, stock: 180, description: 'Split moong dal, easy to digest.' },
+      { name: 'Chana Dal (Bengal Gram)', price: 100.0, stock: 220, description: 'Yellow chana dal, rich in protein.' },
+      { name: 'Rajma (Kidney Beans)', price: 130.0, stock: 150, description: 'Red kidney beans, perfect for curry.' },
+      { name: 'Chickpeas (Kabuli Chana)', price: 90.0, stock: 170, description: 'White chickpeas, versatile legume.' },
+
+      // Fruits (7 items)
+      { name: 'Banana (Robusta)', price: 50.0, stock: 200, description: 'Fresh robusta bananas, naturally sweet.' },
+      { name: 'Apple (Shimla)', price: 150.0, stock: 100, description: 'Crisp Shimla apples, premium quality.' },
+      { name: 'Mango (Alphonso)', price: 200.0, stock: 80, description: 'King of mangoes, sweet and juicy.' },
+      { name: 'Papaya', price: 40.0, stock: 120, description: 'Ripe papayas, rich in vitamins.' },
+      { name: 'Watermelon', price: 30.0, stock: 150, description: 'Sweet watermelons, perfect for summer.' },
+      { name: 'Grapes (Green)', price: 80.0, stock: 90, description: 'Seedless green grapes, fresh and sweet.' },
+      { name: 'Pomegranate', price: 120.0, stock: 70, description: 'Ruby red pomegranates, antioxidant-rich.' }
+    ];
+
+    async function loadProducts() {
+      // If running from file://, always use localStorage/demo products
+      if (window.location.protocol === 'file:') {
+        let local = GrassRootsUtils.loadFromStorage(KEY_PRODUCTS, []);
+        if (!local || local.length === 0) {
+          local = DEMO_PRODUCTS.map((p, i) => ({
+            id: 'demo-' + i,
+            name: p.name,
+            price: p.price,
+            stock: p.stock,
+            description: p.description,
+            createdAt: new Date().toISOString()
+          }));
+          GrassRootsUtils.saveToStorage(KEY_PRODUCTS, local);
+        }
+        return local;
+      }
+      // Otherwise, try backend first, fallback to demo products
+      const BACKEND_URL = window.location.protocol === 'file:'
+        ? 'http://localhost:4000'
+        : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+      try {
+        const resp = await GrassRootsUtils.apiFetch('/api/products');
+        if (resp && resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data) && data.length > 0) return data;
+        }
+      } catch (err) {
+        console.warn('Failed to fetch products from server, falling back to demo products', err);
+      }
+      const demoList = DEMO_PRODUCTS.map((p, i) => ({
+        id: 'demo-' + i,
+        name: p.name,
+        price: p.price,
+        stock: p.stock,
+        description: p.description,
+        createdAt: new Date().toISOString()
+      }));
+      GrassRootsUtils.saveToStorage(KEY_PRODUCTS, demoList);
+      return demoList;
+    }
+
+    function loadDemoProductSelector() {
+      const select = document.getElementById('demoProductSelect');
+      select.innerHTML = '<option value="">-- Select a Demo Product --</option>';
+
+      // Use the main DEMO_PRODUCTS array
+      DEMO_PRODUCTS.forEach((prod, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${prod.name} - ₹${prod.price}/kg`;
+        select.appendChild(opt);
+      });
+    }
+
+    async function render() {
+      const grid = document.getElementById('productsGrid');
+      const products = await loadProducts();
+      console.log('Rendering products:', products);
+      if (!products || products.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;color:#999;grid-column:1/-1;padding:3rem;">No products available.</p>';
+        return;
+      }
+      grid.innerHTML = '';
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-name">${GrassRootsUtils.sanitizeHTML(p.name)}</div>
+          <div class="product-price">₹${Number(p.price).toFixed(2)}/kg</div>
+          <div class="product-stock">${p.stock} kg available</div>
+          ${p.qrId ? `<div class="qr-badge">📱 QR Verified</div>` : ''}
+          ${p.description ? `<p style=\"color:#666;font-size:0.9rem;margin:0.5rem 0;\">${GrassRootsUtils.sanitizeHTML(p.description)}</p>` : ''}
+          <div class="product-actions">
+            <button class="btn" onclick="edit('${p.id}')">Edit</button>
+            <button class="btn btn-delete" onclick="del('${p.id}')">Delete</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function openAdd() {
+      window.editId = null;
+      document.getElementById('mTitle').textContent = 'Add Product';
+      document.getElementById('demoProductSelect').value = '';
+      document.getElementById('mName').value = '';
+      document.getElementById('mPrice').value = '';
+      document.getElementById('mStock').value = '';
+      document.getElementById('mDescription').value = '';
+      document.getElementById('modal').style.display = 'flex';
+      loadDemoProductSelector();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    async function save() {
+      const demoIdx = document.getElementById('demoProductSelect').value;
+      let name = document.getElementById('mName').value.trim();
+      let price = Number(document.getElementById('mPrice').value) || 0;
+      let stock = parseInt(document.getElementById('mStock').value) || 0;
+      let description = document.getElementById('mDescription').value.trim();
+
+      if (!window.editId && demoIdx !== '') {
+        // If a demo product is selected, auto-fill fields
+        const demo = DEMO_PRODUCTS[demoIdx];
+        name = demo.name;
+        price = demo.price;
+        stock = demo.stock;
+        description = demo.description;
+        document.getElementById('mName').value = name;
+        document.getElementById('mPrice').value = price;
+        document.getElementById('mStock').value = stock;
+        document.getElementById('mDescription').value = description;
+      }
+
+      if (!name) {
+        GrassRootsUtils.showToast('Product name is required', 'error');
+        return;
+      }
+      if (price <= 0) {
+        GrassRootsUtils.showToast('Price must be greater than 0', 'error');
+        return;
+      }
+      if (stock < 0) {
+        GrassRootsUtils.showToast('Stock cannot be negative', 'error');
+        return;
+      }
+
+      // If running from file://, save to localStorage only
+      if (window.location.protocol === 'file:') {
+        let products = GrassRootsUtils.loadFromStorage(KEY_PRODUCTS, []);
+        if (window.editId) {
+          // Edit existing
+          products = products.map(p => p.id === window.editId ? { ...p, name, price, stock, description } : p);
+        } else {
+          // Add new
+          products.push({
+            id: GrassRootsUtils.generateId(),
+            name,
+            price,
+            stock,
+            description,
+            createdAt: new Date().toISOString()
+          });
+        }
+        GrassRootsUtils.saveToStorage(KEY_PRODUCTS, products);
+        closeModal();
+        await render();
+        GrassRootsUtils.showToast('Product saved successfully!', 'success');
+        return;
+      }
+
+      // Otherwise, use backend API
+      const BACKEND_URL = window.location.protocol === 'file:'
+        ? 'http://localhost:4000'
+        : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+      if (window.editId) {
+        // update existing product via API
+        try {
+          const resp = await GrassRootsUtils.apiFetch(`/api/products/${window.editId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, price, stock, description })
+          });
+          if (!resp || !resp.ok) throw new Error('Update failed');
+        } catch (err) {
+          console.error('Failed to update product:', err);
+          GrassRootsUtils.showToast('Failed to update product', 'error');
+          return;
+        }
+      } else {
+        // create new product via API
+        const newProduct = {
+          id: GrassRootsUtils.generateId(),
+          name,
+          price,
+          stock,
+          description,
+          createdAt: new Date().toISOString()
+        };
+        try {
+          const resp = await GrassRootsUtils.apiFetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newProduct)
+          });
+          if (!resp || !resp.ok) throw new Error('Create failed');
+        } catch (err) {
+          console.error('Failed to create product:', err);
+          GrassRootsUtils.showToast('Failed to create product', 'error');
+          return;
+        }
+      }
+
+      closeModal();
+      await render();
+      GrassRootsUtils.showToast('Product saved successfully!', 'success');
+    }
+
+    async function edit(id) {
+      const products = await loadProducts();
+      const product = products.find(x => x.id === id);
+      if (!product) return;
+
+      window.editId = id;
+      document.getElementById('mTitle').textContent = 'Edit Product';
+      document.getElementById('mName').value = product.name;
+      document.getElementById('mPrice').value = product.price;
+      document.getElementById('mStock').value = product.stock;
+      document.getElementById('mDescription').value = product.description || '';
+      document.getElementById('modal').style.display = 'flex';
+      // No QR selector needed
+    }
+
+    async function del(id) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      const BACKEND_URL = window.location.protocol === 'file:'
+        ? 'http://localhost:4000'
+        : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+      try {
+        const resp = await GrassRootsUtils.apiFetch(`/api/products/${id}`, { method: 'DELETE' });
+        if (!resp || !resp.ok) throw new Error('Delete failed');
+        await render();
+        GrassRootsUtils.showToast('Product deleted', 'success');
+      } catch (err) {
+        console.error('Failed to delete product:', err);
+        GrassRootsUtils.showToast('Failed to delete product', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auth guard (after utils.js loaded)
+      if (typeof GrassRootsAuth !== 'undefined' && !GrassRootsAuth.requireAuth('retailer')) {
+        // Will redirect automatically
+        return;
+      }
+      render();
+      loadDemoProductSelector();
+      document.getElementById('demoProductSelect').addEventListener('change', function() {
+        const idx = this.value;
+        if (idx !== '') {
+          const demo = DEMO_PRODUCTS[idx];
+          document.getElementById('mName').value = demo.name;
+          document.getElementById('mPrice').value = demo.price;
+          document.getElementById('mStock').value = demo.stock;
+          document.getElementById('mDescription').value = demo.description;
+        } else {
+          document.getElementById('mName').value = '';
+          document.getElementById('mPrice').value = '';
+          document.getElementById('mStock').value = '';
+          document.getElementById('mDescription').value = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

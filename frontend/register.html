@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - GrassRoots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <script src="js/auth.js" defer></script>
+    <script src="js/utils.js" defer></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">GrassRoots</a>
+            <div class="nav-links">
+                <a href="login.html">Login</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="container">
+            <div class="form-container">
+                <h2>Register with GrassRoots</h2>
+                <form id="registrationForm">
+            <div class="form-group">
+                <label for="userType">User Type</label>
+                <select id="userType" required onchange="toggleFields()">
+                    <option value="">Select User Type</option>
+                    <option value="farmer">Farmer</option>
+                    <option value="retailer">Retailer/Shopkeeper</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <!-- Farmer-specific fields -->
+            <div id="farmerFields" style="display: none;">
+                <div class="form-group">
+                    <label for="landSize">Land Size (in acres)</label>
+                    <input type="number" id="landSize">
+                </div>
+                <div class="form-group">
+                    <label for="cropTypes">Primary Crops</label>
+                    <input type="text" id="cropTypes" placeholder="e.g., Rice, Wheat, Vegetables">
+                </div>
+                <div class="form-group">
+                    <label for="location">Farm Location</label>
+                    <input type="text" id="location">
+                </div>
+            </div>
+
+            <!-- Retailer-specific fields -->
+            <div id="retailerFields" style="display: none;">
+                <div class="form-group">
+                    <label for="shopName">Shop/Business Name</label>
+                    <input type="text" id="shopName">
+                </div>
+                <div class="form-group">
+                    <label for="businessAddress">Business Address</label>
+                    <textarea id="businessAddress"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="license">Business License Number</label>
+                    <input type="text" id="license">
+                </div>
+            </div>
+
+            <!-- Customer role removed -->
+
+                    <button type="submit" class="btn">Register</button>
+                </form>
+                <p>
+                    Already have an account? <a href="login.html">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleFields() {
+            const userType = document.getElementById('userType').value;
+            document.getElementById('farmerFields').style.display = 'none';
+            document.getElementById('retailerFields').style.display = 'none';
+
+            if (userType === 'farmer') {
+                document.getElementById('farmerFields').style.display = 'block';
+            } else if (userType === 'retailer') {
+                document.getElementById('retailerFields').style.display = 'block';
+            }
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values
+            const userType = document.getElementById('userType').value;
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Validation
+            if (!userType) {
+                GrassRootsUtils.showToast('Please select user type', 'error');
+                return;
+            }
+
+            if (!name || name.length < 3) {
+                GrassRootsUtils.showToast('Please enter a valid name (min 3 characters)', 'error');
+                return;
+            }
+
+            if (!GrassRootsUtils.isValidEmail(email)) {
+                GrassRootsUtils.showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            if (!GrassRootsUtils.isValidPhone(phone)) {
+                GrassRootsUtils.showToast('Please enter a valid 10-digit phone number', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                GrassRootsUtils.showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            // Show loading
+            GrassRootsUtils.showLoading('Creating your account...');
+
+            // Simulate API call delay
+            setTimeout(() => {
+                // Register using centralized auth system
+                GrassRootsAuth.login({
+                    email: email,
+                    fullName: name,
+                    userType: userType
+                });
+
+                GrassRootsUtils.hideLoading();
+                GrassRootsUtils.showToast('Registration successful!', 'success');
+
+                // Redirect to appropriate dashboard
+                setTimeout(() => {
+                    GrassRootsAuth.redirectToDashboard();
+                }, 500);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

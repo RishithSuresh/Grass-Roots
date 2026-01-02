@@ -1,0 +1,401 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Retailer Payments - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>.container{max-width:1100px;margin:24px auto;padding:0 16px}.btn{background:var(--primary-color);color:#fff;padding:8px 12px;border-radius:8px;border:none}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #eee}
+    body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+    .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
+    .card { width:100%; max-width:960px; background: #fff; border-radius:10px; padding:24px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
+    .card h1 { margin-top:0; color: #2f6b50 }
+    .muted { color:#6b7b6b; margin-top:6px }
+  </style>
+</head>
+<body>
+  <nav class="navbar"><div class="nav-container container"><a href="index.html" class="logo">GrassRoots</a><div class="nav-links"><a href="retailer-dashboard.html">Dashboard</a><a href="retailer-products.html">Products</a><a href="retailer-orders.html">Orders</a><a href="retailer-profile.html">Profile</a></div></div></nav>
+
+  <div class="page-wrapper">
+    <div class="card">
+      <h1>Payments & Receipts</h1>
+      <p class="muted">Pay for orders using blockchain and print receipts for completed payments.</p>
+      <table id="paymentsTable"><thead><tr><th>Order ID</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="js/blockchain.js"></script>
+  <script>
+    const KEY_ORDERS='retailer_orders';
+
+    // Auto-detect backend URL based on current page
+    const BACKEND_URL = window.location.protocol === 'file:'
+      ? 'http://localhost:4000'
+      : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
+    async function fetchOrders() {
+      // Always try localStorage first for file:// protocol
+      if (window.location.protocol === 'file:') {
+        try {
+          const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+          console.log('Loaded orders from localStorage:', orders);
+          return orders;
+        } catch(e2){
+          console.error('Failed to load from localStorage:', e2);
+          return [];
+        }
+      }
+
+      // For http:// protocol, try backend first, then localStorage
+      try {
+        console.log('Fetching orders from:', BACKEND_URL + '/api/orders');
+        const resp = await fetch(BACKEND_URL + '/api/orders');
+        if (!resp.ok) throw new Error('Failed to load');
+        const orders = await resp.json();
+        console.log('Loaded orders from backend:', orders);
+        return orders;
+      } catch (e) {
+        console.warn('Backend failed, falling back to localStorage:', e);
+        try {
+          const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+          console.log('Loaded orders from localStorage (fallback):', orders);
+          return orders;
+        } catch(e2){
+          console.error('Failed to load from localStorage:', e2);
+          return [];
+        }
+      }
+    }
+
+    async function render(){
+      const rows=document.querySelector('#paymentsTable tbody');
+      rows.innerHTML='';
+
+      try {
+        const orders = await fetchOrders();
+        console.log('Rendering orders:', orders);
+
+        if (!orders || orders.length === 0) {
+          rows.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">No orders found. Create an order first!</td></tr>';
+          return;
+        }
+
+        orders.forEach(o=>{
+          const tr=document.createElement('tr');
+
+          // Determine payment status display
+          const paidStatus = o.paid ?
+            `<span style="color: #28a745; font-weight: 600;">✓ Paid</span>` :
+            `<span style="color: #dc3545; font-weight: 600;">✗ Unpaid</span>`;
+
+          // Show different buttons based on payment status
+          let actionButtons = '';
+          if (o.paid) {
+            // Order is paid - show receipt button
+            actionButtons = `<button class='btn' onclick="printReceipt('${o.id}')" style="background: #28a745;">Print Receipt</button>`;
+          } else {
+            // Order is unpaid - show payment button
+            actionButtons = `<button class='btn' onclick="payOrder('${o.id}', ${o.total})" style="background: #007bff;">Pay with Blockchain</button>`;
+          }
+
+          tr.innerHTML=`<td>${o.id}</td><td>₹ ${Number(o.total).toFixed(2)}</td><td>${paidStatus}</td><td>${actionButtons}</td>`;
+          rows.appendChild(tr);
+        });
+      } catch (error) {
+        console.error('Error rendering orders:', error);
+        rows.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #dc3545;">Error loading orders. Check console for details.</td></tr>';
+      }
+    }
+
+    // Redirect to blockchain payment page
+    function payOrder(orderId, total) {
+      window.location.href = `blockchain-payment.html?orderId=${orderId}&amount=${total}`;
+    }
+
+    async function printReceipt(id){
+      let order = null;
+
+      // Fetch order details
+      if (window.location.protocol === 'file:') {
+        const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+        order = orders.find(x => x.id === id);
+      } else {
+        try {
+          const resp = await fetch(BACKEND_URL + `/api/orders/${id}`);
+          if (!resp.ok) throw new Error('Order not found');
+          const data = await resp.json();
+          order = data.order || data;
+        } catch (e) {
+          console.warn('Falling back to local order', e);
+          const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+          order = orders.find(x => x.id === id);
+        }
+      }
+
+      if (!order) {
+        alert('Order not found');
+        return;
+      }
+
+      // Generate receipt HTML
+      const currentDate = new Date().toLocaleString();
+      const items = order.items || [];
+      const itemsHtml = items.map(item => `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name || item.productId}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.qty}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₹ ${(item.price || 0).toFixed(2)}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">₹ ${((item.qty || 0) * (item.price || 0)).toFixed(2)}</td>
+        </tr>
+      `).join('');
+
+      const receiptHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Payment Receipt - ${order.id}</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              max-width: 800px;
+              margin: 20px auto;
+              padding: 20px;
+              background: #f5f5f5;
+            }
+            .receipt {
+              background: white;
+              padding: 40px;
+              border-radius: 10px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            .header {
+              text-align: center;
+              border-bottom: 3px solid #2f6b50;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              color: #2f6b50;
+              margin: 0;
+              font-size: 32px;
+            }
+            .header p {
+              color: #666;
+              margin: 5px 0 0 0;
+            }
+            .info-section {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 30px;
+            }
+            .info-box {
+              flex: 1;
+            }
+            .info-box h3 {
+              color: #2f6b50;
+              margin: 0 0 10px 0;
+              font-size: 14px;
+              text-transform: uppercase;
+            }
+            .info-box p {
+              margin: 5px 0;
+              color: #333;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+            }
+            th {
+              background: #2f6b50;
+              color: white;
+              padding: 12px 8px;
+              text-align: left;
+              font-weight: 600;
+            }
+            th:nth-child(2), th:nth-child(3), th:nth-child(4) {
+              text-align: right;
+            }
+            td {
+              padding: 8px;
+              border-bottom: 1px solid #eee;
+            }
+            .total-section {
+              margin-top: 30px;
+              text-align: right;
+            }
+            .total-row {
+              display: flex;
+              justify-content: flex-end;
+              padding: 8px 0;
+            }
+            .total-label {
+              font-weight: 600;
+              margin-right: 20px;
+              min-width: 100px;
+            }
+            .total-amount {
+              min-width: 120px;
+              text-align: right;
+            }
+            .grand-total {
+              border-top: 2px solid #2f6b50;
+              margin-top: 10px;
+              padding-top: 10px;
+              font-size: 20px;
+              font-weight: bold;
+              color: #2f6b50;
+            }
+            .payment-status {
+              background: #d4edda;
+              border: 2px solid #28a745;
+              color: #155724;
+              padding: 15px;
+              border-radius: 8px;
+              margin: 20px 0;
+              text-align: center;
+              font-weight: 600;
+            }
+            .blockchain-info {
+              background: #f8f9fa;
+              padding: 15px;
+              border-radius: 8px;
+              margin: 20px 0;
+              font-size: 12px;
+              color: #666;
+            }
+            .blockchain-info strong {
+              color: #333;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 40px;
+              padding-top: 20px;
+              border-top: 2px solid #eee;
+              color: #999;
+              font-size: 12px;
+            }
+            @media print {
+              body {
+                background: white;
+                margin: 0;
+                padding: 0;
+              }
+              .receipt {
+                box-shadow: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="receipt">
+            <div class="header">
+              <h1>🌾 GrassRoots</h1>
+              <p>Farm to Table - Direct from Farmers</p>
+            </div>
+
+            <div class="payment-status">
+              ✓ PAYMENT RECEIVED
+            </div>
+
+            <div class="info-section">
+              <div class="info-box">
+                <h3>Receipt Details</h3>
+                <p><strong>Receipt #:</strong> ${order.id}</p>
+                <p><strong>Date:</strong> ${currentDate}</p>
+                <p><strong>Status:</strong> ${order.status || 'Confirmed'}</p>
+              </div>
+              <div class="info-box" style="text-align: right;">
+                <h3>Payment Method</h3>
+                <p><strong>Blockchain Payment</strong></p>
+                <p>Ethereum Network</p>
+                <p>Secure & Verified</p>
+              </div>
+            </div>
+
+            <h3 style="color: #2f6b50; margin-top: 30px;">Order Items</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th style="text-align: center;">Quantity</th>
+                  <th style="text-align: right;">Unit Price</th>
+                  <th style="text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+
+            <div class="total-section">
+              <div class="total-row">
+                <div class="total-label">Subtotal:</div>
+                <div class="total-amount">₹ ${Number(order.total).toFixed(2)}</div>
+              </div>
+              <div class="total-row grand-total">
+                <div class="total-label">Total Paid:</div>
+                <div class="total-amount">₹ ${Number(order.total).toFixed(2)}</div>
+              </div>
+            </div>
+
+            ${order.transactionHash ? `
+            <div class="blockchain-info">
+              <strong>Blockchain Transaction Details:</strong><br>
+              Transaction Hash: ${order.transactionHash}<br>
+              Network: Ethereum (Localhost)<br>
+              Verified on blockchain
+            </div>
+            ` : ''}
+
+            <div class="footer">
+              <p>Thank you for your business!</p>
+              <p>GrassRoots - Connecting Farmers and Retailers</p>
+              <p>This is a computer-generated receipt and does not require a signature.</p>
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          <\/script>
+        </body>
+        </html>
+      `;
+
+      // Open receipt in new window
+      const w = window.open('', '', 'width=900,height=700');
+      w.document.write(receiptHtml);
+      w.document.close();
+    }
+
+    // Check for payment success callback
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+      const successOrderId = urlParams.get('orderId');
+      const txHash = urlParams.get('txHash');
+
+      setTimeout(async () => {
+        // Show success message
+        const message = txHash ?
+          `✅ Payment successful for Order ${successOrderId}!\n\nTransaction Hash: ${txHash}\n\nWould you like to print the receipt?` :
+          `✅ Payment successful for Order ${successOrderId}!\n\nWould you like to print the receipt?`;
+
+        if (confirm(message)) {
+          // Print receipt automatically
+          await printReceipt(successOrderId);
+        }
+
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        // Refresh the table to show updated status
+        await render();
+      }, 500);
+    }
+
+    document.addEventListener('DOMContentLoaded',render);
+  </script>
+</body>
+</html>

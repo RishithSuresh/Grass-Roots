@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Retailer Dashboard - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #e8f5ee 0%, #f7fafc 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      color: #23422a;
+    }
+    .navbar {
+      background: linear-gradient(90deg, var(--primary-color), #357a4b 80%);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      padding: 1.1rem 0;
+      min-height: 72px;
+    }
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2.3rem;
+      align-items: center;
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.97rem;
+      font-weight: 500;
+    }
+    .logout-btn {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem 1.5rem;
+      font-size: 1.13rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .dashboard-header {
+      background: linear-gradient(135deg, var(--primary-color), #4a8b5a 80%);
+      color: white;
+      padding: 2.2rem 0;
+      margin-bottom: 2.2rem;
+    }
+    .dashboard-header h1 {
+      margin: 0;
+      font-size: 2.1rem;
+      font-weight: 700;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 18px;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 2.2rem;
+      margin-bottom: 2.5rem;
+    }
+    .feature-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 2.1rem;
+      box-shadow: 0 8px 32px rgba(44, 62, 80, 0.10);
+      border: 1.5px solid #e6f2ea;
+      min-height: 220px;
+    }
+    .feature-box h3 {
+      margin: 0 0 0.7rem 0;
+      color: var(--primary-color);
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .feature-box p {
+      color: #6a7c6a;
+      margin: 0 0 1.2rem 0;
+      font-size: 1.02rem;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.3rem;
+      font-size: 1rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="retailer-shop-profile.html">Profile</a>
+        <a href="contact.html">Contact</a>
+        <button class="logout-btn btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-header">
+    <div class="container">
+      <h1>Retailer Dashboard</h1>
+      <p>Manage your products, orders, payments, and shop profile.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="dashboard-grid">
+      <div class="feature-box">
+        <h3>Product Catalog</h3>
+        <p>Add or edit products, set price & stock levels.</p>
+        <a href="retailer-products.html" class="btn">Open Products</a>
+      </div>
+
+      <div class="feature-box">
+        <h3>Orders</h3>
+        <p>View incoming orders and update fulfillment status.</p>
+        <a href="retailer-orders.html" class="btn">Open Orders</a>
+      </div>
+
+      <div class="feature-box">
+        <h3>Payments & Invoices</h3>
+        <p>Mark payments, generate printable invoices.</p>
+        <a href="retailer-payments.html" class="btn">Open Payments</a>
+      </div>
+
+      <div class="feature-box">
+        <h3>Profile & Settings</h3>
+        <p>Manage shop details, contact and delivery options.</p>
+        <a href="retailer-profile.html" class="btn">Open Profile</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+      GrassRootsAuth.logout();
+    }
+  </script>
+</body>
+</html>

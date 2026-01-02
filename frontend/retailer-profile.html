@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Retailer Profile - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>.container{max-width:900px;margin:24px auto;padding:0 16px}.btn{background:var(--primary-color);color:#fff;padding:8px 12px;border-radius:8px;border:none}.form-group{margin-bottom:12px}label{display:block;font-weight:600;margin-bottom:6px}
+    body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+    .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
+    .card { width:100%; max-width:760px; background: #fff; border-radius:10px; padding:24px 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
+    .card h1 { margin-top:0; color: #2f6b50 }
+    .muted { color:#6b7b6b; margin-top:6px }
+  </style>
+</head>
+<body>
+  <nav class="navbar"><div class="nav-container container"><a href="index.html" class="logo">GrassRoots</a><div class="nav-links"><a href="retailer-dashboard.html">Dashboard</a><a href="retailer-products.html">Products</a><a href="retailer-orders.html">Orders</a><a href="retailer-payments.html">Payments</a></div></div></nav>
+
+  <div class="page-wrapper">
+    <div class="card">
+      <h1>Shop Profile</h1>
+      <p class="muted">Update your shop information and contact details.</p>
+      <form id="f"><div class="form-group"><label>Shop Name</label><input id="shopName"/></div><div class="form-group"><label>Address</label><input id="shopAddress"/></div><div class="form-group"><label>Phone</label><input id="shopPhone"/></div><div><button type="button" class="btn" onclick="save()">Save</button></div></form>
+    </div>
+  </div>
+  <script>
+    const KEY_PROFILE='retailer_profile';
+
+    // Auto-detect backend URL based on current page
+    const BACKEND_URL = window.location.protocol === 'file:'
+      ? 'http://localhost:4000'
+      : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
+    async function fetchProfile() {
+      if (window.location.protocol === 'file:') {
+        try { return JSON.parse(localStorage.getItem(KEY_PROFILE) || 'null') || {}; } catch (e2) { return {}; }
+      }
+      try {
+        const resp = await fetch(BACKEND_URL + '/api/profile');
+        if (!resp.ok) throw new Error('Failed');
+        return await resp.json();
+      } catch (e) {
+        try { return JSON.parse(localStorage.getItem(KEY_PROFILE) || 'null') || {}; } catch (e2) { return {}; }
+      }
+    }
+    async function saveProfile(p) {
+      if (window.location.protocol === 'file:') {
+        localStorage.setItem(KEY_PROFILE, JSON.stringify(p));
+        alert('Saved locally');
+        return;
+      }
+      try {
+        const resp = await fetch(BACKEND_URL + '/api/profile', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(p) });
+        if (!resp.ok) throw new Error('Save failed');
+        alert('Saved');
+      } catch (e) {
+        localStorage.setItem(KEY_PROFILE, JSON.stringify(p));
+        alert('Saved locally (server unavailable)');
+      }
+    }
+    async function loadProfile(){ const p = await fetchProfile(); document.getElementById('shopName').value = p.shopName || ''; document.getElementById('shopAddress').value = p.address || ''; document.getElementById('shopPhone').value = p.phone || ''; }
+    async function save(){ const p={shopName:document.getElementById('shopName').value.trim(),address:document.getElementById('shopAddress').value.trim(),phone:document.getElementById('shopPhone').value.trim()}; await saveProfile(p); }
+    document.addEventListener('DOMContentLoaded',loadProfile);
+  </script>
+</body>
+</html>

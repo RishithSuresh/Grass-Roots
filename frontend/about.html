@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - GrassRoots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding-top: 60px;
+        }
+        .about-hero {
+            padding: 100px 0 80px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(107, 158, 127, 0.1) 0%, rgba(74, 124, 94, 0.05) 100%);
+            margin-top: 0;
+        }
+        .about-hero h1 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        .about-content {
+            padding: 60px 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .about-content section {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .about-content h2 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 700px) {
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .team-card {
+            background:#fff;
+            padding:2rem;
+            border-radius:12px;
+            box-shadow:0 8px 24px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-8px);
+            box-shadow:0 12px 32px rgba(107, 158, 127, 0.2);
+        }
+        .feature-box {
+            background: rgba(107, 158, 127, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+        .feature-box h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">GrassRoots</a>
+            <div class="nav-links">
+                <a href="login.html">Login</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="about-hero">
+        <div class="container">
+            <h1>About GrassRoots</h1>
+            <p style="max-width:900px;margin:1rem auto;color:var(--muted);">We help farmers access markets, record provenance, and get fair prices by combining low-barrier technology with local partnerships.</p>
+        </div>
+    </header>
+
+    <main class="about-content">
+        <div class="container">
+            <section>
+                <h2>🎯 Our Mission</h2>
+                <p style="font-size:1.15rem;line-height:1.8;color:#555;">To empower smallholder farmers by providing them with cutting-edge digital tools that increase their income, improve market visibility, and ensure fair trade practices. We believe in technology that respects local languages, cultures, and traditional farming workflows.</p>
+            </section>
+
+            <section>
+                <h2>💡 Our Vision</h2>
+                <p style="font-size:1.15rem;line-height:1.8;color:#555;">A world where every farmer has access to transparent markets, fair pricing, and the tools they need to thrive in the digital economy. We envision a future where technology bridges the gap between rural farmers and urban markets.</p>
+            </section>
+
+            <section>
+                <h2>🌱 How We Work</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:1.5rem;">
+                    <div class="feature-box">
+                        <h4>📞 Voice-First Tools</h4>
+                        <p style="color:#666;line-height:1.7;">Farmers can submit crop details via simple call-in systems in their local language, making technology accessible to everyone regardless of literacy levels.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>📱 QR Traceability</h4>
+                        <p style="color:#666;line-height:1.7;">QR-based tracking helps buyers and consumers verify product origin, quality, and journey from farm to table, ensuring transparency.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🤝 Market Linkages</h4>
+                        <p style="color:#666;line-height:1.7;">We connect farmer groups directly with buyers, retailers, and consumers to eliminate middlemen and improve profit margins.</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>💰 Fair Pricing</h4>
+                        <p style="color:#666;line-height:1.7;">Real-time market price information helps farmers make informed decisions and get the best value for their produce.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top:2.5rem;">
+                <h2>Our Team</h2>
+                <p style="color:var(--muted);margin-bottom:2rem;text-align:center;">Meet the passionate individuals behind GrassRoots, dedicated to empowering farmers through technology.</p>
+                <div class="team-grid" style="margin-top:1rem;">
+                    <div class="team-card">
+                        <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">RS</div>
+                        <h4 style="text-align:center;color:var(--primary-color);">Rishith Suresh</h4>
+                    </div>
+                    <div class="team-card">
+                        <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">NH</div>
+                        <h4 style="text-align:center;color:var(--primary-color);">Neha H</h4>
+                    </div>
+                    <div class="team-card">
+                        <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">NN</div>
+                        <h4 style="text-align:center;color:var(--primary-color);">Nisha Nandisha</h4>
+                    </div>
+                    <div class="team-card">
+                        <div style="width:80px;height:80px;background:linear-gradient(135deg,#6B9E7F,#4A7C5E);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:2rem;font-weight:bold;">NG</div>
+                        <h4 style="text-align:center;color:var(--primary-color);">Neha Gujjar</h4>
+                    </div>
+                </div>
+            </section>
+
+            <section style="margin-top:2.5rem;text-align:center;">
+                <a href="index.html" class="btn" style="margin-bottom:1rem;display:inline-block;">Back to Dashboard</a>
+                <br />
+                <a href="contact.html" class="btn">Get in touch</a>
+            </section>
+        </div>
+    </main>
+
+</body>
+</html>

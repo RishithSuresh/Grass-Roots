@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Generator - GrassRoots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <style>
+        .qr-section { margin-bottom: 2rem; padding: 1rem; background: #f9f9f9; border-radius: 0.5rem; border: 1px solid #e0e0e0; }
+        .qr-section h3 { margin-top: 0; color: var(--primary-color); font-size: 1rem; }
+        .qr-history { max-height: 400px; overflow-y: auto; margin-top: 1rem; }
+        .qr-item { display: flex; align-items: center; padding: 0.75rem; background: white; margin: 0.5rem 0; border-radius: 0.35rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .qr-item-preview { width: 60px; height: 60px; margin-right: 1rem; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 0.25rem; }
+        .qr-item-preview canvas { max-width: 100%; max-height: 100%; }
+        .qr-item-info { flex: 1; }
+        .qr-item-name { font-weight: 600; color: var(--text-color); font-size: 0.95rem; }
+        .qr-item-detail { font-size: 0.85rem; color: var(--muted); margin: 0.25rem 0; }
+        .qr-item-actions { display: flex; gap: 0.5rem; }
+        .qr-item-actions button { padding: 0.4rem 0.8rem; font-size: 0.8rem; background: #2f6b50; color: white; border: none; border-radius: 0.25rem; cursor: pointer; }
+        .qr-item-actions button:hover { background: #1f4d35; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="farmer-dashboard.html" class="logo">GrassRoots</a>
+            <div class="nav-links">
+                <a href="farmer-dashboard.html">Dashboard</a>
+                <a href="contact.html">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 2.5rem 0; min-height: 100vh;">
+        <div class="form-container" style="max-width: 980px; margin: 96px auto 40px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                <h2 style="color: var(--primary-color); font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 0.6rem;">📱 QR Code Generator</h2>
+                <div style="color: var(--muted); font-size: 0.95rem; opacity: 0.9;">Generate QR codes from your crop data</div>
+            </div>
+
+            <!-- Crop Selection -->
+            <div class="qr-section">
+                <h3>Step 1: Select Your Crop</h3>
+                <div class="form-group">
+                    <label for="cropInput">Choose a Saved Crop (or manually enter below)</label>
+                    <!-- searchable input backed by a datalist for typing or choosing -->
+                    <input list="cropList" id="cropInput" placeholder="Type or choose a saved crop">
+                    <datalist id="cropList"></datalist>
+                    <!-- hidden select kept for id -> record mapping when a saved crop is chosen -->
+                    <select id="cropSelect" style="display:none;">
+                        <option value="">-- Select a crop --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- QR Generation Form -->
+            <form id="qrForm" class="qr-section">
+                <h3>Step 2: Enter Product & Agricultural Details</h3>
+
+                <div class="form-group">
+                    <label for="productName">Product Name</label>
+                    <input id="productName" type="text" placeholder="e.g. Cherry Tomatoes" />
+                </div>
+
+                <div class="form-group">
+                    <label for="cropType">Crop Type</label>
+                    <input id="cropType" type="text" placeholder="e.g. Tomato" />
+                </div>
+
+                <div class="form-group">
+                    <label for="quality">Quality</label>
+                    <input id="quality" type="text" placeholder="e.g. Grade A" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:0.5rem;">
+                        <label for="harvestDate">Harvest Date</label>
+                        <input id="harvestDate" type="date" />
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="price">Price (optional)</label>
+                        <input id="price" type="number" step="0.01" placeholder="0.00" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="farmLocation">Farm Location</label>
+                    <input id="farmLocation" type="text" placeholder="e.g. Village, District" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:0.5rem;">
+                        <label for="fertilizerUsed">Fertilizer Used</label>
+                        <input id="fertilizerUsed" type="text" />
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="pesticidesUsed">Pesticides Used</label>
+                        <input id="pesticidesUsed" type="text" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1; margin-right:0.5rem;">
+                        <label for="batchNumber">Batch Number</label>
+                        <input id="batchNumber" type="text" />
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>&nbsp;</label>
+                        <button type="submit" style="width:100%;">Generate QR</button>
+                    </div>
+                </div>
+
+                <div id="qrDisplaySection" style="display:none; margin-top:1rem;">
+                    <div id="qrcode"></div>
+                    <div id="qrStatus" style="margin-top:0.5rem; color:var(--muted); font-size:0.95rem;"></div>
+                    <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+                        <button id="downloadBtn" type="button">Download</button>
+                        <button id="printBtn" type="button">Print</button>
+                    </div>
+                </div>
+
+                <div id="qrHistorySection" style="display:none; margin-top:1rem;">
+                    <h4>QR History</h4>
+                    <div id="qrHistory" class="qr-history"></div>
+                </div>
+            </form>
+
+    <script>
+        // Auth guard - call after auth script loads (handled in window.load)
+
+        // Load crops into dropdown from server (fallback to localStorage)
+        let _apiAvailable = false;
+        async function checkApiAvailable() {
+            if (typeof GrassRootsUtils === 'undefined' || typeof GrassRootsUtils.apiFetch !== 'function') {
+                _apiAvailable = false;
+                return _apiAvailable;
+            }
+            try {
+                const res = await GrassRootsUtils.apiFetch('/health', { method: 'GET' });
+                _apiAvailable = !!(res && res.ok);
+            } catch (e) {
+                _apiAvailable = false;
+            }
+            return _apiAvailable;
+        }
+
+        async function loadCropSelector() {
+            const select = document.getElementById('cropSelect');
+            select.innerHTML = '<option value="">-- Select a crop --</option>';
+            if (await checkApiAvailable()) {
+                try {
+                    const resp = await GrassRootsUtils.apiFetch('/api/crops');
+                    if (resp && resp.ok) {
+                        const crops = await resp.json();
+                        crops.forEach(crop => {
+                            const opt = document.createElement('option');
+                            opt.value = crop.id;
+                            opt.textContent = `${crop.name} (${crop.variety || ''})`;
+                            select.appendChild(opt);
+                        });
+                        return;
+                    }
+                } catch (err) {
+                    // fall through to localStorage fallback
+                }
+            }
+
+            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+            crops.forEach(crop => {
+                const opt = document.createElement('option');
+                opt.value = crop.id;
+                opt.textContent = `${crop.type} (${crop.area} acres, planted ${crop.plantingDate})`;
+                select.appendChild(opt);
+            });
+        }
+
+        // Load crop details when selected (use server-side crop when available)
+        document.getElementById('cropSelect').addEventListener('change', async function() {
+            if (!this.value) return;
+            try {
+                const resp = await fetch('/api/crops/' + this.value);
+                if (resp.ok) {
+                    const c = await resp.json();
+                    document.getElementById('cropType').value = c.name || '';
+                    document.getElementById('farmLocation').value = c.notes || '';
+                    return;
+                }
+            } catch (e) {
+                // fallback
+            }
+            const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+            const selected = crops.find(c => c.id == this.value);
+            if (selected) {
+                document.getElementById('cropType').value = selected.type || '';
+                document.getElementById('farmLocation').value = selected.notes || '';
+            }
+        });
+
+        // Format QR data
+        function formatQRData() {
+            const data = {
+                productName: document.getElementById('productName').value,
+                cropType: document.getElementById('cropType').value,
+                quality: document.getElementById('quality').value,
+                harvestDate: document.getElementById('harvestDate').value,
+                farmLocation: document.getElementById('farmLocation').value,
+                fertilizerUsed: document.getElementById('fertilizerUsed').value,
+                pesticidesUsed: document.getElementById('pesticidesUsed').value,
+                batchNumber: document.getElementById('batchNumber').value,
+                price: document.getElementById('price').value,
+                farmerEmail: localStorage.getItem('userEmail'),
+                farmerName: localStorage.getItem('fullName'),
+                generatedAt: new Date().toISOString()
+            };
+
+            // Format as human-readable text block
+            let qrText = `GrassRoots QR\n`;
+            qrText += `Product: ${data.productName}\n`;
+            qrText += `Type: ${data.cropType}\n`;
+            qrText += `Quality: ${data.quality}\n`;
+            qrText += `Harvest: ${data.harvestDate}\n`;
+            qrText += `Location: ${data.farmLocation}\n`;
+            qrText += `Fertilizer: ${data.fertilizerUsed}\n`;
+            qrText += `Pesticides: ${data.pesticidesUsed}\n`;
+            if (data.batchNumber) qrText += `Batch: ${data.batchNumber}\n`;
+            if (data.price) qrText += `Price: ${data.price}\n`;
+            qrText += `Farmer: ${data.farmerName}\n`;
+            qrText += `Contact: ${data.farmerEmail}\n`;
+            qrText += `Generated: ${new Date().toLocaleString()}`;
+
+            return { qrText, data };
+        }
+
+        // Generate QR Code
+        document.getElementById('qrForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const { qrText, data } = formatQRData();
+
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('qrDisplaySection').style.display = 'block';
+            document.getElementById('qrHistorySection').style.display = 'block';
+
+            // Generate using qrcode.js
+            QRCode.toCanvas(document.createElement('canvas'), qrText, { width: 300, margin: 2 }, async function (error, canvas) {
+                if (error) {
+                    console.error(error);
+                    document.getElementById('qrcode').innerHTML = '<p style="color: #c00;">Error generating QR code</p>';
+                    return;
+                }
+                document.getElementById('qrcode').innerHTML = '';
+                document.getElementById('qrcode').appendChild(canvas);
+
+                // Save to history
+                const qrId = 'qr_' + Date.now();
+                const selectedCrop = document.getElementById('cropSelect').value || null;
+                const qrRecord = {
+                    id: qrId,
+                    cropId: selectedCrop,
+                    ...data,
+                    qrText: qrText,
+                    canvasData: canvas.toDataURL('image/png')
+                };
+
+                // POST to backend API (only if available)
+                if (_apiAvailable && typeof GrassRootsUtils !== 'undefined' && typeof GrassRootsUtils.apiFetch === 'function') {
+                    try {
+                        const resp = await GrassRootsUtils.apiFetch('/api/qr', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(qrRecord)
+                        });
+                        if (!resp.ok) throw new Error('Failed to save QR');
+                    } catch (err) {
+                        console.error('Failed to save QR to server:', err);
+                        // fallback: save locally so user doesn't lose data (no popup)
+                            let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                            // avoid duplicates (same QR text)
+                            if (!qrHistory.some(q => q.qrText === qrRecord.qrText)) {
+                                qrHistory.unshift(qrRecord);
+                                qrHistory = qrHistory.slice(0, 10);
+                                localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+                            }
+                    }
+                } else {
+                    // Backend not available — save locally (no popup)
+                        let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                        // avoid duplicates (same QR text)
+                        if (!qrHistory.some(q => q.qrText === qrRecord.qrText)) {
+                            qrHistory.unshift(qrRecord);
+                            qrHistory = qrHistory.slice(0, 10);
+                            localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+                        }
+                }
+
+                // Refresh history after generation
+                if (typeof renderQRHistory === 'function') renderQRHistory();
+
+                return true;
+            });
+        });
+
+        // Download QR
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                const url = canvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.download = `QR-${document.getElementById('productName').value || 'product'}-${Date.now()}.png`;
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+            }
+            // fallback to image src
+            const img = document.querySelector('#qrcode img');
+            if (!img || !img.src) return;
+            fetch(img.src).then(r => r.blob()).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.download = `QR-${document.getElementById('productName').value || 'product'}-${Date.now()}.png`;
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }).catch(err => console.error('Download fallback failed', err));
+        });
+
+        // Print QR - receipt style
+        document.getElementById('printBtn').addEventListener('click', function() {
+            const canvas = document.querySelector('#qrcode canvas');
+            const productName = document.getElementById('productName').value || '';
+            const printWindow = window.open('', '', 'width=800,height=1000');
+
+            // build receipt HTML
+            const details = {
+                productName,
+                cropType: document.getElementById('cropType').value || '',
+                quality: document.getElementById('quality').value || '',
+                harvestDate: document.getElementById('harvestDate').value || '',
+                farmLocation: document.getElementById('farmLocation').value || '',
+                fertilizerUsed: document.getElementById('fertilizerUsed').value || '',
+                pesticidesUsed: document.getElementById('pesticidesUsed').value || '',
+                batchNumber: document.getElementById('batchNumber').value || '',
+                price: document.getElementById('price').value || '',
+                farmerName: localStorage.getItem('fullName') || '',
+                farmerEmail: localStorage.getItem('userEmail') || '',
+                generatedAt: new Date().toLocaleString()
+            };
+
+            const qrSrc = canvas ? canvas.toDataURL('image/png') : (document.querySelector('#qrcode img') ? document.querySelector('#qrcode img').src : '');
+
+            const html = `
+                <html>
+                <head>
+                    <title>GrassRoots QR Receipt</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #222; }
+                        .receipt { width: 680px; margin: 12px auto; border: 1px solid #e6e6e6; padding: 18px; border-radius: 8px; }
+                        .header { display:flex; align-items:center; justify-content:space-between; }
+                        .brand { display:flex; gap:12px; align-items:center; }
+                        .brand .logo { width:48px; height:48px; background:#2f6b50; color:white; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; }
+                        .brand h1 { margin:0; font-size:18px; color:#1f4d35; }
+                        .meta { text-align:right; font-size:12px; color:#666; }
+                        .separator { height:1px; background:linear-gradient(90deg,#eee,#fff); margin:12px 0; }
+                        .grid { display:flex; gap:18px; }
+                        .left { flex:1; }
+                        .right { width:180px; text-align:center; }
+                        .right img { width:160px; height:160px; border:1px solid #ddd; padding:6px; background:white; }
+                        table { width:100%; border-collapse:collapse; margin-top:10px; }
+                        th, td { padding:8px 6px; text-align:left; font-size:14px; }
+                        th { color:#444; width:30%; }
+                        .footer { text-align:center; margin-top:18px; font-size:12px; color:#666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt">
+                        <div class="header">
+                            <div class="brand">
+                                <div class="logo">GR</div>
+                                <div>
+                                    <h1>GrassRoots</h1>
+                                    <div style="font-size:12px;color:#666;">Product QR Receipt</div>
+                                </div>
+                            </div>
+                            <div class="meta">
+                                <div>Generated: ${details.generatedAt}</div>
+                                <div>${details.farmerName || ''}</div>
+                                <div style="color:#888;">${details.farmerEmail || ''}</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+
+                        <div class="grid">
+                            <div class="left">
+                                <table>
+                                    <tr><th>Product</th><td>${details.productName}</td></tr>
+                                    <tr><th>Crop Type</th><td>${details.cropType}</td></tr>
+                                    <tr><th>Quality</th><td>${details.quality}</td></tr>
+                                    <tr><th>Harvest Date</th><td>${details.harvestDate}</td></tr>
+                                    <tr><th>Batch</th><td>${details.batchNumber}</td></tr>
+                                    <tr><th>Location</th><td>${details.farmLocation}</td></tr>
+                                    <tr><th>Fertilizer</th><td>${details.fertilizerUsed}</td></tr>
+                                    <tr><th>Pesticides</th><td>${details.pesticidesUsed}</td></tr>
+                                    <tr><th>Price</th><td>${details.price ? '₹' + Number(details.price).toFixed(2) : '—'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="right">
+                                ${qrSrc ? `<img src="${qrSrc}" alt="QR" />` : ''}
+                                <div style="font-size:12px;color:#888;margin-top:8px;">Scan to view product data</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+                        <div class="footer">Thank you for using GrassRoots — share trusted produce with your buyers.</div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        });
+
+        // Render QR History
+        async function renderQRHistory() {
+            const historyDiv = document.getElementById('qrHistory');
+            let qrHistory = [];
+
+            // Try server first (only if available), then fall back to localStorage
+            if (await checkApiAvailable() && typeof GrassRootsUtils !== 'undefined' && typeof GrassRootsUtils.apiFetch === 'function') {
+                try {
+                    const resp = await GrassRootsUtils.apiFetch('/api/qr');
+                    if (resp && resp.ok) {
+                        qrHistory = await resp.json();
+                    } else {
+                        qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                    }
+                } catch (e) {
+                    qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+                }
+            } else {
+                qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            }
+
+            if (!qrHistory || !qrHistory.length) {
+                historyDiv.innerHTML = '<p style="color: var(--muted);">No QR codes generated yet.</p>';
+                return;
+            }
+            // dedupe displayed list by qrText to avoid showing duplicates
+            const seen = new Set();
+            qrHistory = qrHistory.filter(q => {
+                if (!q || !q.qrText) return false;
+                if (seen.has(q.qrText)) return false;
+                seen.add(q.qrText);
+                return true;
+            });
+
+            let html = '';
+            qrHistory.forEach(qr => {
+                html += `
+                    <div class="qr-item">
+                        <div class="qr-item-preview" id="preview-${qr.id}"></div>
+                        <div class="qr-item-info">
+                            <div class="qr-item-name">${qr.productName || ''}</div>
+                            <div class="qr-item-detail">Crop: ${qr.cropType || ''} | Quality: ${qr.quality || ''}</div>
+                            <div class="qr-item-detail">Harvest: ${qr.harvestDate || ''} | Generated: ${qr.generatedAt ? new Date(qr.generatedAt).toLocaleDateString() : ''}</div>
+                        </div>
+                        <div class="qr-item-actions">
+                            <button onclick="downloadQRFromHistory('${qr.id}')">Download</button>
+                            <button onclick="printQRFromHistory('${qr.id}')">Print</button>
+                            <button onclick="deleteQRFromHistory('${qr.id}')" style="background:#c0392b;color:#fff;border:none;padding:6px 8px;border-radius:4px;">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            historyDiv.innerHTML = html;
+
+            // Render preview canvases
+            qrHistory.forEach(qr => {
+                const previewDiv = document.getElementById(`preview-${qr.id}`);
+                if (previewDiv && qr.canvasData) {
+                    const img = document.createElement('img');
+                    img.src = qr.canvasData;
+                    img.style.maxWidth = '100%';
+                    previewDiv.appendChild(img);
+                }
+            });
+        }
+
+        // Download from history
+        window.downloadQRFromHistory = function(qrId) {
+            const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const qr = qrHistory.find(q => q.id === qrId);
+            if (!qr) return;
+            if (qr.canvasData) {
+                const a = document.createElement('a');
+                a.href = qr.canvasData;
+                a.download = `QR-${qr.productName}-${qr.id}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+            }
+            // fallback to remote image
+            const apiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr.qrText || qr.productName || qr.id);
+            fetch(apiUrl).then(r => r.blob()).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QR-${qr.productName || qr.id}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }).catch(err => console.error('Download history fallback failed', err));
+        };
+
+        // Delete from history
+        window.deleteQRFromHistory = async function(qrId) {
+            if (!confirm('Delete this QR record? This action cannot be undone.')) return;
+
+            // Remove from localStorage first
+            let qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const idx = qrHistory.findIndex(q => q.id === qrId);
+            if (idx !== -1) {
+                qrHistory.splice(idx, 1);
+                localStorage.setItem('farmer_qr_codes', JSON.stringify(qrHistory));
+            }
+
+            // If backend available, attempt server delete (best-effort, silent)
+            try {
+                if (await checkApiAvailable() && typeof GrassRootsUtils !== 'undefined' && typeof GrassRootsUtils.apiFetch === 'function') {
+                    await GrassRootsUtils.apiFetch('/api/qr/' + encodeURIComponent(qrId), { method: 'DELETE' });
+                }
+            } catch (e) {
+                console.warn('Server delete failed (ignored):', e);
+            }
+
+            // Re-render history
+            if (typeof renderQRHistory === 'function') renderQRHistory();
+        };
+
+        // Print from history
+        window.printQRFromHistory = function(qrId) {
+            const qrHistory = JSON.parse(localStorage.getItem('farmer_qr_codes') || '[]');
+            const qr = qrHistory.find(q => q.id === qrId);
+            if (!qr) return;
+            const printWindow = window.open('', '', 'width=800,height=1000');
+
+            const details = {
+                productName: qr.productName || '',
+                cropType: qr.cropType || '',
+                quality: qr.quality || '',
+                harvestDate: qr.harvestDate || '',
+                farmLocation: qr.farmLocation || '',
+                fertilizerUsed: qr.fertilizerUsed || '',
+                pesticidesUsed: qr.pesticidesUsed || '',
+                batchNumber: qr.batchNumber || '',
+                price: qr.price || '',
+                farmerName: qr.farmerName || localStorage.getItem('fullName') || '',
+                farmerEmail: qr.farmerEmail || localStorage.getItem('userEmail') || '',
+                generatedAt: qr.generatedAt ? new Date(qr.generatedAt).toLocaleString() : new Date().toLocaleString()
+            };
+
+            const qrSrc = qr.canvasData || ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(qr.qrText || qr.productName || qr.id));
+
+            const html = `
+                <html>
+                <head>
+                    <title>GrassRoots QR Receipt</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; color: #222; }
+                        .receipt { width: 680px; margin: 12px auto; border: 1px solid #e6e6e6; padding: 18px; border-radius: 8px; }
+                        .header { display:flex; align-items:center; justify-content:space-between; }
+                        .brand { display:flex; gap:12px; align-items:center; }
+                        .brand .logo { width:48px; height:48px; background:#2f6b50; color:white; display:flex; align-items:center; justify-content:center; border-radius:8px; font-weight:bold; }
+                        .brand h1 { margin:0; font-size:18px; color:#1f4d35; }
+                        .meta { text-align:right; font-size:12px; color:#666; }
+                        .separator { height:1px; background:linear-gradient(90deg,#eee,#fff); margin:12px 0; }
+                        .grid { display:flex; gap:18px; }
+                        .left { flex:1; }
+                        .right { width:180px; text-align:center; }
+                        .right img { width:160px; height:160px; border:1px solid #ddd; padding:6px; background:white; }
+                        table { width:100%; border-collapse:collapse; margin-top:10px; }
+                        th, td { padding:8px 6px; text-align:left; font-size:14px; }
+                        th { color:#444; width:30%; }
+                        .footer { text-align:center; margin-top:18px; font-size:12px; color:#666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt">
+                        <div class="header">
+                            <div class="brand">
+                                <div class="logo">GR</div>
+                                <div>
+                                    <h1>GrassRoots</h1>
+                                    <div style="font-size:12px;color:#666;">Product QR Receipt</div>
+                                </div>
+                            </div>
+                            <div class="meta">
+                                <div>Generated: ${details.generatedAt}</div>
+                                <div>${details.farmerName || ''}</div>
+                                <div style="color:#888;">${details.farmerEmail || ''}</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+
+                        <div class="grid">
+                            <div class="left">
+                                <table>
+                                    <tr><th>Product</th><td>${details.productName}</td></tr>
+                                    <tr><th>Crop Type</th><td>${details.cropType}</td></tr>
+                                    <tr><th>Quality</th><td>${details.quality}</td></tr>
+                                    <tr><th>Harvest Date</th><td>${details.harvestDate}</td></tr>
+                                    <tr><th>Batch</th><td>${details.batchNumber}</td></tr>
+                                    <tr><th>Location</th><td>${details.farmLocation}</td></tr>
+                                    <tr><th>Fertilizer</th><td>${details.fertilizerUsed}</td></tr>
+                                    <tr><th>Pesticides</th><td>${details.pesticidesUsed}</td></tr>
+                                    <tr><th>Price</th><td>${details.price ? '₹' + Number(details.price).toFixed(2) : '—'}</td></tr>
+                                </table>
+                            </div>
+                            <div class="right">
+                                ${qrSrc ? `<img src="${qrSrc}" alt="QR" />` : ''}
+                                <div style="font-size:12px;color:#888;margin-top:8px;">Scan to view product data</div>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+                        <div class="footer">Thank you for using GrassRoots — share trusted produce with your buyers.</div>
+                    </div>
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(html);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        };
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            // Auth guard: call only after auth script has loaded
+            if (typeof GrassRootsAuth !== 'undefined' && typeof GrassRootsAuth.requireAuth === 'function') {
+                GrassRootsAuth.requireAuth('farmer');
+            } else {
+                console.warn('GrassRootsAuth not available on load');
+            }
+            async function loadCropSelector() {
+                const sel = document.getElementById('cropSelect');
+                sel.innerHTML = '<option value="">-- Select a crop --</option>';
+                try {
+                    const resp = await GrassRootsUtils.apiFetch('/api/crops');
+                    if (resp.ok) {
+                        const crops = await resp.json();
+                        crops.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.id || c.id;
+                            opt.text = c.name || c.productName || (c.cropType || c.type) || (`Crop ${c.id}`);
+                            sel.appendChild(opt);
+                        });
+                    }
+                } catch (err) {
+                    // ignore and fallback to localStorage
+                }
+
+                // localStorage fallback
+                try {
+                    const local = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+                    local.forEach(c => {
+                        // don't duplicate options if already present
+                        if (![...sel.options].some(o => o.value == c.id)) {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.text = c.name || c.productName || (c.type || 'Crop');
+                            sel.appendChild(opt);
+                        }
+                    });
+                } catch (e) {
+                    // ignore
+                }
+
+                sel.addEventListener('change', function() {
+                    const crops = JSON.parse(localStorage.getItem('farmerCrops') || '[]');
+                    // attempt to get from last fetched list via API if available
+                    (async () => {
+                        let list = crops;
+                        try {
+                            const resp = await GrassRootsUtils.apiFetch('/api/crops');
+                            if (resp.ok) list = await resp.json();
+                        } catch (e) {}
+
+                        const selected = list.find(c => String(c.id) === String(this.value));
+                        if (selected) {
+                            document.getElementById('cropType').value = selected.cropType || selected.type || '';
+                            document.getElementById('farmLocation').value = selected.notes || selected.farmLocation || '';
+                        }
+                    })();
+                });
+
+            
+            }
+            loadCropSelector();
+            renderQRHistory();
+        });
+
+        // Global error handlers to capture uncaught errors/rejections during QR generation
+        window.addEventListener('error', function (evt) {
+            console.error('Global error captured:', evt.error || evt.message || evt);
+            GrassRootsUtils.showToast('Unexpected error: ' + (evt.message || 'see console'), 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function (evt) {
+            console.error('Unhandled rejection:', evt.reason || evt);
+            GrassRootsUtils.showToast('Unexpected error (promise): see console', 'error');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Crop Information - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="farmer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container" style="padding:2.5rem 0;">
+    <div class="form-container" style="max-width:980px;margin:96px auto 40px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+        <h2 style="color:var(--primary-color);font-size:1.15rem;margin:0;display:flex;align-items:center;gap:0.6rem;">🍃 Manage Your Crop Information</h2>
+        <div style="color:var(--muted);font-size:0.95rem;opacity:0.9">&nbsp;</div>
+      </div>
+
+      <!-- Crop Information Form -->
+      <form id="cropInfoFormLocal">
+        <div class="form-group">
+          <label for="cropTypeLocal">Crop Type</label>
+          <select id="cropTypeLocal" required>
+            <option value="">Select Crop</option>
+            <optgroup label="Cereals">
+              <option value="Rice">Rice</option>
+              <option value="Wheat">Wheat</option>
+              <option value="Maize">Maize (Corn)</option>
+            </optgroup>
+            <optgroup label="Cash Crops">
+              <option value="Cotton">Cotton</option>
+              <option value="Sugarcane">Sugarcane</option>
+            </optgroup>
+            <optgroup label="Vegetables">
+              <option value="Tomato">Tomato</option>
+              <option value="Potato">Potato</option>
+              <option value="Onion">Onion</option>
+              <option value="Cabbage">Cabbage</option>
+              <option value="Carrot">Carrot</option>
+              <option value="Beans">Beans</option>
+            </optgroup>
+            <optgroup label="Spices">
+              <option value="Chili">Chili</option>
+              <option value="Turmeric">Turmeric</option>
+              <option value="Ginger">Ginger</option>
+            </optgroup>
+            <optgroup label="Fruits">
+              <option value="Banana">Banana</option>
+              <option value="Mango">Mango</option>
+              <option value="Papaya">Papaya</option>
+              <option value="Grapes">Grapes</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="plantingDateLocal">Planting Date</label>
+          <input type="date" id="plantingDateLocal" required>
+        </div>
+        <div class="form-group">
+          <label for="areaLocal">Area (in acres)</label>
+          <input type="number" id="areaLocal" step="0.1" required>
+        </div>
+        <div class="form-group">
+          <label for="expectedYieldLocal">Expected Yield (in quintals)</label>
+          <input type="number" id="expectedYieldLocal" step="0.1" required>
+        </div>
+        <div class="form-group">
+          <label for="cropNotesLocal">Additional Notes</label>
+          <textarea id="cropNotesLocal" rows="3" placeholder="Any special details about your crop..."></textarea>
+        </div>
+        <button type="submit" class="btn save-btn">Save Crop Information</button>
+      </form>
+
+      <div style="margin-top:1.5rem;">
+        <h3 style="font-size:1rem;margin-bottom:0.6rem;color:var(--text-color);">Your Saved Crops:</h3>
+        <div id="cropListLocal" class="saved-crops-grid"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Simple auth guard using localStorage (demo)
+    if (localStorage.getItem('loggedIn') !== 'true' || localStorage.getItem('userType') !== 'farmer') {
+      alert('Please login as farmer to access this page');
+      window.location.href = 'login.html';
+    }
+
+    // Use API to load crops (server-backed)
+    // API Endpoint: GET /api/farmer/crops
+    // Render saved crops list
+    async function renderCropList() {
+      let crops = [];
+      try {
+        const resp = await GrassRootsUtils.apiFetch('/api/crops');
+        if (resp && resp.ok) {
+          crops = await resp.json();
+        } else {
+          crops = GrassRootsUtils.loadFromStorage('farmerCrops', []);
+        }
+      } catch (e) {
+        crops = GrassRootsUtils.loadFromStorage('farmerCrops', []);
+      }
+      const out = document.getElementById('cropListLocal');
+
+      if (!crops.length) {
+        out.innerHTML = '<p style="color:var(--muted);">No crops added yet. Add your first crop above!</p>';
+        return;
+      }
+
+      let html = '';
+      crops.forEach(c => {
+        const dateStr = c.plantingDate ? GrassRootsUtils.formatDate(c.plantingDate) : 'Not specified';
+        html += `
+          <div class="crop-card">
+            <div class="crop-card-inner">
+              <div class="crop-title">${GrassRootsUtils.sanitizeHTML(c.type || 'Unknown')}</div>
+              <div class="crop-meta">Area: ${c.area || '—'} acres | Yield: ${c.expectedYield || '—'} qt</div>
+              <div class="crop-date">Planted: ${dateStr}</div>
+              ${c.notes ? `<div class="crop-notes">${GrassRootsUtils.sanitizeHTML(c.notes)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      out.innerHTML = html;
+    }
+
+    // Handle form submission and send to backend
+    document.getElementById('cropInfoFormLocal').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const payload = {
+        name: document.getElementById('cropTypeLocal').value,
+        plantedAt: document.getElementById('plantingDateLocal').value || null,
+        notes: document.getElementById('cropNotesLocal').value || null,
+        farmerEmail: localStorage.getItem('userEmail') || null
+      };
+
+      try {
+        const resp = await GrassRootsUtils.apiFetch('/api/crops', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!resp.ok) throw new Error('Failed to save crop');
+        const created = await resp.json();
+        GrassRootsUtils.showToast('Crop saved to database!', 'success');
+      } catch (err) {
+        console.error('Failed to save crop to server:', err);
+        GrassRootsUtils.showToast('Server save failed — saved locally', 'error');
+        // fallback: save locally
+        const crop = {
+          id: GrassRootsUtils.generateId(),
+          type: document.getElementById('cropTypeLocal').value,
+          plantingDate: document.getElementById('plantingDateLocal').value,
+          area: parseFloat(document.getElementById('areaLocal').value) || null,
+          expectedYield: parseFloat(document.getElementById('expectedYieldLocal').value) || null,
+          notes: document.getElementById('cropNotesLocal').value,
+          createdAt: new Date().toISOString()
+        };
+        let crops = GrassRootsUtils.loadFromStorage('farmerCrops', []);
+        crops.push(crop);
+        GrassRootsUtils.saveToStorage('farmerCrops', crops);
+      }
+
+      // Reset and refresh
+      this.reset();
+      await renderCropList();
+    });
+
+    // Initial render
+    renderCropList();
+  </script>
+</body>
+</html>

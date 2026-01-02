@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Voice Call-Bot</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌾 Farmer Voice Call-Bot</h1>
+            <p>Report your farm status via voice</p>
+        </header>
+
+        <main>
+            <!-- Session Info -->
+            <div id="sessionInfo" class="card hidden">
+                <p>Session ID: <code id="sessionId"></code></p>
+                <p>Status: <span id="status">Ready</span></p>
+            </div>
+
+            <!-- Language Selection -->
+            <div id="languageSelect" class="card">
+                <label for="language">Select Language:</label>
+                <select id="language">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="kn">Kannada</option>
+                </select>
+            </div>
+
+            <!-- Voice Selection -->
+            <div id="voiceSelectCard" class="card">
+                <label for="voiceSelect">Assistant Voice:</label>
+                <select id="voiceSelect">
+                    <option value="default">Default</option>
+                    <option value="preferred">Prefer high-quality voices</option>
+                </select>
+                <p style="font-size:12px;color:#666;margin-top:8px;">Tip: Use Chrome/Edge for best voices (Google voices).</p>
+            </div>
+
+            <!-- Recording Controls -->
+            <div id="recordingControls" class="card">
+                <button id="startBtn" class="btn btn-primary">🎤 Start Call</button>
+                <button id="stopBtn" class="btn btn-secondary hidden">⏹ Stop Recording</button>
+                <div id="recordingIndicator" class="recording-indicator hidden">
+                    <span class="pulse"></span> Recording...
+                </div>
+            </div>
+
+            <!-- Transcription Display -->
+            <div id="transcriptionCard" class="card hidden">
+                <h3>Transcription</h3>
+                <div id="transcriptionText" class="transcription-box"></div>
+            </div>
+
+            <!-- Bot Response -->
+            <div id="botResponseCard" class="card hidden">
+                <h3>Bot Response</h3>
+                <div id="botText" class="bot-text"></div>
+                <button id="playAudioBtn" class="btn btn-small">🔊 Play Audio</button>
+                <audio id="botAudio" style="display:none;"></audio>
+            </div>
+
+            <!-- Transcription Confirmation -->
+            <div id="transcriptionConfirmCard" class="card hidden">
+                <h3>✍️ Confirm Transcription</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">Please review the converted text below:</p>
+                <div id="transcriptionConfirmText" class="transcription-box"></div>
+                <p style="font-size:12px;color:#d97706;margin-top:12px;">💡 You can edit the text below if needed:</p>
+                <textarea id="transcriptionEditBox" style="width:100%;padding:10px;margin-top:8px;border:1px solid #ddd;border-radius:6px;font-size:13px;min-height:80px;"></textarea>
+                <div style="margin-top:12px;">
+                    <button id="confirmTranscriptionBtn" class="btn btn-success">✓ Confirm & Continue</button>
+                    <button id="reRecordAllBtn" class="btn btn-secondary">🔄 Re-record All</button>
+                </div>
+            </div>
+
+            <!-- Consent & Confirmation -->
+            <div id="consentCard" class="card hidden">
+                <h3>Confirm Storage</h3>
+                <div class="consent-summary" id="consentSummary"></div>
+                <p class="consent-warning">⚠️ This record will be stored on the blockchain.</p>
+                <button id="consentYesBtn" class="btn btn-success">✓ Yes, Store Record</button>
+                <button id="consentNoBtn" class="btn btn-danger">✗ Cancel</button>
+            </div>
+
+            <!-- Results -->
+            <div id="resultsCard" class="card hidden">
+                <h3>✅ Record Stored</h3>
+                <p>Transaction ID: <code id="txHash"></code></p>
+                <p>IPFS CID: <code id="ipfsCid"></code></p>
+                <p>Data Hash: <code id="dataHash"></code></p>
+                <button id="newCallBtn" class="btn btn-primary">Start New Call</button>
+            </div>
+
+            <!-- Error Display -->
+            <div id="errorCard" class="card hidden alert-error">
+                <p id="errorMsg"></p>
+                <button id="dismissErrorBtn" class="btn btn-small">Dismiss</button>
+            </div>
+
+            <!-- Review Answers (per-question) -->
+            <div id="reviewCard" class="card hidden">
+                <h3>Review Answers</h3>
+                <div class="answers-list"></div>
+                <div style="margin-top:12px;">
+                    <button id="uploadAnswersBtn" class="btn btn-primary">Upload Answers</button>
+                    <button id="skipReviewBtn" class="btn btn-secondary">Skip & Continue</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Open-source POC | WebRTC + IPFS + Blockchain</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

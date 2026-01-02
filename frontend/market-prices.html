@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Market Prices - GrassRoots</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/auth.js" defer></script>
+  <script src="js/utils.js" defer></script>
+  <style>
+    body { padding-top: 60px; }
+    .market-container {
+      max-width: 1200px;
+      margin: 100px auto 40px;
+      padding: 0 2rem;
+    }
+    .market-header {
+      background: linear-gradient(135deg, rgba(107, 158, 127, 0.1) 0%, rgba(74, 124, 94, 0.05) 100%);
+      padding: 2rem;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .market-header h1 {
+      color: var(--primary-color);
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .filter-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .filter-section select {
+      padding: 0.75rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      min-width: 200px;
+    }
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .price-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-left: 4px solid var(--primary-color);
+    }
+    .price-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(107, 158, 127, 0.2);
+    }
+    .price-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .crop-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .crop-icon {
+      font-size: 2rem;
+    }
+    .price-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #2c3e50;
+      margin: 0.5rem 0;
+    }
+    .price-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+    .price-detail-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .trend {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .trend-up {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .trend-down {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .trend-stable {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    .market-location {
+      display: inline-block;
+      background: rgba(107, 158, 127, 0.1);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    .last-updated {
+      text-align: center;
+      color: #999;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container container">
+      <a href="index.html" class="logo">GrassRoots</a>
+      <div class="nav-links">
+        <a href="farmer-dashboard.html">Dashboard</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="market-container">
+    <div class="market-header">
+      <h1>📊 Live Market Prices</h1>
+      <p style="color:#666;font-size:1.1rem;">Real-time agricultural commodity prices across major markets</p>
+    </div>
+
+    <div class="filter-section">
+      <label style="font-weight:600;color:#555;">Filter by:</label>
+      <select id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="cereals">Cereals</option>
+        <option value="vegetables">Vegetables</option>
+        <option value="fruits">Fruits</option>
+        <option value="spices">Spices</option>
+        <option value="cash">Cash Crops</option>
+      </select>
+      <select id="locationFilter">
+        <option value="all">All Locations</option>
+        <option value="Bangalore">Bangalore</option>
+        <option value="Mysore">Mysore</option>
+        <option value="Hubli">Hubli</option>
+        <option value="Mangalore">Mangalore</option>
+      </select>
+    </div>
+
+    <div id="priceGrid" class="price-grid"></div>
+
+    <div class="last-updated">
+      Last updated: <strong id="lastUpdate"></strong>
+    </div>
+  </main>
+
+  <script>
+    // Auth guard
+    if (!GrassRootsAuth.requireAuth('farmer')) {
+      // Will redirect automatically
+    }
+
+    // Comprehensive market price data
+    const marketPrices = [
+      // Cereals
+      { crop: 'Rice', icon: '🌾', category: 'cereals', price: 2500, unit: 'quintal', trend: 'up', change: 2.5, location: 'Bangalore', minPrice: 2400, maxPrice: 2600 },
+      { crop: 'Wheat', icon: '🌾', category: 'cereals', price: 2200, unit: 'quintal', trend: 'down', change: -1.2, location: 'Mysore', minPrice: 2150, maxPrice: 2250 },
+      { crop: 'Maize', icon: '🌽', category: 'cereals', price: 1800, unit: 'quintal', trend: 'stable', change: 0.3, location: 'Hubli', minPrice: 1750, maxPrice: 1850 },
+
+      // Vegetables
+      { crop: 'Tomato', icon: '🍅', category: 'vegetables', price: 3500, unit: 'quintal', trend: 'up', change: 5.2, location: 'Bangalore', minPrice: 3200, maxPrice: 3800 },
+      { crop: 'Potato', icon: '🥔', category: 'vegetables', price: 2000, unit: 'quintal', trend: 'stable', change: 0.5, location: 'Mysore', minPrice: 1900, maxPrice: 2100 },
+      { crop: 'Onion', icon: '🧅', category: 'vegetables', price: 2800, unit: 'quintal', trend: 'up', change: 3.8, location: 'Hubli', minPrice: 2600, maxPrice: 3000 },
+      { crop: 'Cabbage', icon: '🥬', category: 'vegetables', price: 1500, unit: 'quintal', trend: 'down', change: -2.1, location: 'Mangalore', minPrice: 1400, maxPrice: 1600 },
+      { crop: 'Carrot', icon: '🥕', category: 'vegetables', price: 2200, unit: 'quintal', trend: 'stable', change: 0.8, location: 'Bangalore', minPrice: 2100, maxPrice: 2300 },
+
+      // Fruits
+      { crop: 'Banana', icon: '🍌', category: 'fruits', price: 3000, unit: 'quintal', trend: 'up', change: 4.2, location: 'Mysore', minPrice: 2800, maxPrice: 3200 },
+      { crop: 'Mango', icon: '🥭', category: 'fruits', price: 4500, unit: 'quintal', trend: 'up', change: 6.5, location: 'Bangalore', minPrice: 4200, maxPrice: 4800 },
+      { crop: 'Papaya', icon: '🍈', category: 'fruits', price: 2500, unit: 'quintal', trend: 'stable', change: 1.2, location: 'Hubli', minPrice: 2400, maxPrice: 2600 },
+      { crop: 'Grapes', icon: '🍇', category: 'fruits', price: 5500, unit: 'quintal', trend: 'up', change: 3.5, location: 'Mangalore', minPrice: 5200, maxPrice: 5800 },
+
+      // Spices
+      { crop: 'Chili', icon: '🌶️', category: 'spices', price: 8000, unit: 'quintal', trend: 'up', change: 7.2, location: 'Bangalore', minPrice: 7500, maxPrice: 8500 },
+      { crop: 'Turmeric', icon: '🟡', category: 'spices', price: 7500, unit: 'quintal', trend: 'stable', change: 1.5, location: 'Mysore', minPrice: 7200, maxPrice: 7800 },
+      { crop: 'Ginger', icon: '🫚', category: 'spices', price: 6500, unit: 'quintal', trend: 'up', change: 4.8, location: 'Hubli', minPrice: 6200, maxPrice: 6800 },
+
+      // Cash Crops
+      { crop: 'Cotton', icon: '☁️', category: 'cash', price: 5800, unit: 'quintal', trend: 'down', change: -1.8, location: 'Hubli', minPrice: 5600, maxPrice: 6000 },
+      { crop: 'Sugarcane', icon: '🎋', category: 'cash', price: 3200, unit: 'quintal', trend: 'stable', change: 0.6, location: 'Mangalore', minPrice: 3100, maxPrice: 3300 }
+    ];
+
+    let filteredPrices = [...marketPrices];
+
+    function renderPrices() {
+      const grid = document.getElementById('priceGrid');
+
+      if (filteredPrices.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;color:#999;grid-column:1/-1;">No prices found for selected filters.</p>';
+        return;
+      }
+
+      let html = '';
+      filteredPrices.forEach(item => {
+        const trendClass = item.trend === 'up' ? 'trend-up' : item.trend === 'down' ? 'trend-down' : 'trend-stable';
+        const trendIcon = item.trend === 'up' ? '↑' : item.trend === 'down' ? '↓' : '→';
+        const trendText = item.change > 0 ? `+${item.change}%` : `${item.change}%`;
+
+        // safe ids for rendered elements
+        const safeId = `${item.crop}-${item.location}`.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '').toLowerCase();
+
+        html += `
+          <div class="price-card">
+            <div class="price-card-header">
+              <div class="crop-name">${item.crop}</div>
+              <div class="crop-icon">${item.icon}</div>
+            </div>
+            <div class="price-amount">₹${item.price.toLocaleString()}</div>
+            <div style="color:#666;font-size:0.9rem;margin-bottom:0.5rem;">per ${item.unit}</div>
+            <div style="margin-bottom:1rem;">
+              <span class="trend ${trendClass}">${trendIcon} ${trendText}</span>
+            </div>
+            <div class="market-location">📍 ${item.location}</div>
+
+            <div style="margin-top:0.8rem;display:flex;gap:0.5rem;align-items:center;">
+              <button class="predict-btn" data-crop="${encodeURIComponent(item.crop)}" data-location="${encodeURIComponent(item.location)}">🔮 Predict</button>
+              <div id="pred-${safeId}" class="predicted-price" style="font-weight:700;color:#2c3e50;margin-left:0.5rem;"></div>
+            </div>
+
+            <div class="price-details">
+              <div class="price-detail-row">
+                <span>Min Price:</span>
+                <strong>₹${item.minPrice.toLocaleString()}</strong>
+              </div>
+              <div class="price-detail-row">
+                <span>Max Price:</span>
+                <strong>₹${item.maxPrice.toLocaleString()}</strong>
+              </div>
+              <div class="price-detail-row">
+                <span>Category:</span>
+                <strong style="text-transform:capitalize;">${item.category}</strong>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    function applyFilters() {
+      const category = document.getElementById('categoryFilter').value;
+      const location = document.getElementById('locationFilter').value;
+
+      filteredPrices = marketPrices.filter(item => {
+        const categoryMatch = category === 'all' || item.category === category;
+        const locationMatch = location === 'all' || item.location === location;
+        return categoryMatch && locationMatch;
+      });
+
+      renderPrices();
+    }
+
+    function updateTimestamp() {
+      const now = new Date();
+      const formatted = now.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      document.getElementById('lastUpdate').textContent = formatted;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPrices();
+      updateTimestamp();
+
+      document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+      document.getElementById('locationFilter').addEventListener('change', applyFilters);
+
+      // Attach predict button handlers
+      function attachPredictButtons() {
+        document.querySelectorAll('.predict-btn').forEach(btn => {
+          btn.removeEventListener('click', btn._predictHandler);
+          const handler = async () => {
+            const crop = decodeURIComponent(btn.dataset.crop);
+            const location = decodeURIComponent(btn.dataset.location);
+
+            // Find item to get current price and change
+            const item = marketPrices.find(p => p.crop === crop && p.location === location);
+            if (!item) return;
+
+            const targetId = `pred-${(crop + '-' + location).replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').toLowerCase()}`;
+            const placeholder = document.getElementById(targetId);
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Predicting…';
+
+            try {
+              const BACKEND_URL = 'http://localhost:4000';
+              const resp = await fetch(BACKEND_URL + '/api/ml/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ crop: crop, location: location }) // backend will use latest DB values
+              });
+
+              const data = await resp.json();
+              if (!resp.ok) {
+                placeholder.textContent = data && data.error ? data.error : 'Prediction unavailable';
+                console.warn('ML prediction error (status):', resp.status, data);
+              } else if (data && data.predictedPrice) {
+                let txt = `Predicted: ₹${data.predictedPrice.toLocaleString()}`;
+                if (data._db_source && data._db_source.market_name) {
+                  txt += ` (market: ${data._db_source.market_name}, date: ${data._db_source.price_date || 'N/A'})`;
+                }
+                placeholder.textContent = txt;
+              } else {
+                placeholder.textContent = 'Prediction unavailable';
+                console.warn('ML prediction unexpected response:', data);
+              }
+            } catch (err) {
+              console.error('Prediction request failed', err);
+              placeholder.textContent = 'Prediction failed';
+            } finally {
+              btn.disabled = false;
+              btn.textContent = originalText;
+            }
+          };
+          btn.addEventListener('click', handler);
+          btn._predictHandler = handler;
+        });
+      }
+
+      // Re-attach after initial render and whenever filters change
+      attachPredictButtons();
+      const _origApplyFilters = applyFilters;
+      applyFilters = function () { _origApplyFilters(); attachPredictButtons(); };
+
+    });
+  </script>
+</body>
+</html>

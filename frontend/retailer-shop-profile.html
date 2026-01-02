@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Profile - GrassRoots</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #ecf5ee; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial }
+        .page-wrapper { display:flex; justify-content:center; padding:80px 16px 40px 16px; min-height:100vh }
+        .card { width:100%; max-width:900px; background: #fff; border-radius:10px; padding:28px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.06) }
+        .card h1 { margin-top:0; color: #2f6b50; margin-bottom:24px; border-bottom:2px solid #ecf5ee; padding-bottom:12px }
+        .card h2 { color: #2f6b50; margin-top:24px; margin-bottom:14px; font-size:1.15rem }
+        .section { margin-bottom:24px }
+        .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px }
+        @media (max-width:640px) { .info-grid { grid-template-columns:1fr } }
+        .form-group { margin-bottom:14px }
+        .form-group label { display:block; font-weight:600; color:#2f6b50; margin-bottom:6px; font-size:0.95rem }
+        .form-group input { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.95rem }
+        .form-group input:focus { outline:none; border-color:#2f6b50; box-shadow:0 0 0 3px rgba(47,107,80,0.1) }
+        .form-group textarea { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.95rem; font-family:inherit; resize:vertical }
+        .form-group textarea:focus { outline:none; border-color:#2f6b50; box-shadow:0 0 0 3px rgba(47,107,80,0.1) }
+        .form-group select { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.95rem; background-color:white; cursor:pointer }
+        .form-group select:focus { outline:none; border-color:#2f6b50; box-shadow:0 0 0 3px rgba(47,107,80,0.1) }
+        .activity-list { list-style:none; padding:0; margin:0 }
+        .activity-list li { padding:12px 14px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; font-size:0.95rem }
+        .activity-list li:last-child { border-bottom:none }
+        .activity-time { color:#999; font-size:0.85rem; white-space:nowrap }
+        .stat-card { background:linear-gradient(135deg, #2f6b50, #4a8f6f); color:white; padding:16px; border-radius:8px; text-align:center; margin-bottom:12px }
+        .stat-number { font-size:2rem; font-weight:700; margin:0 }
+        .stat-label { font-size:0.9rem; opacity:0.9; margin:4px 0 0 0 }
+        .btn { background:#2f6b50; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer; font-size:0.95rem; font-weight:600; transition:background 0.3s }
+        .btn:hover { background:#1f4a34 }
+        .btn-secondary { background:#999; }
+        .btn-secondary:hover { background:#777 }
+        .back-link { display:inline-block; margin-bottom:16px; color:#2f6b50; text-decoration:none; font-weight:500 }
+        .back-link:hover { text-decoration:underline }
+        .tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid #eee; flex-wrap:wrap }
+        .tab-btn { background:none; border:none; padding:12px 16px; cursor:pointer; font-weight:600; color:#999; border-bottom:3px solid transparent; transition:all 0.3s }
+        .tab-btn.active { color:#2f6b50; border-bottom-color:#2f6b50 }
+        .tab-content { display:none }
+        .tab-content.active { display:block }
+        .empty-state { text-align:center; padding:32px 16px; color:#999 }
+        .empty-state p { margin:12px 0 0 0 }
+        .success-msg { display:none; padding:12px; background:#d1e7dd; color:#0f5132; border-radius:6px; margin-bottom:16px; border-left:4px solid #0f5132 }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="logo">GrassRoots</a>
+            <div class="nav-links">
+                <a href="retailer-dashboard.html">← Back to Dashboard</a>
+                <a href="contact.html">Contact</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="card">
+            <h1>🏪 Shop Profile</h1>
+
+            <!-- Profile Edit Section -->
+            <div class="section">
+                <h2>Shop Information</h2>
+                <div id="successMsg" class="success-msg">✓ Shop profile updated successfully!</div>
+                
+                <!-- Owner Details -->
+                <h3 style="color:#2f6b50;margin:16px 0 12px;font-size:1rem">Owner Details</h3>
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Owner Name</label>
+                        <input id="ownerName" placeholder="Full name of shop owner" />
+                    </div>
+                    <div class="form-group">
+                        <label>Owner Email</label>
+                        <input id="ownerEmail" type="email" placeholder="Owner email address" />
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Owner Phone</label>
+                        <input id="ownerPhone" placeholder="Owner contact number" />
+                    </div>
+                    <div class="form-group">
+                        <label>Owner Identification (Aadhar/ID)</label>
+                        <input id="ownerID" placeholder="ID number for verification" />
+                    </div>
+                </div>
+
+                <!-- Shop Details -->
+                <h3 style="color:#2f6b50;margin:20px 0 12px;font-size:1rem">Shop Details</h3>
+                <div class="form-group">
+                    <label>Shop Name</label>
+                    <input id="shopName" placeholder="Your shop/business name" />
+                </div>
+                <div class="form-group">
+                    <label>Business Type</label>
+                    <select id="businessType">
+                        <option value="">Select business type</option>
+                        <option value="Retail Store">Retail Store</option>
+                        <option value="Wholesale Dealer">Wholesale Dealer</option>
+                        <option value="Distributor">Distributor</option>
+                        <option value="Supermarket">Supermarket</option>
+                        <option value="General Store">General Store</option>
+                        <option value="Specialty Shop">Specialty Shop</option>
+                        <option value="Market Vendor">Market Vendor</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Shop Address</label>
+                    <textarea id="shopAddress" placeholder="Complete shop address" style="height:80px"></textarea>
+                </div>
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>City</label>
+                        <input id="shopCity" placeholder="City" />
+                    </div>
+                    <div class="form-group">
+                        <label>State/Province</label>
+                        <input id="shopState" placeholder="State/Province" />
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Postal Code</label>
+                        <input id="shopPostal" placeholder="Postal/ZIP code" />
+                    </div>
+                    <div class="form-group">
+                        <label>Country</label>
+                        <input id="shopCountry" placeholder="Country" />
+                    </div>
+                </div>
+
+                <!-- Business Registration -->
+                <h3 style="color:#2f6b50;margin:20px 0 12px;font-size:1rem">Business Registration</h3>
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Shop Phone</label>
+                        <input id="shopPhone" placeholder="Shop contact number" />
+                    </div>
+                    <div class="form-group">
+                        <label>Shop Email</label>
+                        <input id="shopEmail" type="email" placeholder="Shop email address" />
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="form-group">
+                        <label>Business License Number</label>
+                        <input id="licenseNumber" placeholder="License number" />
+                    </div>
+                    <div class="form-group">
+                        <label>Tax ID / GST Number</label>
+                        <input id="taxID" placeholder="Tax ID or GST number" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Business Registration Certificate</label>
+                    <input id="certNumber" placeholder="Registration certificate number" />
+                </div>
+
+                <button class="btn" onclick="saveProfile()" style="margin-top:16px">Save Profile</button>
+            </div>
+
+            <!-- Business Statistics -->
+            <div class="section">
+                <h2>📈 Business Statistics</h2>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px">
+                    <div class="stat-card">
+                        <p class="stat-number" id="productCount">0</p>
+                        <p class="stat-label">Products Listed</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-number" id="orderCount">0</p>
+                        <p class="stat-label">Orders Received</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-number" id="paidCount">0</p>
+                        <p class="stat-label">Paid Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <p class="stat-number" id="confirmedCount">0</p>
+                        <p class="stat-label">Confirmed Orders</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Activity Section -->
+            <div class="section">
+                <h2>📊 Business Activity</h2>
+                <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+                    <button class="tab-btn active" onclick="switchTab('all-activity')">All Activity</button>
+                    <button class="tab-btn" onclick="switchTab('products-activity')">Products</button>
+                    <button class="tab-btn" onclick="switchTab('orders-activity')">Orders</button>
+                    <button class="tab-btn" onclick="switchTab('notifications')">Notifications</button>
+                </div>
+
+                <!-- All Activity Tab -->
+                <div id="all-activity" class="tab-content active">
+                    <ul class="activity-list" id="allActivityList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No business activity yet.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Products Activity Tab -->
+                <div id="products-activity" class="tab-content">
+                    <ul class="activity-list" id="productsActivityList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No product activity yet. Start by adding products.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Orders Activity Tab -->
+                <div id="orders-activity" class="tab-content">
+                    <ul class="activity-list" id="ordersActivityList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No orders yet.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div id="notifications" class="tab-content">
+                    <ul class="activity-list" id="notificationsList">
+                        <li class="empty-state" style="display:flex;justify-content:center">
+                            <p>No notifications yet.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="section" style="margin-top:24px;padding-top:16px;border-top:1px solid #eee">
+                <a href="retailer-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const KEY_PROFILE = 'retailer_profile';
+        const KEY_NOTIFS = 'retailer_notifications';
+
+        // Auto-detect backend URL based on current page
+        const BACKEND_URL = window.location.protocol === 'file:'
+          ? 'http://localhost:4000'
+          : `${window.location.protocol}//${window.location.hostname}:${window.location.port}`;
+
+        async function fetchProfile() {
+            try {
+                const resp = await fetch(BACKEND_URL + '/api/profile');
+                if (!resp.ok) throw new Error('Failed to load profile');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to fetch profile from server, falling back to localStorage', err);
+                try { return JSON.parse(localStorage.getItem(KEY_PROFILE) || 'null') || {}; } catch(e){ return {}; }
+            }
+        }
+
+        async function saveProfileToServer(profile) {
+            try {
+                const resp = await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
+                if (!resp.ok) throw new Error('Failed to save');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to save profile to server, saving locally', err);
+                localStorage.setItem(KEY_PROFILE, JSON.stringify(profile));
+                return profile;
+            }
+        }
+
+        async function fetchProducts() {
+            try {
+                const resp = await fetch(BACKEND_URL + '/api/products');
+                if (!resp.ok) throw new Error('Failed to load products');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to fetch products from server, falling back to localStorage', err);
+                try { return JSON.parse(localStorage.getItem('retailer_products') || '[]'); } catch(e){ return []; }
+            }
+        }
+
+        async function fetchOrders() {
+            try {
+                const resp = await fetch(BACKEND_URL + '/api/orders');
+                if (!resp.ok) throw new Error('Failed to load orders');
+                return await resp.json();
+            } catch (err) {
+                console.warn('Failed to fetch orders from server, falling back to localStorage', err);
+                try { return JSON.parse(localStorage.getItem('retailer_orders') || '[]'); } catch(e){ return []; }
+            }
+        }
+
+        // Auth check and initial load
+        window.addEventListener('DOMContentLoaded', async function() {
+            const loggedIn = localStorage.getItem('loggedIn');
+            const userType = localStorage.getItem('userType');
+            if (loggedIn !== 'true' || userType !== 'retailer') {
+                alert('Access denied: Retailers only.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load profile form
+            await loadProfileForm();
+
+            // Load stats and activity
+            const products = await fetchProducts();
+            const orders = await fetchOrders();
+            const notifications = (function(){ try { return JSON.parse(localStorage.getItem(KEY_NOTIFS) || '[]'); } catch(e){ return []; } })();
+
+            const paidOrders = orders.filter(o => o.paid).length;
+            const confirmedOrders = orders.filter(o => o.status === 'Confirmed').length;
+
+            document.getElementById('productCount').textContent = (products && products.length) || 0;
+            document.getElementById('orderCount').textContent = (orders && orders.length) || 0;
+            document.getElementById('paidCount').textContent = paidOrders;
+            document.getElementById('confirmedCount').textContent = confirmedOrders;
+
+            // Render activity sections
+            renderProductsActivity(products || []);
+            renderOrdersActivity(orders || []);
+            renderNotifications(notifications || []);
+            renderAllActivity(products || [], orders || [], notifications || []);
+        });
+
+        async function loadProfileForm() {
+            const profile = await fetchProfile();
+            
+            // Owner details
+            document.getElementById('ownerName').value = profile.ownerName || '';
+            document.getElementById('ownerEmail').value = profile.ownerEmail || '';
+            document.getElementById('ownerPhone').value = profile.ownerPhone || '';
+            document.getElementById('ownerID').value = profile.ownerID || '';
+            
+            // Shop details
+            document.getElementById('shopName').value = profile.shopName || '';
+            document.getElementById('businessType').value = profile.businessType || '';
+            document.getElementById('shopAddress').value = profile.address || '';
+            document.getElementById('shopCity').value = profile.city || '';
+            document.getElementById('shopState').value = profile.state || '';
+            document.getElementById('shopPostal').value = profile.postal || '';
+            document.getElementById('shopCountry').value = profile.country || '';
+            
+            // Business registration
+            document.getElementById('shopPhone').value = profile.phone || '';
+            document.getElementById('shopEmail').value = profile.shopEmail || '';
+            document.getElementById('licenseNumber').value = profile.licenseNumber || '';
+            document.getElementById('taxID').value = profile.taxID || '';
+            document.getElementById('certNumber').value = profile.certNumber || '';
+        }
+
+        async function saveProfile() {
+            const shopName = document.getElementById('shopName').value.trim();
+            
+            if (!shopName) {
+                alert('Shop name is required');
+                return;
+            }
+
+            const profile = {
+                // Owner details
+                ownerName: document.getElementById('ownerName').value.trim(),
+                ownerEmail: document.getElementById('ownerEmail').value.trim(),
+                ownerPhone: document.getElementById('ownerPhone').value.trim(),
+                ownerID: document.getElementById('ownerID').value.trim(),
+                
+                // Shop details
+                shopName: shopName,
+                businessType: document.getElementById('businessType').value,
+                address: document.getElementById('shopAddress').value.trim(),
+                city: document.getElementById('shopCity').value.trim(),
+                state: document.getElementById('shopState').value.trim(),
+                postal: document.getElementById('shopPostal').value.trim(),
+                country: document.getElementById('shopCountry').value.trim(),
+                
+                // Business registration
+                phone: document.getElementById('shopPhone').value.trim(),
+                shopEmail: document.getElementById('shopEmail').value.trim(),
+                licenseNumber: document.getElementById('licenseNumber').value.trim(),
+                taxID: document.getElementById('taxID').value.trim(),
+                certNumber: document.getElementById('certNumber').value.trim()
+            };
+            
+            await saveProfileToServer(profile);
+
+            // Show success message
+            const msg = document.getElementById('successMsg');
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 4000);
+        }
+
+        function renderProductsActivity(products) {
+            const list = document.getElementById('productsActivityList');
+            if (!products.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No product activity yet.</p></li>';
+                return;
+            }
+            list.innerHTML = '';
+            products.slice(0, 15).forEach(product => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${product.name}</strong>
+                        <div style="font-size:0.85rem;color:#999">Price: ₹${Number(product.price).toFixed(2)} | Stock: ${product.stock}</div>
+                    </div>
+                    <span class="activity-time">Added</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderOrdersActivity(orders) {
+            const list = document.getElementById('ordersActivityList');
+            if (!orders.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No orders yet.</p></li>';
+                return;
+            }
+            list.innerHTML = '';
+            orders.slice(0, 15).forEach(order => {
+                const li = document.createElement('li');
+                const itemCount = order.items ? order.items.length : 0;
+                const statusColor = order.status === 'Confirmed' ? 'color:#0f5132' : 'color:#856404';
+                li.innerHTML = `
+                    <div>
+                        <strong>${order.id}</strong>
+                        <div style="font-size:0.85rem;color:#999">${itemCount} item(s) | Total: ₹${Number(order.total).toFixed(2)}</div>
+                        <div style="font-size:0.85rem;${statusColor}"><strong>Status:</strong> ${order.status}</div>
+                    </div>
+                    <span class="activity-time">${order.paid ? 'Paid' : 'Pending'}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderNotifications(notifications) {
+            const list = document.getElementById('notificationsList');
+            if (!notifications.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No notifications yet.</p></li>';
+                return;
+            }
+            list.innerHTML = '';
+            notifications.slice(0, 15).forEach(notif => {
+                const li = document.createElement('li');
+                const time = new Date(notif.at).toLocaleString();
+                li.innerHTML = `
+                    <div>${notif.msg}</div>
+                    <span class="activity-time">${time}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function renderAllActivity(products, orders, notifications) {
+            const list = document.getElementById('allActivityList');
+            const activities = [];
+
+            // Add product activities
+            products.forEach(p => {
+                activities.push({
+                    time: new Date().toISOString(),
+                    msg: `Added product: ${p.name}`,
+                    type: 'product'
+                });
+            });
+
+            // Add order activities
+            orders.forEach(o => {
+                activities.push({
+                    time: new Date().toISOString(),
+                    msg: `Order ${o.id} - ${o.items.length} item(s) - ₹${Number(o.total).toFixed(2)}`,
+                    type: 'order'
+                });
+            });
+
+            // Add notifications
+            notifications.forEach(n => {
+                activities.push({
+                    time: n.at,
+                    msg: n.msg,
+                    type: 'notification'
+                });
+            });
+
+            if (!activities.length) {
+                list.innerHTML = '<li class="empty-state" style="display:flex;justify-content:center"><p>No business activity yet.</p></li>';
+                return;
+            }
+
+            // Sort by time (newest first)
+            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+            list.innerHTML = '';
+            activities.slice(0, 20).forEach(activity => {
+                const li = document.createElement('li');
+                const time = new Date(activity.time).toLocaleString();
+                const typeEmoji = {
+                    'product': '📦',
+                    'order': '📋',
+                    'notification': '🔔'
+                }[activity.type] || '•';
+
+                li.innerHTML = `
+                    <div>
+                        <span style="margin-right:8px">${typeEmoji}</span>${activity.msg}
+                    </div>
+                    <span class="activity-time">${time}</span>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            const tabEl = document.getElementById(tabName);
+            if (tabEl) {
+                tabEl.classList.add('active');
+                event.target.classList.add('active');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('fullName');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
